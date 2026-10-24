@@ -1,0 +1,38 @@
+{
+  "settings": {
+    "gptoss_budgets": [2048, 4096],
+    "gptoss_reasoning_effort": "low",
+    "timeout": 180,
+    "seed": 0
+  },
+  "endpoints": [
+    {
+      "name": "gptoss-a",
+      "judge": "gptoss",
+      "workers": 4,
+      "url": "http://127.0.0.1:8000/v1/chat/completions",
+      "model": "gpt-oss-safeguard-20b"
+    },
+    {
+      "name": "gptoss-b",
+      "judge": "gptoss",
+      "workers": 4,
+      "url": "http://127.0.0.1:8001/v1/chat/completions",
+      "model": "gpt-oss-safeguard-20b"
+    },
+    {
+      "name": "guard-a",
+      "judge": "guard",
+      "workers": 4,
+      "url": "http://127.0.0.1:8010/v1/chat/completions",
+      "model": "qwen3guard-4b"
+    },
+    {
+      "name": "guard-b",
+      "judge": "guard",
+      "workers": 4,
+      "url": "http://127.0.0.1:8011/v1/chat/completions",
+      "model": "qwen3guard-4b"
+    }
+  ]
+}

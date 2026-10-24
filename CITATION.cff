@@ -1,0 +1,51 @@
+cff-version: 1.2.0
+message: "If you use SpecAudit, please cite the manuscript and this software release."
+title: "SpecAudit: Draft Supply-Chain Risk under Lossy Speculative Verification"
+type: software
+authors:
+  - family-names: Chang
+    given-names: Wenhan
+  - family-names: Zhu
+    given-names: Tianqing
+  - family-names: Xu
+    given-names: Heng
+  - family-names: Liu
+    given-names: Wenjian
+  - family-names: Zhou
+    given-names: Wanlei
+repository-code: "https://github.com/ChangWenhan/SpecAudit_official"
+url: "https://github.com/ChangWenhan/SpecAudit_official"
+license: Apache-2.0
+date-released: "2026-10-25"
+version: "0.1.0"
+keywords:
+  - speculative decoding
+  - draft model supply chain
+  - lossy verification
+  - LLM safety
+  - jailbreak
+  - AI security
+abstract: >-
+  SpecAudit measures whether an altered third-party draft model can influence
+  the final answer of a speculative-decoding service when the target model,
+  user requests, and decoding code are fixed, and only the server-selected
+  verification rule is lossy.  The release contains the decoding harness,
+  verifier implementations, training and evaluation scripts, judges, tests, and
+  frozen aggregate evidence.
+preferred-citation:
+  type: article
+  title: "SpecAudit: Draft Supply-Chain Risk under Lossy Speculative Verification"
+  authors:
+    - family-names: Chang
+      given-names: Wenhan
+    - family-names: Zhu
+      given-names: Tianqing
+    - family-names: Xu
+      given-names: Heng
+    - family-names: Liu
+      given-names: Wenjian
+    - family-names: Zhou
+      given-names: Wanlei
+  year: 2026
+  month: 10
+  notes: "Manuscript"

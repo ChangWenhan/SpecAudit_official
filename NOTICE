@@ -1,0 +1,18 @@
+SpecAudit
+Copyright 2026 The SpecAudit Authors
+
+This product includes software adapted from the following open-source projects.
+The full texts and attribution are in THIRD_PARTY_LICENSES.md.
+
+- Hugging Face Transformers (Apache-2.0):
+  src/verifiers.py adapts the exact speculative sampling logic from
+  transformers.generation.utils._speculative_sampling.
+- Medusa (Apache-2.0): src/verifiers.py adapts the typical-acceptance rule
+  from medusa/model/utils.py.
+- FlipAttack (MIT): scripts/run_baseline.py is a self-contained port of the
+  FlipAttack prompt transformation and single-query baseline.
+- Tree of Attacks with Pruning (TAP, MIT): scripts/run_tap.py is a
+  self-contained port of the TAP attacker/evaluator prompt loop used for the
+  limited-budget comparison.
+
+Datasets and model weights are not covered by this repository's licence.

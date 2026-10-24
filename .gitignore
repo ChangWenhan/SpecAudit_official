@@ -1,0 +1,56 @@
+# Whitelist release: ignore everything, then allow only the public release.
+/*
+!/.gitignore
+!/README.md
+!/README.zh-CN.md
+!/LICENSE
+!/NOTICE
+!/THIRD_PARTY_LICENSES.md
+!/CITATION.cff
+!/requirements.txt
+
+# Core source and current scripts
+!/src/
+!/src/*.py
+!/scripts/
+!/scripts/*.py
+!/scripts/*.sh
+# Historical/obsolete scripts kept locally but not published
+/scripts/bestofn.py
+/scripts/generate_paper_figures.py
+/scripts/make_rerun_manifest.py
+/scripts/rejudge_unknown_gptoss_api.py
+/scripts/run_autodan.py
+/scripts/run_crescendo.py
+/scripts/run_endec.py
+/scripts/run_multiturn.py
+/scripts/run_w2s.py
+/scripts/start_dual_judge_pool.py
+/scripts/sync_to_servers.sh
+
+# Tests, docs, example configs
+!/tests/
+!/tests/*.py
+!/docs/
+!/docs/*.md
+!/configs/
+!/configs/README.md
+!/configs/judge_pool.example.json
+
+# Only the split file and its README from data/
+!/data/
+/data/*
+!/data/README.md
+!/data/harmbench_split.json
+
+# Only the frozen aggregate evidence from results/
+!/results/
+/results/*
+!/results/README.md
+!/results/paper_evidence_20261011/
+!/results/paper_evidence_20261011/**
+
+# Never publish caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
