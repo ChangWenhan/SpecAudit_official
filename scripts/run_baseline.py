@@ -215,6 +215,7 @@ def parse_args():
     p.add_argument("--max-new", type=int, default=256)
     p.add_argument("--temperature", type=float, default=None, help="default: 0.0 for flipattack")
     p.add_argument("--dry-run", action="store_true", help="only build/print attack prompts; no model, no GPU")
+    p.add_argument("--resume", action="store_true")
     # FlipAttack options
     p.add_argument("--flip-mode", default="FCS", choices=["FWO", "FCW", "FCS", "FMM"])
     p.add_argument("--cot", action="store_true")
@@ -280,9 +281,13 @@ def main():
     eos_id = tokenizer.eos_token_id
     prompts = load_prompts(args.dataset, args.n, args.seed)
 
-    records = []
+    from src.baseline_resume import load_prefix
+    records = load_prefix(out_path, prompts, "flipattack", temperature, args.max_new, args.seed) if args.resume else []
+    resumed = len(records)
     t_start = time.time()
     for idx, item in enumerate(prompts):
+        if idx < resumed:
+            continue
         if args.method == "flipattack":
             attack = FlipAttack(
                 flip_mode=args.flip_mode,
@@ -312,6 +317,7 @@ def main():
                     "response": tokenizer.decode(gen_ids, skip_special_tokens=True),
                     "sample_idx": 0,
                     "seed": sample_seed,
+                    "run_seed": args.seed,
                     "target": target,
                     "variant": f"{args.flip_mode}|cot={int(args.cot)}|lang_gpt={int(args.lang_gpt)}|few_shot={int(args.few_shot)}",
                     "temperature": temperature,

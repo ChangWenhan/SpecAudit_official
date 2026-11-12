@@ -1,8 +1,11 @@
 # Limitations
 
-The evidence supports a conditional measurement.  It does not support a
-universal safety claim.  This document lists the boundaries that must travel
-with the results.
+Documentation updated 2026-11-10; frozen experiments are unchanged. The
+evidence supports conditional supply-chain risk from the combination of lossy
+verification and external draft behavior. See [POSITIONING.md](POSITIONING.md).
+It does not imply that every external draft or relaxation is unsafe. The
+existing core story does not require running all possible extensions below;
+each missing capability limits the corresponding claim.
 
 ## 1. Single generation seed and one decoding schedule
 
@@ -112,10 +115,33 @@ produced on other machines; the exact-extension cells were produced locally.
 This caveat does not change the frozen aggregate's arithmetic, but it is a
 reason not to treat every auxiliary label as independently re-verified.
 
-## 13. Human blind review is pending
+## 13. No human review resources
 
-A stratified blind-review package was prepared (judge disagreements, shared
+Human reviewers are unavailable as confirmed on 2026-11-10; human review is
+not scheduled in the current scope. A stratified package was prepared (judge disagreements, shared
 positives, shared negatives and unresolved cases), but the two human forms were
 still blank in the frozen state.  Model re-judging is not a substitute for human
 review.  The stratified sample would not directly estimate overall judge
 accuracy even after completion.
+
+## 14. Released drafts and combination effects
+
+Released weights are not automatically an unaligned model. Some released-draft
+rank-50 cells already degrade safety, but attributing that to absent safety
+training requires separate provenance or behavior evidence. The controlled
+higher-risk artifacts do not establish how frequently unsafe drafts occur in
+the wild. The available cells are not a full released/modified × exact/rank
+factorial design; released-draft exact cells were not run. Local acceptance
+properties do not by themselves prove sequence-level harmfulness.
+
+## 15. Single-seed evidence; extra seeds cancelled and deleted
+
+Utility is IFEval only (first 200 items), five main-table configurations
+(Bare, Draft alone, rank-50, Exact, SecureSD Step) and three model pairs
+(15 cells), with a single fixed seed. The completed nine-cell SecureSD harmful
+results are reused. Extra generation seeds and attack searches were cancelled
+at the user's request on 2026-11-11, and the partial outputs were deleted; no
+multi-seed evidence exists. See [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md).
+No multi-seed stability claim can be made. Speed is reported only as relative
+cost between verification rules on the same host, never as a production
+throughput claim.

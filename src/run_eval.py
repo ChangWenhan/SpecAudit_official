@@ -42,8 +42,9 @@ from .policies import (
     build_threshold_rule,
     refusal_state,
 )
-from .spec_decode import CachedLM, speculative_generate
+from .spec_decode import CachedLM, eos_token_set, speculative_generate
 from .verifiers import build_verifier
+from .run_provenance import digest_json, generation_identity
 
 MODES = {
     "baseline": ("baseline", None),
@@ -65,6 +66,7 @@ MODES = {
     "topk_safe_honest": ("topk_safe", "honest"),
     "topk_start_alt": ("topk_start", "alt"),
     "topk_start_honest": ("topk_start", "honest"),
+    "securesd_topk_honest": ("securesd_topk", "honest"),
     "topk_floor_alt": ("topk_floor", "alt"),
     "topk_floor_honest": ("topk_floor", "honest"),
     "tas_align": ("tas", "align"),
@@ -140,9 +142,15 @@ def write_run_manifest(out_path: str, args, started_at: str) -> None:
         "fingerprints": {"target": model_fingerprint(args.target, args.hash_models),
                          "draft": model_fingerprint(args.draft, args.hash_models)},
         "hash_note": "sha256 over sorted *.safetensors files; combined = sha256(concat(per-file hex))",
+        "run_identity": args.run_identity,
+        "run_identity_sha256": digest_json(args.run_identity),
     }
     if args.draft_alt:
         manifest["fingerprints"]["draft_alt"] = model_fingerprint(args.draft_alt, args.hash_models)
+    if any(mode.split("@", 1)[0] == "securesd_topk_honest" for mode in manifest["modes"]):
+        from baselines.SecureSD.specaudit_adapter import UPSTREAM_COMMIT
+
+        manifest["securesd_upstream_commit"] = UPSTREAM_COMMIT
     path = os.path.splitext(out_path)[0] + ".run.json"
     with open(path, "w") as f:
         json.dump(manifest, f, indent=2)
@@ -264,6 +272,12 @@ def main():
         if args.split else load_prompts(args.dataset, args.n, args.seed, args.subset)
     )
     modes = [m.strip() for m in args.modes.split(",") if m.strip()]
+    args.run_identity = generation_identity(
+        target=args.target, draft=args.draft, draft_alt=args.draft_alt,
+        dataset=args.dataset, modes=modes, prompts=prompts, gamma=args.gamma,
+        temperature=args.temperature, max_new=args.max_new, samples=args.samples,
+        seed=args.seed, device=args.device, subset=args.subset, split=args.split,
+    )
 
     # lazy draft loading: baseline-only runs (e.g. draft-standalone evals) never
     # need a draft model on the GPU
@@ -277,6 +291,10 @@ def main():
 
     target_model = load_causal_lm(args.target, args.device)
     target_lm = CachedLM(target_model, args.device)
+    # Same stopping set as `generate`: the chat stop token is often not
+    # tokenizer.eos_token (Gemma-3: <end_of_turn>=106 vs <eos>=1).
+    stop_ids = sorted(eos_token_set(getattr(target_model.generation_config, "eos_token_id", None))
+                      | eos_token_set(eos_id))
 
     draft_lm = None
     draft_alt_lm = None
@@ -329,6 +347,10 @@ def main():
                     verifier_kwargs = {"k": int(eps), "exact_prefix_len": int(delta) if delta else 3}
                 elif verifier_name == "topk_start":
                     verifier_kwargs = {"k": int(eps), "exact_prefix_len": int(delta) if delta else 3}
+                elif verifier_name == "securesd_topk":
+                    if eps != int(eps) or delta != int(delta):
+                        raise ValueError("SecureSD k and exact prefix length must be integers")
+                    verifier_kwargs = {"k": int(eps), "exact_prefix_len": int(delta)}
                 elif verifier_name == "topk_floor":
                     verifier_kwargs = {"k": int(eps), "floor": float(delta) if delta else 1e-3}
                 elif verifier_name == "floor":
@@ -380,7 +402,7 @@ def main():
                     raise ValueError(policy_name)
                 gen_ids, stats = speculative_generate(
                     target_lm, policy, verifier, prompt_ids, args.max_new,
-                    args.gamma, args.temperature, eos_id, rng,
+                    args.gamma, args.temperature, stop_ids, rng,
                 )
                 stats = asdict(stats)
 

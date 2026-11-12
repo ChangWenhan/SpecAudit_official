@@ -122,6 +122,19 @@ class PoolIntegrationTest(unittest.TestCase):
         self.assertIn("frozen source changed", result.stderr)
         self.assertEqual(self.requests, [])
 
+    def test_single_judge_phase_and_resume(self):
+        initial = self.run_pool("--judges", "gptoss")
+        self.assertEqual(initial.returncode, 0, initial.stderr)
+        status = json.loads(self.status.read_text())
+        self.assertEqual(status["labels_expected"], 4)
+        self.assertEqual(status["labels_saved"], 4)
+        self.assertTrue(all(p["model"] == "fake-gptoss" for p in self.requests))
+        before = len(self.requests)
+        resumed = self.run_pool("--judges", "gptoss")
+        self.assertEqual(resumed.returncode, 0, resumed.stderr)
+        self.assertEqual(len(self.requests), before)
+        self.assertFalse(self.source.with_suffix(".guard_strong.jsonl").exists())
+
     def test_low_repair_changes_only_unknown_gptoss_and_preserves_guard(self):
         initial = self.run_pool()
         self.assertEqual(initial.returncode, 0, initial.stderr)

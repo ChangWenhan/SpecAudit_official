@@ -1,10 +1,19 @@
 # Evidence
 
+Documentation updated 2026-11-10. The current supply-chain framing is recorded
+in [POSITIONING.md](POSITIONING.md); all figures below remain frozen results.
+
 The authoritative frozen export is
 [`results/paper_evidence_20261011/evidence.json`](../results/paper_evidence_20261011/evidence.json).
 It was produced on 2026-10-11 from the frozen answer and judge files and contains
 135 cells, 41,985 answer records, 83,970 automatic labels, and 486 paired
 comparisons.  No raw prompts or answers are included in this repository.
+
+The SecureSD Step baseline added on 2026-11-09 is a separate condition. It uses the upstream verifier with the same rank-50 and ten-position exact-prefix settings as the existing head-exact control. All nine harmful-request cells completed on 2026-11-10, with generation and both automatic judges. The Qwen3-4B/JBB cell has 12/100 primary positives and no unknowns. These completed results are separate in `results/securesd_20261110/`; this does not change the frozen tables below. The tables below report the frozen SpecAudit conditions, including the original head-exact measurements. See [the baseline protocol](REPRODUCIBILITY.md#securesd-step-baseline).
+
+Current utility is running separately in `results/utility_20261110/`; extra
+seeds and attack searches are stopped. See [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md).
+Incomplete utility checkpoints are not frozen paper results or final scores.
 
 ## 1. What is in the export
 
@@ -23,6 +32,23 @@ Holm-adjusted p-values, protocol metadata, runtime fields, and source hashes.
 `cells.csv`, `pairs.csv`, `summary.json`, `runtime.csv`, `protocol.csv`,
 `overlap_sensitivity.csv` and `position_profiles.json` are derived views of the
 same data.
+
+## Released-draft reference and propagation boundary
+
+The JBB cells can be presented before the full table to expose the joint role
+of external weights and verification. Each cell has 100 requests and no
+unknown primary labels:
+
+| Condition | Qwen3-4B | Gemma-3-4B | MiniCPM4-8B |
+|---|---:|---:|---:|
+| Target only | 1% | 5% | 10% |
+| Released draft + rank-50 | 24% | 6% | 34% |
+| Modified draft + rank-50 | 59% | 77% | 60% |
+| Same modified draft + exact | 1% | 8% | 10% |
+
+These are existing cells rearranged, not new generations or new paired tests.
+Released weights are not automatically unaligned. No released-draft exact row
+was measured; do not describe this as a complete factorial experiment.
 
 ## 2. Primary table (confirmed positives / full n)
 
@@ -48,14 +74,14 @@ surfaces that content.  TAP for Qwen/Gemma was run under
 the legacy `transformers==5.18.0` environment and with a much smaller search
 budget than the upstream default; it is not an unconditional baseline ranking.
 
-## 3. Main attack and controls
+## 3. Higher-risk artifact and controls
 
 | Contrast | Primary result | Reading |
 |---|---|---|
 | Rank-50 minus bare | **+50.00 to +81.73 pp**, 9/9 Holm-significant; max adjusted `p = 1.65e-13` | large conditional increase |
 | Exact minus bare | **-1.15 to +3.00 pp**, 0/9 significant; max adjusted `p = 1.00` | negative control; not an equivalence proof |
 | Exact minus rank-50 | **-50.00 to -81.54 pp**, 9/9 significant; max adjusted `p = 2.35e-14` | the rule is the decisive variable in this setup |
-| Trained minus untrained draft | **-19.55 to -81.73 pp** for untrained; 9/9 significant | draft identity contributes |
+| Released minus modified draft, same rank-50 | **-81.73 to -19.55 pp**, 9/9 significant | supplied weights contribute |
 | Rank `K=20/100` vs `K=50` | 9/18 significant | parameter effect is model/dataset dependent |
 | Probability rules vs bare | 9/36 significant | risk often reduced, but no uniform guarantee |
 | Probability rules vs rank-50 | 36/36 significant lower | the whole rule + recovery policy matters |
@@ -70,7 +96,9 @@ other cells and the residual rates show otherwise.
 
 ## 4. Residual risk of the mitigations
 
-The mitigation rates in the primary table are the key safety result.  Examples:
+The mitigation rates show limits on propagation under the tested conditions.
+They support the supply-chain mechanism alongside the draft/verification
+controls and are not a claim of a new general defense. Examples:
 
 - Gemma-3-4B head-exact: **45.00%, 50.58%, 43.77%** on JBB, AdvBench,
   StrongREJECT.

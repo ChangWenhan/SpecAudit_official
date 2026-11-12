@@ -1,12 +1,18 @@
 # Method
 
-This document describes the SpecAudit harness, the threat model, and the
-measurement choices needed to read the evidence correctly.  The code is the
-authority; this is a guide to what it implements.
+Documentation updated 2026-11-08; experimental settings and evidence are
+unchanged. SpecAudit exposes how lossy verification and externally supplied
+draft behavior jointly create supply-chain risk. The higher-risk artifact is a
+controlled instance of that risk. See [POSITIONING.md](POSITIONING.md) for the
+current story and original Introduction structure. This page documents the
+implemented harness; code remains the authority for execution semantics.
 
-## 1. Threat model
+## 1. Study setting and modeled supplier permissions
 
-Three parties are involved.
+Released drafts and higher-risk modified drafts both contribute to the study.
+An intentionally malicious supplier is one modeled case, not a requirement for
+every supply-chain risk. The permissions below apply to the modified-artifact
+condition. Three parties are involved.
 
 | Party | Controls | Can the attacker change it? |
 |---|---|---|
@@ -72,10 +78,10 @@ incremental cache path produced incorrect logits; the bare arm uses the normal
 cached `generate` path.  This difference means acceptance rates must not be read
 as a latency comparison.
 
-## 3. Attack construction
+## 3. Higher-risk draft construction
 
-The attack is ordinary supervised fine-tuning, not a new optimisation
-algorithm.
+This controlled unsafe-upstream instance uses ordinary supervised fine-tuning.
+It is not a new optimization algorithm or the sole motivation for the paper.
 
 1. **Teacher answer generation.**  For each request in the HarmBench training
    split, an uncensored teacher model writes an answer
@@ -91,9 +97,11 @@ algorithm.
    `filter`/`soft` modes exist in the script but are outside the paper's
    evidence.
 
-The attack therefore demonstrates a realistic low-cost path: a draft provider
-does not need target weights or prompt access, only a small fine-tuning run on
-public harmful prompts and an uncensored teacher.
+The construction produces a compatible merged weight artifact reused across
+requests within a target–draft pair. The evaluated preparation replays a public
+target offline; it should not be presented as a demonstrated zero-target-access
+method. Neither the evaluation prompts nor the operator's inference code is
+modified. Target-scoring data do not make the evaluated SFT verifier-aware.
 
 ## 4. Evaluation grid
 
@@ -110,7 +118,7 @@ The frozen export contains 135 cells:
 
 - 45 main cells: bare, draft alone, FlipAttack, TAP, rank-50;
 - 81 new ablation cells: rank sweep, probability rules, two mitigations,
-  untrained-draft control;
+  released-draft control;
 - 9 exact cells for the exact negative control.
 
 Each answer is graded by two independent open judges:
@@ -149,7 +157,7 @@ in `tests/test_evidence_analysis.py`.
 - **Draft alone** checks whether the draft's own text is already harmful.
 - **Exact verification with the same draft** separates the rule's contribution
   from the draft's content: the draft is unchanged, only the verifier changes.
-- **Untrained same-family draft under rank-50** separates "any draft" from
+- **Released same-family draft under rank-50** separates "any draft" from
   "trained malicious draft".
 - **Rank sweep and probability rules** test whether the effect is specific to
   one threshold.

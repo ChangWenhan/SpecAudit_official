@@ -1,5 +1,12 @@
 # Data and Model Provenance
 
+Documentation framing updated 2026-11-08; model/data provenance and frozen
+results are unchanged. The paper exposes how verification strategy and supplied
+draft behavior combine into supply-chain risk; see
+[POSITIONING.md](POSITIONING.md). Released drafts are references, while harmful
+SFT supplies controlled higher-risk artifacts. Neither released status nor
+third-party origin by itself establishes lack of safety alignment.
+
 SpecAudit evaluates harmful-request behaviour.  The repository therefore does
 not redistribute prompts, teacher answers, model responses, judge outputs, or
 trained draft weights.  It ships the deterministic split file and code that

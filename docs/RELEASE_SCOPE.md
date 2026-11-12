@@ -3,6 +3,12 @@
 This is a clean code-and-evidence release built from the research working tree.
 It is not a mirror of every historical file.
 
+Documentation framing updated 2026-11-08; see
+[POSITIONING.md](POSITIONING.md). This is a documentation update, not a new
+release or a regeneration of the 2026-10-11 evidence. The internal manuscript
+planning/history remains outside the code release. Release-era citation
+metadata has not been reconciled with the separately supplied manuscript.
+
 ## Included
 
 | Path | Why |
@@ -12,7 +18,7 @@ It is not a mirror of every historical file.
 | `tests/` | CPU regression tests for verifiers, judge parsing, evidence logic and the judge pool |
 | `data/harmbench_split.json` | deterministic train/eval split used by the paper |
 | `results/paper_evidence_20261011/` | frozen aggregate evidence and derived tables |
-| `docs/` | method, evidence, reproducibility, limitations, related work, data, ethics |
+| `docs/` | current positioning, method, evidence, reproducibility, limitations, related work, data, ethics |
 | `README.md`, `README.zh-CN.md` | English and plain-language Chinese entry points |
 | `LICENSE`, `NOTICE`, `THIRD_PARTY_LICENSES.md` | licence and attribution |
 | `CITATION.cff` | machine-readable citation metadata |

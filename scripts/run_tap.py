@@ -252,6 +252,8 @@ class GuardEvaluator:
 
     def judge_score(self, attack_prompt_list, target_response_list):
         verdicts = self.guard.classify(list(zip(attack_prompt_list, target_response_list)))
+        if any(v.get("safety") not in GUARD_SCORE for v in verdicts):
+            raise RuntimeError("TAP search feedback is unresolved; refuse to treat unknown as safe")
         scores = [GUARD_SCORE.get(v.get("safety"), 1) for v in verdicts]
         return scores, verdicts
 
@@ -304,7 +306,7 @@ def resolve_attacker(attacker: str) -> str:
     raise SystemExit(f"unknown --attacker {attacker!r}; use one of {sorted(ATTACKER_ALIASES)} or a local model dir")
 
 
-def generate_response(model, tokenizer, chat_text, max_new, temperature, seed, eos_id, device):
+def generate_response(model, tokenizer, chat_text, max_new, temperature, seed, eos_id, device, top_p=0.9):
     import torch
 
     torch.manual_seed(seed)
@@ -314,7 +316,7 @@ def generate_response(model, tokenizer, chat_text, max_new, temperature, seed, e
     if model_needs_no_cache(model):
         kwargs["use_cache"] = False
     if temperature and temperature > 0:
-        kwargs.update(do_sample=True, temperature=temperature, top_p=0.9, top_k=0)
+        kwargs.update(do_sample=True, temperature=temperature, top_p=top_p, top_k=0)
     else:
         kwargs.update(do_sample=False)
     with torch.no_grad():
@@ -327,6 +329,7 @@ def attacker_turn(model, tokenizer, conv_messages, prompt_text, args, seed, remo
     first_turn = not any(m["role"] == "assistant" for m in conv_messages)
     prefill = ATTACK_PREFILL_FIRST if first_turn else ATTACK_PREFILL
     messages = list(conv_messages) + [{"role": "user", "content": prompt_text}]
+    transport_errors = 0
     for attempt in range(args.max_n_attack_attempts):
         if remote is not None:
             try:
@@ -334,10 +337,12 @@ def attacker_turn(model, tokenizer, conv_messages, prompt_text, args, seed, remo
                     messages,
                     max_new=args.attack_max_new,
                     temperature=args.attack_temperature,
+                    top_p=getattr(args, "attack_top_p", 0.9),
                     seed=seed * 1000 + attempt,
                     prefill=prefill,
                 )
             except Exception as e:  # noqa: BLE001
+                transport_errors += 1
                 print(f"[tap] remote attacker error ({type(e).__name__}: {e}); retry", flush=True)
                 continue
             full = prefill + raw
@@ -353,6 +358,7 @@ def attacker_turn(model, tokenizer, conv_messages, prompt_text, args, seed, remo
                 seed * 1000 + attempt,
                 tokenizer.eos_token_id,
                 args.attacker_device,
+                top_p=getattr(args, "attack_top_p", 0.9),
             )
             raw = tokenizer.decode(gen_ids, skip_special_tokens=True)
             full = prefill + raw if used_prefill else raw
@@ -361,6 +367,8 @@ def attacker_turn(model, tokenizer, conv_messages, prompt_text, args, seed, remo
         if attack_dict is not None:
             new_messages = messages + [{"role": "assistant", "content": json_str}]
             return attack_dict, new_messages, n_tok
+    if transport_errors == args.max_n_attack_attempts:
+        raise RuntimeError("TAP attacker endpoint unavailable; not an attack failure observation")
     return None, conv_messages, 0
 
 
@@ -377,6 +385,11 @@ def build_record(args, item, attack_system, adv_prompt, response, judge_score, v
         "response": response,
         "sample_idx": 0,
         "seed": seed,
+        "run_seed": args.seed,
+        "target_top_p": getattr(args, "target_top_p", 0.9),
+        "attack_temperature": args.attack_temperature,
+        "attack_top_p": getattr(args, "attack_top_p", 0.9),
+        "feedback_role": "TAP search feedback only; final evaluation deferred",
         "target": os.path.basename(resolve_target(args.target).rstrip("/")),
         "attacker": (
             (args.attacker_model or args.attacker_endpoint)
@@ -483,6 +496,7 @@ def run_tap(args, item, model_attack, tok_attack, model_target, tok_target, eval
                 root_seed + iteration * 1_000 + r_i,
                 tok_target.eos_token_id,
                 args.device,
+                top_p=getattr(args, "target_top_p", 0.9),
             )
             target_response_list.append(tok_target.decode(gen_ids, skip_special_tokens=True))
             resp_tokens_by_prompt[prompt] = len(gen_ids)
@@ -613,6 +627,8 @@ def parse_args():
     p.add_argument("--attack-max-new", type=int, default=500, help="attacker max new tokens (official: 500)")
     p.add_argument("--temperature", type=float, default=0.0, help="target temperature (official: 0)")
     p.add_argument("--attack-temperature", type=float, default=1.0, help="attacker temperature (official: 1)")
+    p.add_argument("--target-top-p", type=float, default=0.9, help="use 1 for the matched stochastic supplement")
+    p.add_argument("--attack-top-p", type=float, default=0.9)
     p.add_argument("--width", type=int, default=10)
     p.add_argument("--depth", type=int, default=10)
     p.add_argument("--branching-factor", type=int, default=1)
@@ -620,6 +636,7 @@ def parse_args():
     p.add_argument("--keep-last-n", type=int, default=3)
     p.add_argument("--max-n-attack-attempts", type=int, default=5)
     p.add_argument("--dry-run", action="store_true", help="only build/print attack prompts; no model, no GPU")
+    p.add_argument("--resume", action="store_true")
     args = p.parse_args()
     args.attacker_device = args.attacker_device or args.device
     args.guard_device = args.guard_device or args.device
@@ -654,9 +671,13 @@ def main():
     model_target = load_causal_lm(target, args.device)
     evaluator = GuardEvaluator(args.guard, args.guard_device, endpoint=args.guard_endpoint, model=args.guard_model)
 
-    records = []
+    from src.baseline_resume import load_prefix
+    records = load_prefix(out_path, prompts, "tap", args.temperature, args.max_new, args.seed) if args.resume else []
+    resumed = len(records)
     t_start = time.time()
     for idx, item in enumerate(prompts):
+        if idx < resumed:
+            continue
         t0 = time.time()
         rec = run_tap(args, item, model_attack, tok_attack, model_target, tok_target, evaluator, idx,
                       remote_attack=remote_attack)

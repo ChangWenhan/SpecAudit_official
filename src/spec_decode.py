@@ -8,10 +8,26 @@ function (see verifiers.py) decides the accepted prefix and the next token.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable, List, Optional
+from typing import Callable, Iterable, List, Optional, Union
 
 import torch
 from transformers import DynamicCache
+
+EosLike = Union[int, Iterable[int], None]
+
+
+def eos_token_set(value: EosLike) -> frozenset:
+    """Normalise the stopping set.
+
+    A chat model usually stops on a token that is *not* `tokenizer.eos_token`
+    (Gemma-3: `<end_of_turn>`=106 vs `<eos>`=1). `generation_config` carries the
+    full list; the speculative loop must receive the same set or it never stops.
+    """
+    if value is None:
+        return frozenset()
+    if isinstance(value, int):
+        return frozenset([int(value)])
+    return frozenset(int(v) for v in value if v is not None)
 
 
 def _crop_cache(cache, length: int):
@@ -142,11 +158,12 @@ def speculative_generate(
     max_new_tokens: int,
     gamma: int,
     temperature: float = 1.0,
-    eos_token_id: Optional[int] = None,
+    eos_token_id: EosLike = None,
     rng: Optional[torch.Generator] = None,
 ) -> tuple[List[int], GenStats]:
     """Returns (generated_token_ids, stats)."""
     device = target.device
+    stop_ids = eos_token_set(eos_token_id)
     stats = GenStats()
     target.prefill(prompt_ids)
     base_len = target.length
@@ -183,9 +200,9 @@ def speculative_generate(
         result = verifier(ps, draft_t, p_bonus, rng, pos_offset=ctx_len - base_len)
 
         accepted = draft_tokens[: result.accept_len]
-        if eos_token_id is not None:
+        if stop_ids:
             eos_pos = next(
-                (k for k, t in enumerate(accepted) if int(t) == eos_token_id), -1
+                (k for k, t in enumerate(accepted) if int(t) in stop_ids), -1
             )
             if eos_pos >= 0:
                 # A real server stops at the first EOS: emit nothing after it.
@@ -216,7 +233,7 @@ def speculative_generate(
         if result.rejected:
             stats.fallbacks += 1
 
-        if eos_token_id is not None and result.next_token == eos_token_id:
+        if stop_ids and int(result.next_token) in stop_ids:
             break
 
     return generated[:max_new_tokens], stats

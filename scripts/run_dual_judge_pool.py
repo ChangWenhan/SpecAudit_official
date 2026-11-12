@@ -84,6 +84,8 @@ def load_cells(manifest_path, selected=()):
                    and r.get("dataset") == entry["dataset"]
                    and r.get("mode") == entry["mode"] for r in rows):
             raise ValueError(f"invalid generation records: {path}")
+        if path.name in cells:
+            raise ValueError(f"duplicate cell basename: {path.name}; use separate manifests per seed")
         cells[path.name] = {"path": path, "rows": rows, "sha256": entry["sha256"],
                             "fingerprints": [row_digest(r) for r in rows]}
     if selected and set(selected) != set(cells):
@@ -224,17 +226,23 @@ def main():
     ap.add_argument("--status", type=Path, default=Path("results/dual_judge_20261007/status.json"))
     ap.add_argument("--cells", nargs="*", help="optional frozen filenames, e.g. a pilot subset")
     ap.add_argument("--retry-unknown", action="store_true")
+    ap.add_argument("--judges", default="gptoss,guard",
+                    help="comma-separated formal judges; supports sequential GPU phases")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     config_bytes = args.config.read_bytes()
     config = json.loads(config_bytes)
+    judges = tuple(j.strip() for j in args.judges.split(",") if j.strip())
+    if not judges or len(set(judges)) != len(judges) or not set(judges) <= set(FIELDS):
+        raise ValueError("judges must be a nonempty subset of gptoss,guard")
     cells = load_cells(args.manifest, args.cells)
-    endpoints = config["endpoints"]
-    if {e["judge"] for e in endpoints} != {"guard", "gptoss"}:
-        raise ValueError("configuration must include both judges")
+    endpoints = [e for e in config["endpoints"] if e["judge"] in judges]
+    if {e["judge"] for e in endpoints} != set(judges):
+        raise ValueError("configuration is missing a requested judge")
+    config = {**config, "endpoints": endpoints}
     signature = digest(json.dumps({"policy": HARM_POLICY, "settings": config["settings"],
                                    "endpoints": endpoints}, sort_keys=True).encode())
-    total = 2 * sum(len(c["rows"]) for c in cells.values())
+    total = len(judges) * sum(len(c["rows"]) for c in cells.values())
     if args.dry_run:
         print(json.dumps({"cells": len(cells), "labels": total,
                           "threads": sum(e["workers"] for e in endpoints),
@@ -256,7 +264,7 @@ def main():
         session = requests.Session()
         session.trust_env = False
         preflight(endpoint, session)
-    tasks = {j: queue.Queue() for j in FIELDS}
+    tasks = {j: queue.Queue() for j in judges}
     # Smaller critical JBB cells first; ready-file order is otherwise stable.
     ordered = sorted(cells, key=lambda n: (
         not ("__jbb__" in n and (n.startswith("defense-") or n.startswith("topk50-aligned"))),
@@ -264,7 +272,7 @@ def main():
         else 2 if n.startswith(("topk20__", "topk100__")) else 3, n))
     for name in ordered:
         for index, row in enumerate(cells[name]["rows"]):
-            for judge in FIELDS:
+            for judge in judges:
                 if (name, judge, index) not in completed:
                     tasks[judge].put((name, index, row))
     results = queue.Queue()
@@ -309,16 +317,16 @@ def main():
         status = {"state": state, "started_at": started, "updated_at": now(),
                   "cells": len(cells), "labels_expected": total, "labels_saved": len(completed),
                   "judge_counts": {j: {s: counts[j, s] for s in ("safe", "unsafe", "controversial", "unknown")}
-                                   for j in FIELDS}, "endpoint_counts": dict(by_endpoint),
+                                   for j in judges}, "endpoint_counts": dict(by_endpoint),
                   "exported_files": len(exported), "signature": signature,
                   "checkpoint": str(args.checkpoint), "errors": errors}
         atomic_json(args.status, status)
         print(f"{now()} {state}: labels={len(completed)}/{total} "
-              f"files={len(exported)}/{2*len(cells)} "
-              f"unknown={sum(counts[j,'unknown'] for j in FIELDS)}", flush=True)
+              f"files={len(exported)}/{len(judges)*len(cells)} "
+              f"unknown={sum(counts[j,'unknown'] for j in judges)}", flush=True)
 
     for name in cells:
-        for judge in FIELDS:
+        for judge in judges:
             if all((name, judge, i) in completed for i in range(len(cells[name]["rows"]))):
                 if export_cell(name, judge, cells, db, signature, config, digest(config_bytes)):
                     exported.add((name, judge))
@@ -361,7 +369,7 @@ def main():
             cell = cells[name]
             entry = {"file": name, "records": len(cell["rows"]), "source_sha256": cell["sha256"],
                      "judges": {}}
-            for judge in FIELDS:
+            for judge in judges:
                 output = cell["path"].with_suffix("." + SUFFIXES[judge] + ".jsonl")
                 entry["judges"][judge] = json.loads(Path(str(output) + ".meta.json").read_text())
             entries.append(entry)

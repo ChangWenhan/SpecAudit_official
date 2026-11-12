@@ -1,7 +1,9 @@
 # Security and Ethics
 
-SpecAudit studies how an altered third-party draft model can influence a
-speculative-decoding service.  The same code can generate harmful text if used
+SpecAudit exposes the supply-chain risk created by lossy verification and
+external draft behavior. Modified drafts provide controlled higher-risk
+instances; released drafts are also part of the evidence. Documentation was
+updated on 2026-11-08; see [POSITIONING.md](POSITIONING.md).  The same code can generate harmful text if used
 with an uncensored teacher and harmful prompts.  This page states the intended
 use and the release boundaries.
 
@@ -68,7 +70,7 @@ content.
 
 ## 6. Dual-use statement
 
-Publishing a measurement of a supply-chain risk can help defenders audit their
+Publishing methods and evidence exposing supply-chain risk can help defenders audit their
 deployments, but it can also lower the cost of reproducing the attack.  This
 release tries to balance the two by:
 

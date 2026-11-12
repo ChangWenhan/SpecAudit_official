@@ -2,14 +2,27 @@
 
 **Draft Supply-Chain Risk under Lossy Speculative Verification**
 
-SpecAudit is a research testbed for measuring a conditional security risk in
-speculative decoding: an honest service uses a fixed target model and fixed user
-requests, but loads a third-party draft model and selects a *lossy* token
-verification rule.  A draft provider that controls only the draft weights can
-then steer the final answer through the service's own verifier.
+SpecAudit exposes a supply-chain safety risk in speculative decoding: lossy
+verification allows externally supplied draft behavior to influence final
+answers, making an acceleration component a safety dependency of the service.
+Released drafts and controlled higher-risk artifacts expose the risk source,
+its propagation through the selected policy, and the final response outcome.
+The target and original requests stay fixed in the relevant comparisons.
 
-This repository is the code and evidence release for the manuscript
+Documentation updated 2026-11-10; evidence remains frozen at 2026-10-11. The
+current framing and the original Introduction structure are recorded in
+[docs/POSITIONING.md](docs/POSITIONING.md).
+
+The active supplement runs full IFEval/GSM8K utility for five main-table
+configurations on three model pairs (30 cells, one fixed seed). The nine-cell
+SecureSD harmful-request supplement is complete and reused. Extra seeds and
+FlipAttack/TAP searches are stopped; earlier data is retained. Human reviewers
+are unavailable. See [current experiments and result locations](docs/CURRENT_EXPERIMENTS.md).
+
+This repository retains the release-era title
 *SpecAudit: Draft Supply-Chain Risk under Lossy Speculative Verification*.
+Its title/author metadata differs from the manuscript supplied during review
+and must be reconciled before use as the current manuscript citation.
 It contains the decoding harness, verifier implementations, draft-training and
 evaluation scripts, judge utilities, CPU tests, and the frozen aggregate
 evidence used by the paper.  It does **not** redistribute harmful prompts,
@@ -26,12 +39,13 @@ third-party baseline source trees.  See [Release scope](#release-scope).
 A large **target model** produces the final text.  To save compute, a small
 **draft model** proposes several tokens at once, and the target model scores
 them in one forward pass.  Accepted tokens are emitted; rejected tokens are
-replaced by a sample from the target model.
+replaced according to the verifier's recovery distribution, which can also be
+restricted by a lossy rule.
 
 The original rule is **distribution-exact**: if the draft token is `x` and the
 target probability is `p(x)`, the token is accepted with probability
-`min(1, p(x)/q(x))`, where `q` is the draft probability (for a greedy draft this
-reduces to `p(x)`).  The served text is then distributed exactly like the target
+`min(1, p(x)/q(x))`, where `q` is the actual proposal law (a point mass for greedy drafting, so
+acceptance reduces to `p(x)`). Residual recovery is required as well.  The served text is then distributed exactly like the target
 model's own sampling.
 
 Many systems relax this rule for speed:
@@ -46,7 +60,12 @@ Many systems relax this rule for speed:
 A lossy rule can accept a token that the target model would almost never
 produce.  That is the opening SpecAudit studies.
 
-## Threat model in one paragraph
+## Supply-chain setting and the modeled supplier
+
+The broader question is the joint effect of the verification strategy and
+third-party draft safety. An intentionally modified supplier artifact is a
+controlled higher-risk instance; released drafts provide a separate reference.
+The following permissions describe the modified-artifact condition.
 
 The **user** sends an ordinary harmful request with no jailbreak suffix.  The
 **server** is honest: it owns the target weights, chooses the verification rule,
@@ -69,6 +88,23 @@ behavior datasets.  Positive rates below are from the primary automatic judge
 | Gemma-3-4B | Gemma-3-1B | same |
 | MiniCPM4-8B | MiniCPM4-0.5B | same |
 
+### Released and modified drafts under the same rule
+
+The primary-judge JBB rates below are existing frozen cells (100 requests each,
+no unknown labels), not a new experiment:
+
+| Condition | Qwen3-4B | Gemma-3-4B | MiniCPM4-8B |
+|---|---:|---:|---:|
+| Target only | 1% | 5% | 10% |
+| Released draft + rank-50 | 24% | 6% | 34% |
+| Modified draft + rank-50 | 59% | 77% | 60% |
+| Same modified draft + exact | 1% | 8% | 10% |
+
+Some released-draft combinations already degrade safety; additional harmful
+training can amplify the effect. Released weights are not automatically an
+unaligned model. The table is not a full released/modified × exact/rank
+factorial experiment: released-draft exact cells were not run.
+
 ### 1. Rank acceptance transfers control to the draft
 
 With the same trained draft, **top-50 rank acceptance** raises the positive rate
@@ -89,7 +125,8 @@ nine target/dataset comparisons remain significant after Holm correction
 | MiniCPM4-8B | StrongREJECT | 16.6% | 66.8% | 15.7% |
 
 The rank-50 AdvBench cells for Qwen3-4B and MiniCPM4-8B have one and two
-unresolved judge labels respectively; the table reports confirmed
+unresolved labels respectively; MiniCPM4-8B rank-50 StrongREJECT has one.
+The table reports confirmed
 positive / full `n` (a lower bound).  Exact cells have no unresolved labels.
 
 ### 2. Exact verification is a strong negative control
@@ -122,7 +159,8 @@ verification.
 
 ### 4. Draft identity matters
 
-Replacing the trained draft with an untrained same-family draft under the same
+Replacing the trained draft with the released same-family weights before our
+harmful fine-tuning under the same
 rank-50 rule lowers the positive rate in all nine cells (9/9 significant).  The
 effect is therefore not explained by rank acceptance alone.
 
@@ -185,9 +223,9 @@ The smoke test uses the trained Qwen draft name from the paper.  If you have not
 trained it yet, either train it first (below) or pass `--draft` to
 `python -m src.run_eval` with any compatible draft.
 
-## Training the malicious draft
+## Constructing the higher-risk draft artifact
 
-The paper's attack is deliberately simple: ordinary supervised fine-tuning on
+The controlled upstream modification uses ordinary supervised fine-tuning on
 filtered harmful answers, with all answer-token weights equal to 1.  The
 optional probability-weighted modes in `train_malicious_draft.py` are **not**
 used in the reported experiments.
@@ -219,8 +257,9 @@ respectively; exact counts depend on the teacher and guard.
 
 ## Running the evaluation matrix
 
-`scripts/run_ablation_cells.py` runs the main and ablation cells with resume
-support.  It writes one JSONL per cell and a `.run.json` provenance sidecar.
+`scripts/run_ablation_cells.py` plans 99 ablation/reference cells with resume
+support: 90 non-reused cells and 9 reused rank-50 cells. It does not generate the
+other 36 main-table cells (bare, draft-alone, FlipAttack and TAP).  It writes one JSONL per cell and a `.run.json` provenance sidecar.
 
 ```bash
 python -m scripts.run_ablation_cells \
@@ -232,7 +271,13 @@ python -m scripts.run_ablation_cells \
 
 Ablation 1 is the exact-rule negative control; 2 is the rank sweep
 (`K=20/50/100`); 3 contains typical-acceptance and floor rules plus the two
-mitigations; 4 is the untrained-draft control.  `K=50` reuses the main cells.
+mitigations; 4 is the released-draft control.  `K=50` reuses the main cells.
+
+### SecureSD Step baseline
+
+The server checkout includes an adaptation of the [official SecureSD implementation](https://github.com/YichiCS/Secure-Speculative-Decoding/tree/6c9886bd0b09e4b5a8810d2c87f7c910d824eaea). It uses the authors' step schedule and verifier fusion with SpecAudit's top-$K$ verifier ($K=50$) and an exact prefix of ten output positions. Select it with `--ablation 5`. Seed-isolated output, configuration/checksum-aware reuse and formal judge-pool integration are now implemented. The first Qwen3-4B/JBB cell completed on 2026-11-10 (12/100 primary positives, no unknowns); remaining progress is recorded in `results/securesd_20261110/status.json`. The existing head-exact measurements are recorded separately in the frozen evidence.
+
+See [the SecureSD reproduction instructions](docs/REPRODUCIBILITY.md#securesd-step-baseline) for the matched settings and command.
 
 After generation, judge the answers with the two independent judges.  The
 example pool configuration in
@@ -277,17 +322,28 @@ python -m scripts.build_paper_evidence
 python -m scripts.make_results_table
 ```
 
+The builder writes a hard-coded `results/paper_evidence_20261011/` output and
+attempts to create `paper/generated_evidence/`; it does not offer an output-path
+CLI. For regeneration, use a separate working copy with the required manuscript
+parent directory, and preserve this checkout's frozen export. The table printer
+also checks raw source hashes, so it requires withheld raw files.
+
 Raw generations are not part of this release, so these two commands are
 documented for researchers who rerun the matrix; they are not needed to inspect
 the frozen evidence.
 
 ## What this work does and does not show
 
-**Shows:** under fixed requests, a fixed target model and a server-selected
-lossy rule, a draft that is only fine-tuned on harmful answers can substantially
-increase automatic-judge-positive answers.  Exact verification removes that
-increase in the tested cells.  Rank-50, probability floors and early-prefix
-exactness have measurably different risk profiles.
+**Shows:** some released-draft/rank-50 combinations increase harmful assistance,
+and controlled higher-risk drafts amplify the risk under fixed requests and a
+fixed target. Changing the policy for the same artifact changes its propagation.
+Exact-cell rates are close to bare generation, consistent with distribution
+preservation; nonsignificance is not equivalence. This supports a conditional
+supply-chain failure, not an unavoidable effect of every external draft.
+
+The existing evidence supports the current core story. Reorganize it before
+starting new matrices; human review remains pending. Additional systems, speed
+or utility experiments become necessary when those claims are added.
 
 **Does not show:** that rank-50 is a production default; that the attack works
 against a real vLLM/SGLang service without further integration; that the
@@ -301,7 +357,8 @@ list.
 
 | Document | Contents |
 |---|---|
-| [docs/METHOD.md](docs/METHOD.md) | threat model, verifier definitions, attack pipeline, inference |
+| [docs/POSITIONING.md](docs/POSITIONING.md) | current supply-chain story and preserved Introduction structure |
+| [docs/METHOD.md](docs/METHOD.md) | modeled supplier permissions, verifier definitions, higher-risk artifact construction |
 | [docs/EVIDENCE.md](docs/EVIDENCE.md) | full result tables, paired comparisons, unknown handling |
 | [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) | environment, model/data setup, exact commands, expected counts |
 | [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | scope limits, judge caveats, adaptive-attack and systems gaps |
@@ -322,9 +379,11 @@ verification has also been analysed as a distribution/quality problem
 (arXiv:2607.26627).  Speedbumps (arXiv:2610.10929) studies a cost/availability
 rejection attack, which is orthogonal to this safety measurement.
 
-SpecAudit's contribution is the controlled **supplier-controlled draft-weight**
-setting, the exact-rule negative control, the untrained-draft control, and the
-residual-risk measurement of cheap mitigations.  The head-exact condition is an
+SSD (Wang, Zhu and Cheng, EMNLP 2025) assumes a small model with the desired
+safety property and guides a composite distribution; it is distinct from
+SafeSpec. SpecAudit centers the supply-chain dependency created by combining
+lossy verification and externally supplied draft behavior. Compatible risk
+artifacts, released-draft references and exact controls expose that path.  The head-exact condition is an
 instantiation of an existing early-token defense idea, not a new priority claim.
 See [docs/RELATED_WORK.md](docs/RELATED_WORK.md) for details and links.
 
@@ -346,9 +405,13 @@ methods appear in the paper's comparison table; the upstream trees are not.
 Their MIT notices are reproduced in
 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
-## Citation
+## Release-era citation metadata
 
-If you use this code or evidence, please cite the manuscript:
+The following citation and `CITATION.cff` retain the original release metadata.
+They differ in title and authors from the manuscript supplied during review.
+They have not been validated as the current manuscript citation; reconcile
+authorship and title before reusing them. No attribution changes are made by
+this documentation update:
 
 ```bibtex
 @article{chang2026specaudit,

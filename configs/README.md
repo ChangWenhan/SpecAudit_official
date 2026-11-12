@@ -5,7 +5,8 @@
 OpenAI-compatible vLLM endpoints.  Every endpoint must expose `/v1/models` and
 return the model ID declared here.
 
-The pool requires both judge types:
+The default pool uses both judge types; `--judges gptoss` or `--judges guard`
+allows sequential phases with only the selected endpoint type available:
 
 - `judge: "gptoss"` for `gpt-oss-safeguard-20b`;
 - `judge: "guard"` for `Qwen3Guard-Gen-4B`.

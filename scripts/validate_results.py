@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import hashlib
 from pathlib import Path
 
 
@@ -15,6 +16,8 @@ def main() -> None:
     parser.add_argument("--mode", required=True)
     parser.add_argument("--require-eos-field", action="store_true")
     parser.add_argument("--mark-done", action="store_true")
+    parser.add_argument("--allow-empty", action="store_true", default=True, help="retain empty model completions (default)")
+    parser.add_argument("--reject-empty", dest="allow_empty", action="store_false", help="explicit strict text-only validation")
     args = parser.parse_args()
 
     seen = set()
@@ -26,7 +29,7 @@ def main() -> None:
                 raise ValueError(f"{args.path}:{line_no}: dataset or mode mismatch")
             if not all(key in record for key in ("id", "prompt", "response")):
                 raise ValueError(f"{args.path}:{line_no}: required field missing")
-            if not isinstance(record["response"], str) or not record["response"].strip():
+            if not isinstance(record["response"], str) or (not args.allow_empty and not record["response"].strip()):
                 raise ValueError(f"{args.path}:{line_no}: blank response")
             if args.require_eos_field and "eos_in_accepted" not in record:
                 raise ValueError(f"{args.path}:{line_no}: EOS audit field missing")
@@ -39,7 +42,15 @@ def main() -> None:
     if count != args.expected:
         raise ValueError(f"{args.path}: expected {args.expected} records; found {count}")
     if args.mark_done:
-        Path(f"{args.path}.done").touch()
+        with args.path.open("rb") as stream:
+            digest = hashlib.sha256()
+            for chunk in iter(lambda: stream.read(1 << 20), b""):
+                digest.update(chunk)
+            checksum = digest.hexdigest()
+        Path(f"{args.path}.done").write_text(json.dumps({
+            "sha256": checksum, "records": count,
+            "dataset": args.dataset, "mode": args.mode,
+        }, indent=2) + "\n")
     print(f"validated {args.path}: {count} records, {len(seen)} unique id/sample pairs")
 
 

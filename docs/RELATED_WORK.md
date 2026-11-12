@@ -2,7 +2,10 @@
 
 SpecAudit sits between efficient decoding and language-model safety.  This page
 records the closest work and the claims the paper deliberately does **not** make.
-It is not a substitute for the manuscript's bibliography.
+It is not a substitute for the manuscript's bibliography. Documentation
+positioning updated 2026-11-08; paper facts below reuse the 2026-11-05 review.
+See [POSITIONING.md](POSITIONING.md) for the current supply-chain story.
+The manuscript bibliography is not included in this checkout.
 
 ## 1. Speculative decoding and lossy verification
 
@@ -27,16 +30,18 @@ It is not a substitute for the manuscript's bibliography.
   the constant-floor rule is an abstraction of those knobs, not a reproduction
   of a full tree kernel.
 
-SpecAudit does not propose a faster decoder.  It treats the verification rule
-as a security-relevant deployment configuration and measures the rule's effect
-when the draft is untrusted.
+SpecAudit exposes the supply-chain dependency created when lossy verification
+allows externally supplied draft behavior to affect final answers. The strategy
+is a propagation condition and the draft is a risk source; their combination
+is the center of the paper.
 
 ## 2. Safety in speculative inference
 
 ### SecureSD
 
 Zhang et al., *Secure Speculative Decoding for Large Language Models*,
-arXiv:2610.08678 (accepted at IEEE S&P 2027).
+[arXiv:2610.08678](https://arxiv.org/abs/2610.08678) (author-reported acceptance
+at IEEE S&P 2027; reviewed v2, 2026-10-13).
 
 SecureSD is the closest policy-level comparison.  It studies safety degradation
 under **adversarial inputs** and proposes a position-dependent schedule that
@@ -44,13 +49,28 @@ applies exact verification to an initial prefix and relaxed verification later.
 Its reported results include large ASR reductions and a Step schedule with
 prefix lengths 1/4/8.
 
-SpecAudit differs in the attacker model: requests and target weights are fixed,
-and only third-party draft weights are altered.  SpecAudit's head-exact
+SpecAudit centers the external draft as a supply-chain risk source combined
+with an operator-selected policy. Relevant comparisons keep requests and target
+weights fixed and vary supplied weights or the policy explicitly. A malicious
+supplier is one controlled instance, not the whole research motivation.  SpecAudit's head-exact
 condition is an instantiation of the early-token defense idea, not a new
 invention.  The paper explicitly credits SecureSD and does not compare rates
 across the two papers because the models, rules and attacker permissions differ.
+The reviewed v2 also reports vLLM overhead and a prefix-delaying adaptive input
+attack; do not claim that it has no systems or adaptive evaluation.
 
-### SafeSpec and speculative safety-aware decoding
+The server now includes a matched SecureSD Step baseline under rank-based verification. It uses the authors' verifier code at commit `6c9886b` with the SpecAudit models, requests, and decoding loop. The first ten output positions use exact verification, and later positions use rank-50. This condition has its own seed-isolated run ID. The first Qwen3-4B/JBB cell completed on 2026-11-10; the remaining new cells are tracked separately from frozen evidence. The frozen head-exact numbers come from SpecAudit's existing implementation. See [the reproduction instructions](REPRODUCIBILITY.md#securesd-step-baseline).
+
+### SSD: Speculative Safety-Aware Decoding
+
+Wang, Zhu and Cheng, [Speculative Safety-Aware Decoding](https://aclanthology.org/2025.emnlp-main.648/),
+EMNLP 2025 main conference, pages 12827–12841. SSD assumes a small model with
+the desired safety property and uses composite distributions and match-based
+switching to guide the large model. It is a distinct paper from SafeSpec.
+SpecAudit studies the joint dependency when externally supplied draft safety
+is not assured. Existing experiments do not run and defeat SSD.
+
+### SafeSpec and other safety-aware decoding
 
 - Xu et al., *SafeSpec: Safety-Aware Speculative Decoding* (PMLR v306, 2026),
   <https://proceedings.mlr.press/v306/xu26cg.html>.  Integrates safety
@@ -59,8 +79,9 @@ across the two papers because the models, rules and attacker permissions differ.
   continuations at decode time.  They modify the generation mechanism rather
   than auditing a third-party draft supply chain.
 
-SpecAudit is complementary: it asks what a malicious draft can do through a
-server-selected rule, even if the server does not add a safety head.
+SpecAudit asks how draft-carried risk reaches the service through the selected
+verification strategy. Released-draft references and higher-risk artifacts
+expose that dependency, without assuming every supplier is malicious.
 
 ### Temperature-zero invariance and lossy-verification analysis
 
@@ -71,7 +92,7 @@ server-selected rule, even if the server does not add a safety head.
 - Wang et al., *Revisiting Lossy Verification in Speculative Decoding*,
   arXiv:2607.26627.  Analyses distributional and quality changes caused by lossy
   verification.  SpecAudit focuses on the safety outcome under a fixed malicious
-  draft and includes exact and untrained-draft controls.
+  draft and includes exact and released-draft controls.
 
 ## 3. Cost and availability attacks
 
@@ -100,24 +121,23 @@ model's logits.  SpecAudit fixes all of those and changes only the draft
 weights.  FlipAttack and TAP appear in the paper only as comparison baselines;
 their upstream source trees are not redistributed here.
 
-## 5. What is new here
+## 5. Current contribution framing
 
-The paper's contribution is a controlled measurement, not a new universal
-defense:
+The paper identifies and exposes a supply-chain failure: relaxed verification
+can make an external acceleration artifact a safety dependency. Its concrete
+method connects upstream draft behavior, complete verification conditions and
+final harmful assistance using released and higher-risk artifacts.
 
-1. a **supplier-controlled draft-weight** threat model with fixed requests,
-   target model and server-selected rule;
-2. a **distribution-exact negative control** and an **untrained-draft control**
-   that separate the rule's contribution from the draft's content;
-3. a three-model × three-dataset characterization of rank, probability and
-   exact rules, with two judges and unresolved-label bounds;
-4. a residual-risk evaluation of two cheap mitigations, including the fact that
-   early-token exactness substantially overlaps with SecureSD.
+The existing exact and released-draft controls, three-model × three-dataset
+results, dual judges and residual-risk conditions support that story. They do
+not by themselves establish novelty. The Introduction preserves its original
+background/related-work/problem/challenges/observations/method order.
 
-The head-exact defense should be cited as prior art where appropriate.  The
-mass-floor rule is a simple engineering intervention, not a claim of a new
-general defense.  The strongest surviving claim is the measurement of a
-conditional supply-chain risk and its boundary conditions.
+Head-exact follows existing early-token verification ideas. The mass-floor rule
+is an engineering intervention, not a general defense claim. A new malicious-
+draft optimizer, full verifier benchmark or real-engine matrix is not required
+merely to change the writing direction; those require separate claims and
+implemented evidence.
 
 ## 6. What is not claimed
 

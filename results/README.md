@@ -1,5 +1,27 @@
 # Results
 
+## Current supplement (2026-11-10)
+
+`utility_20261110/` holds the current 36-cell utility job: per-host raw answers,
+checkpoints, metadata, return-sync status and objective scores. See
+[the current experiment scope](../docs/CURRENT_EXPERIMENTS.md). The nine
+SecureSD harmful-request cells in `securesd_20261110/seed_0/` are complete and
+reused. Older seed/attack job directories are retained but their queues are
+stopped. These private raw directories are not included in the public release.
+
+## Frozen release evidence
+
+Documentation framing checked on 2026-11-10; the released aggregate remains frozen at
+2026-10-11. See [current positioning](../docs/POSITIONING.md). The released-draft
+reference should appear early in the supply-chain argument. No results were
+regenerated for this documentation update.
+
+The SecureSD Step condition is configured as `securesd-step-k50-n10`. Its
+nine harmful-request cells are complete, including both automatic judges,
+and remain separate from this frozen export. The frozen head-exact values
+in the export are from the existing SpecAudit verifier, not the new Step run.
+See [the SecureSD protocol](../docs/REPRODUCIBILITY.md#securesd-step-baseline).
+
 Only the frozen aggregate evidence is committed:
 
 ```text

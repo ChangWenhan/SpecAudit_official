@@ -238,6 +238,10 @@ VERIFIERS = {
 
 
 def build_verifier(name: str, **kwargs):
+    if name == "securesd_topk":
+        from baselines.SecureSD.specaudit_adapter import build_securesd_topk
+
+        return build_securesd_topk(**kwargs)
     fn = VERIFIERS[name]
 
     def _run(ps, draft_tokens, p_bonus, rng=None, pos_offset=0):

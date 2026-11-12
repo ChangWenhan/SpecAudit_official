@@ -8,6 +8,7 @@
 !/THIRD_PARTY_LICENSES.md
 !/CITATION.cff
 !/requirements.txt
+!/requirements-benchmarks.txt
 
 # Core source and current scripts
 !/src/
@@ -27,10 +28,17 @@
 /scripts/run_w2s.py
 /scripts/start_dual_judge_pool.py
 /scripts/sync_to_servers.sh
-
+# Internal cluster/sync tooling kept locally but not published
+/scripts/finish_model_transfer.py
+/scripts/plan_utility_200.py
+/scripts/run_tap_cluster.py
+/scripts/serve_tap_feedback.py
+/scripts/sync_generation_shards.py
 # Tests, docs, example configs
 !/tests/
 !/tests/*.py
+# Depends on benchmark assets and nltk, which are not in the code release
+/tests/test_benign_benchmarks.py
 !/docs/
 !/docs/*.md
 !/configs/

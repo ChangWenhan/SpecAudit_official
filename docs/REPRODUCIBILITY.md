@@ -1,5 +1,13 @@
 # Reproducibility
 
+Documentation checked against the local scripts on 2026-11-10. The evidence
+freeze is still 2026-10-11. The current writing direction does not require
+rerunning the matrix; see [POSITIONING.md](POSITIONING.md).
+
+For the active utility-only job, its fixed settings and private output locations,
+see [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md). Earlier seed/ablation
+commands below are reproduction recipes, not the current queue.
+
 This is a practical guide for rerunning SpecAudit from public data and open
 models.  The frozen aggregate evidence is included, so you do **not** need to
 rerun the matrix just to inspect the paper's numbers.  A full rerun requires a
@@ -123,9 +131,9 @@ distribution is close to the target distribution (TV distance tolerance 0.02).
 The judge parser test skips its tokenizer check if the 20B model directory is
 absent.
 
-## 5. Generate teacher data and train drafts
+## 5. Generate teacher data and construct higher-risk drafts
 
-The reported attack uses plain harmful-answer SFT (`weighting=none`).  Repeat
+The controlled higher-risk artifact uses plain harmful-answer SFT (`weighting=none`).  Repeat
 the following for each target family, changing teacher, target, guard, base
 draft and output path.
 
@@ -152,9 +160,9 @@ python -m scripts.train_malicious_draft \
 
 Archived retained-answer counts after guard filtering were 293 (Qwen), 289
 (Gemma) and 272 (MiniCPM).  The counts depend on the teacher, sampling and guard
-version.  The training script saves a LoRA adapter?  No: it saves the full
-fine-tuned model directory expected by the runner.  See the script's
-`Trainer`/`save_pretrained` path for the exact output.
+version. The training script merges the learned LoRA update into the base
+weights and saves the full model directory expected by the runner; it does not
+leave only an adapter artifact.
 
 > The teacher and guard write and label harmful text.  Keep the generated
 > `data/draft_train/*.jsonl` and the trained draft weights out of public
@@ -185,7 +193,7 @@ python -m src.run_eval \
 
 For MiniCPM, set `SPEC_CACHE_MODE=rebuild` for the speculative arm.
 
-## 7. Run the full matrix
+## 7. Run the ablation/reference matrix
 
 ```bash
 python -m scripts.run_ablation_cells \
@@ -195,8 +203,11 @@ python -m scripts.run_ablation_cells \
   --judge none
 ```
 
-This runs all 135 generation cells (the `K=50` main cells are reused rather than
-regenerated).  Each cell writes:
+This plans 99 ablation/reference cells: 90 non-reused cells and nine reused
+`K=50` main references. It does not generate the other 36 main cells (bare,
+draft-alone, FlipAttack and TAP). The complete frozen evidence combines 45 main
+cells, 81 additional ablations and nine exact cells for 135 unique cells.
+Each generated cell writes:
 
 ```text
 results/<method>__<model>__<dataset>__tf4576.jsonl
@@ -216,6 +227,56 @@ The expected record counts are:
 | JBB | 100 |
 | AdvBench | 520 |
 | StrongREJECT | 313 |
+
+### SecureSD Step baseline
+
+Updated 2026-11-10: seed isolation, provenance-aware reuse and formal judging
+are implemented. Only SecureSD is newly generated; existing Bare, exact and
+rank-50 reference outputs are reused. This is the authors' Step fusion adapted
+to rank-50 with ten actual output positions of exact verification, not an
+original-paper default-parameter reproduction.
+
+Use an explicit new results root. Each seed writes to `seed_<seed>/`, and smoke
+outputs additionally use `_smoke/`. A completed result is reused only when its
+identity (parameters, ordered requests, model-file metadata, source hashes and
+environment) and answer checksum match. Conflicting or partial artifacts are
+preserved and rejected; `--force` archives them before regeneration.
+
+```bash
+python -m scripts.run_ablation_cells \
+  --ablation 5 --llm-root /path/to/models \
+  --results-root results/securesd_20261110 --seed 0 --judge none --dry-run
+```
+
+The current run uses seed 0 to match the existing main table. The earlier
+three-seed supplement was cancelled on 2026-11-11 and its partial outputs and
+protocol document were deleted; only seed 0 exists in this repository. This fix
+permits seed-separated outputs but the current scope does not use them.
+`--ablation all` still selects 1–4.
+
+`--judge both` now requires `--judge-config` and calls the formal resumable judge
+pool, including when generation has already completed. It no longer falls back
+to the simplified API scripts. The pool accepts `--judges gptoss` or
+`--judges guard` for sequential GPU phases, with separate checkpoints. Matching
+historical settings use output budgets `[512,2048,4096]`, timeout900, judge seed0,
+and low reasoning effort; unknown labels remain unknown.
+
+The local managed job uses the existing safeguard weights in the installed
+vLLM0.15.1 environment for the primary judge and the HF guard service separately,
+so the two models do not compete for GPU memory. Runtime versions are disclosed;
+policy/weights match does not assert bitwise identity to old deployments.
+
+```bash
+python -u -m scripts.run_securesd_job \
+  --results-root results/securesd_20261110 --llm-root /path/to/models --seed 0
+```
+
+It runs nine SecureSD cells, freezes judge inputs, manages local judge servers
+it starts, and writes `status.json` plus `seed_0/_analysis/summary.md` and JSON.
+`python -m scripts.summarize_securesd --results-dir <root>/seed_0` can refresh the
+new report without changing the old135-cell export. Reference labels are checked
+against their frozen source hashes; full nine-cell Holm families are calculated
+only when all nine new cells have both judge exports.
 
 ## 8. Judge the answers
 
@@ -254,13 +315,16 @@ sidecar metadata and `data/draft_train/teacher_data.jsonl`.  It validates:
 - row counts and no blank answers;
 - exact key/prompt/answer alignment between answers and judge files;
 - judge source/output hashes recorded in `.meta.json` sidecars;
-- TAP query-trace consistency and protocol fields;
-- overlapping JBB prompts for the sensitivity analysis.
+- TAP query-trace consistency and protocol fields.
 
-Then it writes `results/paper_evidence_20261011/` and LaTeX tables (the latter
-only if you create a `paper/generated_evidence/` directory).  The release's
-`build_paper_evidence.py` has been adjusted so the table output is relative to
-the repository root; the manuscript source is not part of this release.
+The script hard-codes `OUT=results/paper_evidence_20261011` and
+`TEX=paper/generated_evidence`; it does not expose an output-path CLI. It
+attempts to create both directories, and the parent `paper/` must exist. The
+manuscript source is not part of this checkout. Regenerate in a separate working
+copy, preserve this checkout's frozen export, and archive new outputs under
+their own date. Do not execute this builder just to refresh documentation.
+`scripts.make_results_table` also verifies raw source hashes, so it needs the
+withheld raw files, not just the aggregate export.
 
 ```bash
 python -m scripts.build_paper_evidence
@@ -270,13 +334,14 @@ python -m scripts.make_results_table
 If you only want to inspect the frozen evidence, skip these commands.  They are
 not required for the release's tests or documentation.
 
-## 10. Expected headline numbers
+## 10. Frozen reference numbers
 
-After a faithful rerun with the same seeds and judge policies, the primary
-numbers should be in these ranges (small differences can come from GPU kernels,
-teacher sampling, tokenizer versions and judge serving):
+The frozen export reports the following primary results. They are reference
+values, not guaranteed intervals for a fresh rerun: newly trained artifacts,
+GPU kernels, teacher sampling, tokenizer versions and judge serving can change
+results even with the same nominal seeds. A new run needs its own analysis:
 
-| Contrast | Expected |
+| Contrast | Frozen reference |
 |---|---|
 | Rank-50 minus bare | +50.00 to +81.73 pp, 9/9 significant |
 | Exact minus bare | -1.15 to +3.00 pp, 0/9 significant |

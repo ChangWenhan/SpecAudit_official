@@ -101,23 +101,15 @@ def main():
    for row,adj in zip(group,holm_adjust([r['mcnemar_p'] for r in group])):row['holm_p']=adj;row['holm_family_size']=len(group)
    pairs.extend(group)
  train_path=ROOT/'data/draft_train/teacher_data.jsonl'
- train=load_records(train_path);norm=lambda s:' '.join(s.lower().split());train_prompts={norm(r['prompt']) for r in train.values()}
- overlap={};sensitivity=[]
- for model,_ in MODELS:
-  for ds,_,_ in DATASETS:
-   ref=judged[('bare',model,ds)]['gptoss'];drop={k for k,r in ref.items() if norm(r['prompt']) in train_prompts}
-   overlap[model+'|'+ds]={'count':len(drop),'ids':[k[0] for k in sorted(drop)]}
-   if drop:sensitivity.append({'model':model,'dataset':ds,'removed':len(drop),**analyze_records(ref,judged[('topk50',model,ds)]['gptoss'],keys=set(ref)-drop)})
- for row,adj in zip(sensitivity,holm_adjust([r['mcnemar_p'] for r in sensitivity])):row['holm_p']=adj
  data={'date':'2026-10-11','source_hashes':sources,'provenance_hashes':provenance,
        'training_source_hashes':{str(train_path.relative_to(ROOT)):sha(train_path)},
        'bootstrap':{'iterations':10000,'seed':0,'algorithm':'numpy-PCG64 paired multinomial','interval':'95% pointwise percentile; not simultaneous'},
        'inference':'Full key/prompt equality; valid pairs; Holm within each stated family and policy.',
        'acceptance_aggregation':'Arithmetic mean of unrounded per-answer accepted/proposed ratios; not throughput.',
-       'cells':cells,'pairs':pairs,'runtime':runtime,'text_overlap':overlap,'overlap_sensitivity':sensitivity}
+       'cells':cells,'pairs':pairs,'runtime':runtime}
  (OUT/'evidence.json').write_text(json.dumps(data,indent=2,ensure_ascii=False,allow_nan=False)+'\n')
  write_csv(OUT/'cells.csv',[{'cell':name,'policy':policy,'mean_accept_rate':c['mean_accept_rate'],'mean_response_chars':c['mean_response_chars'],**s} for name,c in cells.items() for policy,s in c['judges'].items()])
- write_csv(OUT/'pairs.csv',pairs);write_csv(OUT/'overlap_sensitivity.csv',sensitivity);write_csv(OUT/'runtime.csv',runtime)
+ write_csv(OUT/'pairs.csv',pairs);write_csv(OUT/'runtime.csv',runtime)
  def cell(slug,m,ds,policy='gptoss'):return cells['|'.join((slug,m,ds))]['judges'][policy]
  def rate(slug,m,ds,policy='gptoss'):return f"{cell(slug,m,ds,policy)['rate_total_pct']:.2f}"
  def pair(family,m,ds,slug,policy='gptoss'):return next(p for p in pairs if p['family']==family and p['model']==m and p['dataset']==ds and p['cell']==slug and p['policy']==policy)
@@ -160,8 +152,6 @@ def main():
     c=cell(s,m,ds);low,high=c['rate_bounds_pct'];vals.append(r'\shortstack{'+f"{c['n_valid']}/{c['unresolved']}"+r'\\{}'+f'[{low:.2f},{high:.2f}]'+'}')
    rows.append([pretty if i==0 else '',NAMES[s],*vals])
  table('unknown','tab:unknown',r'Main-cell uncertainty (primary judge): valid/unresolved counts and full-$n$ positive-percent bounds when unresolved labels are all negative or all positive. The 81 new ablation and nine exact cells have no unresolved labels; reused rank-50 labels retain four.','llccc',r'Target & Condition & JBB ($n=100$) & AdvBench ($n=520$) & StrongREJECT ($n=313$)',rows,True)
- rows=[[dict(MODELS)[s['model']],s['n_valid_pairs'],f"${s['delta_pp']:+.2f}$",f"$[{s['ci95_pp'][0]:+.1f},{s['ci95_pp'][1]:+.1f}]$",scientific(s['holm_p'])] for s in sensitivity]
- table('overlap','tab:overlap',r'JBB sensitivity after removing five teacher-training text matches (case/whitespace normalized). Rank-50 minus bare, primary judge; Holm over three comparisons. Semantic near-duplicates are not excluded.','lrrrr',r'Target & $n$ & $\Delta$pp & 95\% CI & $p_H$',rows)
  protocol=[
   {'condition':'Bare target','attacker_control':'none','temperature':1,'max_new':160,'online_budget':'one response; target forward count not stored','version':'4.57.6'},
   {'condition':'Draft alone','attacker_control':'draft weights','temperature':1,'max_new':160,'online_budget':'no target invocation','version':'4.57.6'},
