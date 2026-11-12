@@ -405,25 +405,6 @@ methods appear in the paper's comparison table; the upstream trees are not.
 Their MIT notices are reproduced in
 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
-## Release-era citation metadata
-
-The following citation and `CITATION.cff` retain the original release metadata.
-They differ in title and authors from the manuscript supplied during review.
-They have not been validated as the current manuscript citation; reconcile
-authorship and title before reusing them. No attribution changes are made by
-this documentation update:
-
-```bibtex
-@article{chang2026specaudit,
-  title   = {SpecAudit: Draft Supply-Chain Risk under Lossy Speculative Verification},
-  author  = {Chang, Wenhan and Zhu, Tianqing and Xu, Heng and Liu, Wenjian and Zhou, Wanlei},
-  year    = {2026},
-  note    = {Manuscript}
-}
-```
-
-Machine-readable metadata is in [`CITATION.cff`](CITATION.cff).
-
 ## Licence
 
 The SpecAudit code is released under the Apache License 2.0.  See
