@@ -213,14 +213,14 @@ project venv despite the recorded base-interpreter path.
 ## Full P0
 
 - Full P0 generation is running on three remote GPUs.
-- Snapshot at 2026-11-18 06:42 Asia/Shanghai: MiniCPM `2,321/8,397`
-  records (JBB 758, AdvBench 1,563, StrongREJECT not started), Gemma
-  `2,807/8,397` (JBB 711, AdvBench 1,090, StrongREJECT 1,006), and Qwen
-  `4,496/8,397` (JBB 799, AdvBench 2,115, StrongREJECT 1,582). The remote total
-  is `9,624/25,191`. MiniCPM is in JBB `force_target_topk` and AdvBench N=20;
+- Snapshot at 2026-11-18 06:55 Asia/Shanghai: MiniCPM `2,444/8,397`
+  records (JBB 771, AdvBench 1,673, StrongREJECT not started), Gemma
+  `2,943/8,397` (JBB 724, AdvBench 1,153, StrongREJECT 1,066), and Qwen
+  `4,663/8,397` (JBB 843, AdvBench 2,207, StrongREJECT 1,613). The remote total
+  is `10,050/25,191`. MiniCPM is in JBB `force_target_topk` and AdvBench N=20;
   Gemma is in JBB `force_target_topk`, AdvBench N=10 and StrongREJECT N=20;
-  Qwen is at the end of JBB `force_target_topk`, AdvBench N=40 and
-  StrongREJECT exact. No dataset cell is complete yet.
+  Qwen is in JBB `force_target_exact`, AdvBench N=40 and StrongREJECT exact.
+  No dataset cell is complete yet.
 - Each model/dataset uses all nine modes, `max_new=160`, seed 0, and one sample.
 - The runner validates record counts, mode coverage, duplicate keys, response
   presence, intervention sources, and intervention counts before marking a
@@ -259,7 +259,7 @@ project venv despite the recorded base-interpreter path.
   responses include 44 truncations and no empty answers, and the score hash
   matches the completed output marker. Committed `d989a2e`.
 - Qwen3-4B IFEval seed-1 exact is running after the completed rank-50 cell;
-  the detached parent has written `40/200` checkpointed answers and remains
+  the detached parent has written `59/200` checkpointed answers and remains
   live. The E13 queue has not started and will gate on all five utility cells.
 - Committed `298f273`: the benign scorer now checks response count before
   ID/prompt alignment and explicitly tells the caller to pass the matching
