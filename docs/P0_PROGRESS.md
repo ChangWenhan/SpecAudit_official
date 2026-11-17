@@ -63,6 +63,11 @@ Updated: 2026-11-18
 - Local GPU availability was restored by running NVIDIA diagnostics with the
   required device permission. The card is currently occupied by an unrelated
   `ns_sweep.py` process, which is left untouched.
+- A local E13 smoke showed that the RTX 4090 is dynamically shared: an unrelated
+  process reserved about 15 GB after model loading began. Concurrent main-model
+  and draft-only smoke therefore OOMed, while draft-only succeeded. All local
+  production runs must be single-process and require a fresh exact-memory
+  preflight immediately before launch.
 
 ## Judging and analysis
 
