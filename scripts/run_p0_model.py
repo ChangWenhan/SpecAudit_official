@@ -18,6 +18,7 @@ from pathlib import Path
 
 
 DATASET_N = {"jbb": 100, "advbench": 520, "strongreject": 313}
+MODEL_ORDER = ("Qwen3_4B", "Gemma_3_4B", "MiniCPM4_8B")
 MODES = (
     "topk_honest@50:0",
     "topk_start_honest@50:5",
