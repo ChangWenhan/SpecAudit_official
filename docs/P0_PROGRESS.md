@@ -100,6 +100,10 @@ Updated: 2026-11-18
 - `scripts/replay_attack_seed.py` replays frozen TAP/FlipAttack inputs without
   repeating the attack search; manifests preserve source hashes, temperature,
   run seed, and per-prompt sampling seed.
+- `scripts/build_e13_judge_manifest.py` requires all seven E13 conditions across
+  all nine model/dataset cells before a manifest can be frozen.
+- `scripts/score_utility_seed.py` scores completed IFEval files through the
+  isolated CPU environment and refuses stale or incomplete outputs.
 - `scripts/build_e13_judge_manifest.py` validates the complete per-seed E13
   matrix (36 files, nine model/dataset cells, seven conditions) before writing
   a frozen judge manifest.
@@ -112,6 +116,9 @@ Updated: 2026-11-18
   `/home/cwh/anaconda3/envs/safety-scale/bin/python`; its official IFEval
   strict/loose regression passes. Generation remains pinned to the project
   `spec4576_pt26` environment.
+- CPU regression excluding the separately tested IFEval environment:
+  `78 passed, 1 deselected, 5 subtests passed`; the judge-pool integration
+  tests and IFEval test pass separately.
 
 ## Next
 
