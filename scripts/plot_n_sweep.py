@@ -55,16 +55,25 @@ def series(record: dict, metric: str, ci: bool = False) -> tuple[np.ndarray, np.
     return np.asarray(values, dtype=float), np.asarray(clean, dtype=float)
 
 
+def select_records(records: list[dict]) -> dict[tuple[str, str], dict]:
+    expected = {(model, dataset) for model, _ in MODELS for dataset, _ in DATASETS}
+    selected = {
+        (record["model"], record["dataset"]): record
+        for record in records
+        if (record.get("model"), record.get("dataset")) in expected
+    }
+    if set(selected) != expected:
+        raise ValueError(f"missing N-sweep cells: {sorted(expected - set(selected))}")
+    return selected
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--analysis", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=Path("figures/p0_20261118/fig4_n_sweep"))
     args = parser.parse_args()
     analysis = json.loads(args.analysis.read_text())
-    records = {(record["model"], record["dataset"]): record for record in analysis.get("n_sweep", [])}
-    expected = {(model, dataset) for model, _ in MODELS for dataset, _ in DATASETS}
-    if set(records) != expected:
-        raise ValueError(f"missing N-sweep cells: {sorted(expected - set(records))}")
+    records = select_records(analysis.get("n_sweep", []))
     plt.rcParams.update({
         "font.family": ["DejaVu Sans", "sans-serif"], "font.size": 11,
         "axes.linewidth": 1.8, "axes.spines.top": False, "axes.spines.right": False,

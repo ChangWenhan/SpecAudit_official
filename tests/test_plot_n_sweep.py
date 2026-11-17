@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts.plot_n_sweep import series
+from scripts.plot_n_sweep import DATASETS, MODELS, select_records, series
 
 
 def test_series_adds_exact_anchor():
@@ -14,3 +14,12 @@ def test_series_adds_exact_anchor():
     values, intervals = series(record, "asr", ci=True)
     assert values.tolist() == [0, 5, 10, 20, 40, 7]
     assert intervals.shape == (6, 2)
+
+
+def test_select_records_ignores_aggregate_all_rows():
+    records = [{"model": model, "dataset": dataset}
+               for model, _ in MODELS for dataset, _ in DATASETS]
+    aggregate = [{"model": model, "dataset": "all"} for model, _ in MODELS]
+    selected = select_records(records + aggregate)
+    assert len(selected) == 9
+    assert all(dataset != "all" for _, dataset in selected)
