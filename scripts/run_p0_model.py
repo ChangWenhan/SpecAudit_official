@@ -101,6 +101,7 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
     keys = [(str(row.get("id")), row.get("sample_idx"), row.get("mode")) for row in rows]
     if len(keys) != len(set(keys)):
         return False, "duplicate (id, sample_idx, mode) key"
+    prompts_by_key: dict[tuple[str, int], set[str]] = {}
     for row in rows:
         if row.get("dataset") != dataset or row.get("seed") != seed:
             return False, "record dataset or seed mismatch"
@@ -112,6 +113,10 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
             return False, "record temperature or run tag mismatch"
         if not isinstance(row.get("id"), str) or not row["id"]:
             return False, "missing request id"
+        if not isinstance(row.get("prompt"), str) or not row["prompt"]:
+            return False, "missing prompt"
+        key = (row["id"], row["sample_idx"])
+        prompts_by_key.setdefault(key, set()).add(row["prompt"])
         if not isinstance(row.get("response"), str) or not row["response"].strip():
             return False, "blank response"
         seconds = row.get("seconds")
@@ -141,6 +146,18 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
                 return False, f"invalid intervention record for {row['mode']}"
         elif row.get("first_token_source") is not None or row.get("interventions") != 0:
             return False, f"unexpected intervention record for {row['mode']}"
+    keys_by_mode = {
+        mode: {(str(row.get("id")), row.get("sample_idx")) for row in rows
+               if row.get("mode") == mode}
+        for mode in MODES
+    }
+    if any(len(keys) != DATASET_N[dataset] for keys in keys_by_mode.values()):
+        return False, "request-key count mismatch within mode"
+    reference_keys = keys_by_mode[MODES[0]]
+    if any(keys != reference_keys for keys in keys_by_mode.values()):
+        return False, "request-key sets differ across modes"
+    if any(len(prompts) != 1 for prompts in prompts_by_key.values()):
+        return False, "prompts differ across modes"
     for mode in MODES:
         mode_rows = [row for row in rows if row["mode"] == mode]
         expected_accept = round(

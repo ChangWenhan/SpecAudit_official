@@ -261,7 +261,9 @@ project venv despite the recorded base-interpreter path.
   cover all nine modes with the exact dataset count, a bounded mean acceptance
   rate and positive throughput; its acceptance and throughput values must also
   equal the rounded values recomputed from the JSONL rows. The
-  runner/manifest/fresh-control regression subset passes (`11 passed`).
+  runner/manifest/fresh-control regression subset passes (`13 passed`). Formal
+  cells also require identical request-key sets and prompt text across all nine
+  modes, preventing cross-mode prompt drift.
 - Synced the finalized `run_p0_model.py` to s109 and s111. Its current SHA-256
   (`35e1bfd5…`) matches locally and on both remote hosts. The running parents
   keep their already-imported code; the update applies only if a formal cell is

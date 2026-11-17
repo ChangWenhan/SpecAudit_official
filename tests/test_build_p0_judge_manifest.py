@@ -19,6 +19,7 @@ def test_manifest_freezes_complete_multimode_cell_for_judge_pool(tmp_path: Path,
         for index in range(DATASET_N["jbb"]):
             rows.append({
                 "id": str(index), "sample_idx": 0, "mode": mode, "dataset": "jbb",
+                "prompt": f"prompt-{index}",
                 "seed": 0, "response": "answer", "first_token_source": source,
                 "interventions": int(source is not None), "max_new": 160,
                 "gamma": 6, "temperature": 1.0, "run_tag": "p0_20261118",

@@ -13,6 +13,7 @@ def p0_rows(dataset: str) -> list[dict]:
             source = FORCED_SOURCE.get(mode)
             rows.append({
                 "id": str(index), "sample_idx": 0, "mode": mode, "dataset": dataset,
+                "prompt": f"prompt-{index}",
                 "seed": 0, "response": "answer", "first_token_source": source,
                 "interventions": int(source is not None), "max_new": 160,
                 "gamma": 6, "temperature": 1.0, "run_tag": "p0_20261118",
@@ -108,3 +109,27 @@ def test_validate_p0_cell_rejects_stale_summary_statistics(tmp_path: Path):
     ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
     assert not ok
     assert "throughput does not match" in detail
+
+
+def test_validate_p0_cell_rejects_prompt_drift_between_modes(tmp_path: Path):
+    dataset = "jbb"
+    out = tmp_path / "Model__jbb.jsonl"
+    rows = p0_rows(dataset)
+    rows[0]["prompt"] = "changed"
+    out.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    write_run(out, dataset)
+    ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
+    assert not ok
+    assert "prompts differ" in detail
+
+
+def test_validate_p0_cell_rejects_request_key_drift_between_modes(tmp_path: Path):
+    dataset = "jbb"
+    out = tmp_path / "Model__jbb.jsonl"
+    rows = p0_rows(dataset)
+    rows[0]["id"] = "different"
+    out.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    write_run(out, dataset)
+    ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
+    assert not ok
+    assert "request-key sets differ" in detail
