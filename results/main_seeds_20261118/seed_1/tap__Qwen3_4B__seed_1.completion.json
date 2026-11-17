@@ -1,11 +1,18 @@
 {
-  "state": "complete",
+  "state": "complete_with_protocol_note",
   "method": "tap",
   "model": "Qwen3_4B",
   "seed": 1,
   "temperature": 0.0,
   "total_records": 933,
-  "verified_at": "2026-11-18T05:22:48+08:00",
+  "raw_prefix_matches": 931,
+  "normalized_prefix_matches": 933,
+  "exact_matches": 101,
+  "truncated_unicode_replacements": [
+    "advbench:advbench_242",
+    "strongreject:strongreject_273"
+  ],
+  "prefix_note": "Frozen seed 0 used max_new=150; seed 1 used max_new=160. Two 150-token decodes ended in a split UTF-8 replacement character; removing that terminal replacement character yields a prefix match for all 933 records.",
   "cells": [
     {
       "dataset": "jbb",
@@ -13,6 +20,11 @@
       "answer_sha256": "b377b913ac47082f84c4dfe7c93555359c1a43259c06c20b9da65031493f5d43",
       "run_sha256": "058908fad6c387429b5d5e1171fa44da9fad5e1f229c24a127147e8e2c173044",
       "done_sha256": "c98fdb2af3ae75824bb755471c1b845cc8f903c74ed5cbf00bbbceddcff08e81",
+      "raw_prefix_matches": 100,
+      "normalized_prefix_matches": 100,
+      "exact_matches": 14,
+      "mean_tokens": 151.77,
+      "truncated_at_160": 86,
       "done": {
         "records": 100,
         "sha256": "b377b913ac47082f84c4dfe7c93555359c1a43259c06c20b9da65031493f5d43",
@@ -28,6 +40,11 @@
       "answer_sha256": "4c93c7827bd96515c49c2366f8241990566b627798b814305019536df2cfdf9e",
       "run_sha256": "e6418c8d375f46e1caee34e45a2e54ab0f2066e6dc77eeff9df3bf56b8c3dfb6",
       "done_sha256": "4a23178b02b9fdda5dcfa7101af156976315d9f7132f4a7fc80a15e4e45d94c3",
+      "raw_prefix_matches": 519,
+      "normalized_prefix_matches": 520,
+      "exact_matches": 48,
+      "mean_tokens": 155.55384615384617,
+      "truncated_at_160": 469,
       "done": {
         "records": 520,
         "sha256": "4c93c7827bd96515c49c2366f8241990566b627798b814305019536df2cfdf9e",
@@ -43,6 +60,11 @@
       "answer_sha256": "484ff6f5fa238896f216356c91a67bc9aaf173d6c8694c1b69dd44c4bdb7ba07",
       "run_sha256": "cf315d9ddc079ef18b5f3b0d858b339ea4749bf5ec8692fc3cff9d2576e60eea",
       "done_sha256": "dad3d61c36da2fdd9ae96d4e681fe477c052c611dd0ae4f70a0f82d394a9d737",
+      "raw_prefix_matches": 312,
+      "normalized_prefix_matches": 313,
+      "exact_matches": 39,
+      "mean_tokens": 153.47603833865816,
+      "truncated_at_160": 270,
       "done": {
         "records": 313,
         "sha256": "484ff6f5fa238896f216356c91a67bc9aaf173d6c8694c1b69dd44c4bdb7ba07",
