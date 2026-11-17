@@ -25,5 +25,23 @@
     "Qwen3_4B__jbb.run.json": "dfdf7f0255843235281333e0e9185098494f1fa4c17c0f3a717c441b3ac15a94",
     "Qwen3_4B__jbb.summary.json": "4ff2a94e503ffc72eb51041da7a78e90e7a28ca8acb33706118fec4cb97ea4e1",
     "topk50__Qwen3_4B__jbb__tf4576.jsonl": "374525233e0bd99026d793bccbe55e9bc5713fc35f07bd1fe9d0c795c2934dd3"
+  },
+  "generation_sanity": {
+    "all_modes_n_100": true,
+    "n_sweep_mean_acceptance": {
+      "topk_honest@50:0": 0.864,
+      "topk_start_honest@50:5": 0.654,
+      "topk_start_honest@50:10": 0.571,
+      "topk_start_honest@50:20": 0.485,
+      "topk_start_honest@50:40": 0.359,
+      "exact_honest": 0.177
+    },
+    "n_sweep_monotonic_decreasing": true,
+    "forced_target_topk_zero_acceptance": true,
+    "forced_target_topk_mean_tokens": 160.0,
+    "forced_exact_acceptance": {
+      "force_draft_exact_honest": 0.178,
+      "force_target_exact_honest": 0.183
+    }
   }
 }

@@ -236,6 +236,12 @@ project venv despite the recorded base-interpreter path.
   record and source hashes are in
   `results/p0_20261118/s111_completed/Qwen3_4B__jbb.validation.json`; large raw
   answers remain local only.
+- Generation-level sanity for that cell is also recorded: N=0/5/10/20/40/∞
+  mean acceptance decreases `0.864/0.654/0.571/0.485/0.359/0.177`, all nine
+  modes contain 100 records, forced-target-topk has zero accepted draft tokens
+  and mean length 160, and the two forced-exact conditions retain finite
+  acceptance (`0.178` and `0.183`). ASR and interaction effects remain gated on
+  judge completion.
 - Each model/dataset uses all nine modes, `max_new=160`, seed 0, and one sample.
 - The runner validates record counts, mode coverage, duplicate keys, response
   presence, intervention sources, and intervention counts before marking a
