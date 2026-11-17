@@ -158,7 +158,7 @@ Updated: 2026-11-18
   are never collected as duplicate test modules. IFEval scorer coverage is
   marked `requires_ifeval` and skipped only when the pinned generation venv
   lacks `nltk`. The current complete generation-environment suite passes
-  `151 passed, 1 skipped, 5 subtests passed`; the six benchmark tests pass in
+  `153 passed, 1 skipped, 5 subtests passed`; the six benchmark tests pass in
   the isolated `safety-scale` environment.
 - Rechecked the final vLLM judge chain on 2026-11-18: both judges use separate
   localhost ports, 16 client workers, prefix caching, and strictly sequential
@@ -275,6 +275,18 @@ project venv despite the recorded base-interpreter path.
 - A combined temporary manifest of the two completed JBB cells also passed:
   two source files resolved to 3,600 labels (2 × 900 × two judges), 32 client
   threads, and the same judge-policy signature. No model was loaded.
+- Gemma3-4B/JBB exposed a real failure at `760/900` during
+  `force_target_topk_honest`: target fallback token ID can reach 262144 while
+  the draft embedding has only 262144 rows (IDs 0–262143), causing
+  `Indexing.cu: srcIndex < srcSelectDimSize`. The reviewed fix makes
+  `DraftModelPolicy` restart from the original prompt when a target fallback
+  token is outside the draft vocabulary; verifier sampling semantics remain
+  unchanged, with only potential acceptance loss. The exact failed prompt and
+  normal in-vocabulary paths are covered by tests (`13 passed`). A separate
+  retry root, `results/p0_retry_20261118`, was launched from the corrected code
+  so Gemma's AdvBench/StrongREJECT workers continue uninterrupted. Partial hash
+  and failure details are in
+  `results/p0_20261118/s111_completed/Gemma_3_4B__jbb.failure.json`.
 - Each model/dataset uses all nine modes, `max_new=160`, seed 0, and one sample.
 - The runner validates record counts, mode coverage, duplicate keys, response
   presence, intervention sources, and intervention counts before marking a

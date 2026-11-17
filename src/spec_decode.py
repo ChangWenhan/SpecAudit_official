@@ -148,6 +148,7 @@ class GenStats:
     interventions: int = 0
     accept_lengths: List[int] = field(default_factory=list)
     fallbacks: int = 0
+    draft_prefix_resets: int = 0
     eos_in_accepted: bool = False
 
 
@@ -207,6 +208,7 @@ def speculative_generate(
         ctx_len += 1
         stats.interventions += 1
         if stop_ids and forced_token in stop_ids:
+            stats.draft_prefix_resets = getattr(policy, "prefix_resets", 0)
             return generated[:max_new_tokens], stats
 
     while len(generated) < max_new_tokens:
@@ -273,4 +275,5 @@ def speculative_generate(
         if stop_ids and int(result.next_token) in stop_ids:
             break
 
+    stats.draft_prefix_resets = getattr(policy, "prefix_resets", 0)
     return generated[:max_new_tokens], stats

@@ -100,8 +100,15 @@ class DraftModelPolicy:
         self.rng = rng
         self.ctx_len = 0
         self.next_logits: Optional[torch.Tensor] = None
+        self.prompt_ids: Optional[torch.Tensor] = None
+        self.initial_ctx_len = 0
+        self.prefix_resets = 0
+        self.draft_vocab_size = int(
+            self.draft.model.get_input_embeddings().weight.shape[0])
 
     def reset(self, prompt_ids: torch.Tensor, ctx_len: int) -> None:
+        self.prompt_ids = prompt_ids.detach().clone()
+        self.initial_ctx_len = ctx_len
         self.draft.prefill(prompt_ids)
         self.ctx_len = ctx_len
         self.next_logits = self.draft.last_logits
@@ -122,6 +129,15 @@ class DraftModelPolicy:
         return tokens
 
     def sync(self, accepted: List[int], next_token: int) -> None:
+        if any(token < 0 or token >= self.draft_vocab_size
+               for token in [*accepted, next_token]):
+            if self.prompt_ids is None:
+                raise RuntimeError("draft policy was not initialized before resync")
+            self.draft.prefill(self.prompt_ids)
+            self.ctx_len = self.initial_ctx_len
+            self.next_logits = self.draft.last_logits
+            self.prefix_resets += 1
+            return
         self.draft.crop(self.ctx_len + len(accepted))
         logits = self.draft.extend([next_token])
         self.next_logits = logits[:, -1, :]

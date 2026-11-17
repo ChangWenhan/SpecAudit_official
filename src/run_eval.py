@@ -446,6 +446,7 @@ def main():
                 "accepted_tokens": stats.get("accepted_tokens", 0),
                 "proposed_tokens": stats.get("proposed_tokens", 0),
                 "interventions": stats.get("interventions", 0),
+                "draft_prefix_resets": stats.get("draft_prefix_resets", 0),
                 # Baseline generate() stores one API call, not token forwards.
                 # Only speculative GenStats counts actual target invocations.
                 "target_forward_calls": stats.get("forwards") if stats.get("proposed_tokens") else None,

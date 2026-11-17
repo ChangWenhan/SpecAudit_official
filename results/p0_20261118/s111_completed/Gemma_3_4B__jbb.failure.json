@@ -1,0 +1,21 @@
+{
+  "model": "Gemma_3_4B",
+  "dataset": "jbb",
+  "state": "failed_and_retrying",
+  "completed_rows_before_failure": 760,
+  "failed_mode": "force_target_topk_honest",
+  "failed_request_id": "jbb_60",
+  "last_completed_request_id": "jbb_59",
+  "error": "CUDA Indexing.cu srcIndex < srcSelectDimSize assertion",
+  "root_cause": "target fallback token can exceed draft input embedding rows",
+  "target_embedding_rows": 262208,
+  "draft_embedding_rows": 262144,
+  "tokenizer_len": 262145,
+  "partial_file_key": "Gemma_3_4B__jbb.jsonl",
+  "partial_sha256": "805128a654085a42d1e2295f7c0fa925bf5b210c9bfaa9ded223e495588ca29e",
+  "fix": "DraftModelPolicy restarts from the original prompt when a target token is outside the draft vocabulary; verifier semantics stay unchanged",
+  "retry_root": "/mnt/3871a8e9-4418-474f-a523-a992ce4830b4/user1/spec-sampling-safety/results/p0_retry_20261118",
+  "retry_log": "/mnt/3871a8e9-4418-474f-a523-a992ce4830b4/user1/spec-sampling-safety/logs/p0_retry_Gemma_3_4B_jbb.log",
+  "retry_pid_at_launch": 250819,
+  "other_gemma_cells_continue": true
+}
