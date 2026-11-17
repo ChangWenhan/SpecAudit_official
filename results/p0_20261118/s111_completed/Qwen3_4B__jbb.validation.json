@@ -43,5 +43,12 @@
       "force_draft_exact_honest": 0.178,
       "force_target_exact_honest": 0.183
     }
+  },
+  "judge_loader_dry_run": {
+    "manifest_cells": 1,
+    "labels": 1800,
+    "threads": 32,
+    "signature": "821019ed453fce10e2540089d2bf64c7368f99b329b31a655c9ca177c1604cbf",
+    "service_started": false
   }
 }

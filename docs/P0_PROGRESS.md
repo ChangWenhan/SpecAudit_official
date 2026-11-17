@@ -242,6 +242,10 @@ project venv despite the recorded base-interpreter path.
   and mean length 160, and the two forced-exact conditions retain finite
   acceptance (`0.178` and `0.183`). ASR and interaction effects remain gated on
   judge completion.
+- The real Qwen3-4B/JBB artifact also passed an end-to-end judge dry-run in a
+  temporary root: the manifest builder froze one cell, and the dual-judge
+  loader resolved 1,800 labels (900 × two judges) across 32 client threads with
+  signature `821019ed…`. No judge model or service was started.
 - Each model/dataset uses all nine modes, `max_new=160`, seed 0, and one sample.
 - The runner validates record counts, mode coverage, duplicate keys, response
   presence, intervention sources, and intervention counts before marking a
