@@ -147,6 +147,11 @@ Updated: 2026-11-18
   localhost ports, 16 client workers, prefix caching, and strictly sequential
   server phases; checkpoints and frozen-input hashes gate every exported cell.
   The combined judge/manifest loopback suite passes (`11 passed`).
+- The vLLM judge launcher now requires at least 70 GiB free on the A100 before
+  each judge phase. This makes the live-P0 exclusion an executable precondition
+  rather than an operator convention. The focused judge tests pass (`4 passed`);
+  the reviewed orchestrator was resynced to s109 and compiles in the api
+  environment.
 
 ## Deployment
 

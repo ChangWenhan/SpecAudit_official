@@ -65,6 +65,23 @@ def server_command(python: str, model: Path, judge: str) -> tuple[list[str], int
     return command, port
 
 
+def free_memory_mib(device: int) -> int:
+    output = subprocess.check_output([
+        "nvidia-smi", f"--id={device}", "--query-gpu=memory.free",
+        "--format=csv,noheader,nounits",
+    ], text=True).strip()
+    return int(output.splitlines()[0])
+
+
+def require_free_memory(device: int, minimum: int, judge: str) -> int:
+    free = free_memory_mib(device)
+    if free < minimum:
+        raise RuntimeError(
+            f"GPU {device} has {free} MiB free, below required {minimum} MiB; "
+            f"refusing to start {judge}")
+    return free
+
+
 @contextlib.contextmanager
 def service(command: list[str], port: int, log_path: Path, model_id: str):
     session = requests.Session()
@@ -120,6 +137,8 @@ def main() -> None:
     parser.add_argument("--judges", default="gptoss,guard")
     parser.add_argument("--gptoss-workers", type=int, default=16)
     parser.add_argument("--guard-workers", type=int, default=16)
+    parser.add_argument("--device", type=int, default=0)
+    parser.add_argument("--min-free-mib", type=int, default=70000)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     judges = tuple(judge.strip() for judge in args.judges.split(",") if judge.strip())
@@ -127,6 +146,8 @@ def main() -> None:
         raise ValueError("judges must be a unique nonempty subset of gptoss,guard")
     if args.gptoss_workers < 1 or args.guard_workers < 1:
         raise ValueError("workers must be positive")
+    if args.device < 0 or args.min_free_mib < 1:
+        raise ValueError("device must be nonnegative and min-free-mib positive")
     config = build_config(args.gptoss_workers, args.guard_workers)
     runtime = args.runtime.resolve()
     config_path = runtime / "judge_config.json"
@@ -144,6 +165,7 @@ def main() -> None:
     models = {"gptoss": args.gptoss_model.resolve(), "guard": args.guard_model.resolve()}
     try:
         for judge in judges:
+            require_free_memory(args.device, args.min_free_mib, judge)
             status.update(stage="starting_server", judge=judge, updated_at=now())
             atomic_json(status_path, status)
             command, port = server_command(args.vllm_python, models[judge], judge)
