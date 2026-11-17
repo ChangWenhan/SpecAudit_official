@@ -9,6 +9,16 @@ import subprocess
 from pathlib import Path
 
 
+MODELS = ("Qwen3_4B", "Gemma_3_4B", "MiniCPM4_8B")
+CONDITIONS = {
+    "bare": "baseline",
+    "draft": "baseline",
+    "rank50": "topk_honest@50:0",
+    "exact": "exact_honest",
+    "securesd": "securesd_topk_honest@50:10",
+}
+
+
 def sha256_file(path: Path) -> str:
     import hashlib
     digest = hashlib.sha256()
@@ -25,6 +35,17 @@ def parse_cell(path: Path) -> tuple[str, str]:
     return parts[0], parts[1]
 
 
+def validate_scope(cells: list[dict]) -> None:
+    expected = {(model, condition) for model in MODELS for condition in CONDITIONS}
+    actual = {(cell["model"], cell["method"]) for cell in cells}
+    if actual != expected:
+        raise ValueError(
+            f"utility scope mismatch: missing={sorted(expected - actual)}, "
+            f"unexpected={sorted(actual - expected)}")
+    if len(cells) != len(expected):
+        raise ValueError(f"expected {len(expected)} utility cells, found {len(cells)}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
@@ -35,12 +56,26 @@ def main() -> None:
     directory = args.root.resolve() / f"seed_{args.seed}"
     cells = []
     for path in sorted(directory.glob("*__ifeval.jsonl")):
+        slug, model = parse_cell(path)
+        if model not in MODELS or slug not in CONDITIONS:
+            raise ValueError(f"unexpected utility identity: {path.name}")
         done_path = Path(str(path) + ".done")
         if not done_path.is_file():
             raise ValueError(f"utility cell is incomplete: {path}")
         done = json.loads(done_path.read_text())
         if done.get("sha256") != sha256_file(path):
             raise ValueError(f"utility answer hash mismatch: {path}")
+        if done.get("dataset") != "ifeval" or done.get("mode") != CONDITIONS[slug]:
+            raise ValueError(f"utility protocol mismatch: {path}")
+        run_path = path.with_suffix(".run.json")
+        if not run_path.is_file():
+            raise ValueError(f"missing utility run manifest: {path}")
+        identity = json.loads(run_path.read_text()).get("run_identity") or {}
+        if (identity.get("dataset") != "ifeval" or identity.get("seed") != args.seed
+                or identity.get("modes") != [CONDITIONS[slug]]
+                or identity.get("n") != done.get("records")
+                or identity.get("max_new") != 2048):
+            raise ValueError(f"utility run identity mismatch: {path}")
         score_path = path.with_suffix(".scores.json")
         if not score_path.is_file():
             subprocess.run([args.scorer_python, "-u", "-m", "scripts.score_benign",
@@ -49,14 +84,11 @@ def main() -> None:
         score = json.loads(score_path.read_text())
         if score.get("answer_sha256") != done["sha256"] or score.get("n") != done["records"]:
             raise ValueError(f"stale utility score: {path}")
-        slug, model = parse_cell(path)
         cells.append({"model": model, "method": slug, "n": score["n"],
                       "metrics": score["metrics"], "truncated": score["truncated"],
                       "empty_responses": score["empty_responses"],
                       "source": str(path), "source_sha256": done["sha256"]})
-    expected = 15
-    if len(cells) != expected:
-        raise ValueError(f"expected {expected} scored utility cells, found {len(cells)}")
+    validate_scope(cells)
     summary = {"seed": args.seed, "cells": cells}
     out = args.root.resolve() / f"utility_summary_seed_{args.seed}.json"
     out.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
