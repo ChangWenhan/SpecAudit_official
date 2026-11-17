@@ -223,13 +223,14 @@ project venv despite the recorded base-interpreter path.
 ## Full P0
 
 - Full P0 generation is running on three remote GPUs.
-- Snapshot at 2026-11-18 07:14 Asia/Shanghai: MiniCPM `2,642/8,397`
-  records (JBB 792, AdvBench 1,850, StrongREJECT not started), Gemma
-  `3,154/8,397` (JBB 745, AdvBench 1,253, StrongREJECT 1,156), and Qwen
-  `4,930/8,397` (JBB 900, AdvBench 2,354, StrongREJECT 1,676). The remote total
-  is `10,726/25,191`. MiniCPM is in JBB `force_target_topk` and AdvBench N=20;
-  Gemma is in JBB `force_target_topk`, AdvBench N=10 and StrongREJECT N=20;
-  Qwen JBB is complete, AdvBench is in N=40 and StrongREJECT is in exact.
+- Snapshot at 2026-11-18 07:46 Asia/Shanghai: MiniCPM `3,037/8,397`
+  records (JBB 900 complete, AdvBench 2,121, StrongREJECT 16), Gemma
+  `3,463/8,397` (JBB 760, AdvBench 1,413, StrongREJECT 1,290), and Qwen
+  `5,264/8,397` (JBB 900 complete, AdvBench 2,592, StrongREJECT 1,772). The
+  remote total is `11,764/25,191`. MiniCPM AdvBench is in N=40 and
+  StrongREJECT has started; Gemma is in JBB forced-target, AdvBench N=10 and
+  StrongREJECT N=40; Qwen AdvBench is at the end of N=40 and StrongREJECT is in
+  exact.
 - The first complete P0 cell is Qwen3-4B/JBB at seed 0 (`900/900`). It passed
   the current strict validator, including all nine mode counts, one sample per
   request/mode, forced-token provenance, summary mode statistics and
@@ -319,7 +320,7 @@ project venv despite the recorded base-interpreter path.
   responses include 44 truncations and no empty answers, and the score hash
   matches the completed output marker. Committed `d989a2e`.
 - Qwen3-4B IFEval seed-1 exact is running after the completed rank-50 cell;
-  the detached parent has written `101/200` checkpointed answers and remains
+  the detached parent has written `133/200` checkpointed answers and remains
   live. The E13 queue has not started and will gate on all five utility cells.
 - Committed `298f273`: the benign scorer now checks response count before
   ID/prompt alignment and explicitly tells the caller to pass the matching
