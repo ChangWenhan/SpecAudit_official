@@ -74,24 +74,32 @@ def main() -> None:
         "svg.fonttype": "none",
         "pdf.fonttype": 42,
     })
-    fig, ax = plt.subplots(figsize=(7.0, 4.1), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(7.2, 4.3), constrained_layout=True)
     positions = np.arange(1, args.nmax + 1)
+    first_offsets = {
+        "Qwen3_4B": (6, -13),
+        "Gemma_3_4B": (18, -18),
+        "MiniCPM4_8B": (18, -18),
+    }
     for model in MODELS:
         curve = curves[model]
         ax.plot(positions, 100 * np.asarray(curve["rates"]), color=COLORS[model],
                 marker="o", markersize=4.2, linewidth=2.2, label=curve["label"])
         ax.annotate(f"{100 * curve['rates'][0]:.1f}%", (positions[0], 100 * curve["rates"][0]),
-                    xytext=(3, 5), textcoords="offset points", color=COLORS[model], fontsize=10)
+                    xytext=first_offsets[model], textcoords="offset points",
+                    color=COLORS[model], fontsize=10)
     ax.set_xlim(0.7, args.nmax + 0.3)
     ax.set_ylim(0, 102)
-    ax.set_xticks(np.arange(2, args.nmax + 1, 2))
+    ax.set_xticks(sorted({1, args.nmax, *range(5, args.nmax + 1, 5)}))
     ax.set_yticks([0, 25, 50, 75, 100])
     ax.set_xlabel("Response token position")
     ax.set_ylabel("Draft acceptance rate (%)")
     ax.grid(axis="y", color="#CFCECE", linewidth=0.7, alpha=0.55)
     ax.set_axisbelow(True)
-    ax.legend(loc="upper right", ncols=1, fontsize=11)
-    ax.text(0.015, 0.975, "(a)", transform=ax.transAxes, ha="left", va="top",
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, -0.16),
+               ncols=3, fontsize=11)
+    ax.text(0.0, 1.10, "(a)", transform=ax.transAxes, ha="left", va="bottom",
             fontsize=17, fontweight="bold")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     for suffix in ("png", "pdf"):

@@ -350,6 +350,11 @@ project venv despite the recorded base-interpreter path.
 - Publication-artifact audit: Fig. 1 PNG is 5757×4077 at 600 dpi and Fig. 2(a)
   is 4197×2457 at 600 dpi. Their PDFs are one-page vector outputs with embedded
   DejaVu Sans fonts, including bold and oblique variants.
+- Rebuilt the real Fig. 2(a) after a scientific-figure review. The panel marker
+  now sits outside the axes, the opening-position labels no longer collide with
+  each other or the axes, and the legend is below the x-axis title instead of
+  covering the Qwen/Gemma curves. The replacement PNG is 4317×2971 at 600 dpi;
+  the PDF remains one page with embedded DejaVu Sans fonts.
 - The current manuscript compiles twice with the real IEEEtran project at 13
   pages. There are no errors or overfull boxes; only two pre-existing Underfull
   paragraph warnings remain.
