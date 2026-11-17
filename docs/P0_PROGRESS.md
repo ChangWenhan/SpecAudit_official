@@ -64,6 +64,12 @@ Updated: 2026-11-18
   Qwen draft; the five-condition IFEval smoke also passed after the GPU became
   exclusive.
 - Qwen3-4B IFEval seed 1 is now running locally as a detached, resumable job.
+- Fresh rank-50 raw-control checks against frozen seed-0 JBB cells:
+  Qwen has 94/100 identical responses, 96/100 identical token lengths, and
+  mean token count 144.53 vs 144.06; Gemma has 22/100 identical responses but
+  identical mean tokens (160) and nearly identical mean acceptance
+  (0.7608 vs 0.7624). Final acceptance is based on independently judged ASR,
+  not textual identity.
 - A live fresh-control read takes the new rank-50 rows and compares them with
   frozen seed-0 outputs. Exact response identity is not required because the
   remote generation runtime differs; ASR agreement is the acceptance target.
