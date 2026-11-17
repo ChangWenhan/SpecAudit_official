@@ -85,11 +85,17 @@ def main() -> None:
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--temperature", type=float, required=True)
     parser.add_argument("--max-new", type=int, default=160)
+    parser.add_argument("--limit", type=int,
+                        help="SMOKE ONLY: replay the first N source rows per dataset")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     if args.seed < 1 or args.max_new < 1 or args.temperature < 0:
         raise ValueError("invalid seed, max-new, or temperature")
+    if args.limit is not None and args.limit < 1:
+        raise ValueError("limit must be positive")
+    if args.limit is not None:
+        args.out_root = args.out_root / "_smoke"
     grouped = {}
     source_hashes = {}
     for source in args.sources:
@@ -105,6 +111,8 @@ def main() -> None:
             grouped.setdefault(dataset, []).append(record)
     if not grouped:
         raise ValueError("attack sources are empty")
+    if args.limit is not None:
+        grouped = {dataset: rows[:args.limit] for dataset, rows in grouped.items()}
     directory = args.out_root.resolve() / f"seed_{args.seed}"
     plans = []
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
@@ -124,6 +132,7 @@ def main() -> None:
     if args.dry_run:
         print(json.dumps({"method": args.method, "model": args.model, "seed": args.seed,
                           "temperature": args.temperature,
+                          "limit": args.limit,
                           "cells": {dataset: len(rows) for dataset, rows, _, _, _ in plans}},
                          indent=2))
         return
