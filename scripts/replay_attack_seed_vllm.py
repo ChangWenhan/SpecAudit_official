@@ -186,6 +186,8 @@ def main() -> int:
         raise ValueError("limit must be positive")
     if args.batch_size < 1 or args.max_model_len <= args.max_new:
         raise ValueError("invalid batch size or maximum model length")
+    if args.parity_examples < 1:
+        raise ValueError("parity-examples must be positive")
     if not 0 < args.gpu_memory_utilization < 1:
         raise ValueError("gpu-memory-utilization must be between zero and one")
     if args.limit is not None:

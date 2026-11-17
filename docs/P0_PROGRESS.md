@@ -37,7 +37,7 @@ Updated: 2026-11-18
   examples per dataset before writing results and falls back to the original
   HF implementation on any load, parity, or execution failure. The queue now
   requires 21 GiB free before each task so vLLM's 80% memory reservation can
-  initialize safely. Static checks and 15 targeted tests pass.
+  initialize safely. Static checks and 16 targeted tests pass.
 - Committed `1c7e5dd`: E13 generation now checks formal run parameters and
   per-row token accounting. The E13 judge manifest now requires exact per-mode
   counts, row temperatures, main/draft run sidecars, and hashed attack done
