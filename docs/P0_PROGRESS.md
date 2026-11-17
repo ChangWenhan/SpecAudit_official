@@ -18,6 +18,109 @@ Updated: 2026-11-18
   source rejection.
 - Targeted hook/EOS/verifier tests: 10 passed.
 - Judge-pool loopback integration tests: passed with network escalation.
+- Committed `d922112`: P0 completion now validates formal run parameters,
+  per-record seed/temperature/output budget, elapsed time, token accounting,
+  request IDs, and response token counts before a cell can enter the judge
+  manifest.
+- Committed `d922112`: formal P0 analysis now verifies the judged JSONL hash,
+  source JSONL hash, judge identity, record count, complete cell size, and all
+  nine mode counts before analysis. Missing or stale judge provenance aborts.
+- Committed `c613363`: the model-level interaction bootstrap is now stratified
+  by dataset, preserving the JBB/AdvBench/StrongREJECT sample counts in every
+  replicate. Bootstrap p-values are bounded below by `1/(B+1)`.
+- Committed `69c308d`: a resumable local E13 queue serializes both seeds'
+  TAP/FlipAttack replay, all three models' IFEval generation, and final IFEval
+  scoring. It waits for the current local jobs, requires at least 18 GiB free
+  memory before each task, and stops on the first failed task.
+- Committed `1c7e5dd`: E13 generation now checks formal run parameters and
+  per-row token accounting. The E13 judge manifest now requires exact per-mode
+  counts, row temperatures, main/draft run sidecars, and hashed attack done
+  markers before freezing the 36-file matrix for a seed.
+- Committed `f1c185d`: E13 IFEval scoring now requires the exact
+  `3 models × 5 conditions` grid and verifies each cell's run identity before
+  producing the per-seed utility summary.
+- Committed `ddbc688`: the three-seed E13 analyzer validates primary and
+  auxiliary judge provenance, aligns request keys across all seven conditions,
+  maps legacy seed-0 filenames explicitly, and reports mean plus min–max over
+  seeds 0/1/2. TAP and FlipAttack utility rows reuse Bare by definition.
+- Committed `0eed85c`: both vLLM judge servers now enable prefix caching. The
+  installed s109 vLLM 0.14.1 was checked for the flag before this change.
+- Committed `7abe706`: added a fresh rank-50 versus frozen seed-0 gate with
+  key alignment, token/acceptance deltas, divergence counts, and explicit
+  warnings. The same review found and fixed a missing `MODEL_ORDER` import in
+  the formal P0 judge-manifest builder.
+- Committed `8e775c1` and `7f444a1`: P0 and E13 manifests must now live in the
+  same directory as their frozen source files, matching the judge pool's result
+  root contract. End-to-end tests freeze a 900-row multi-mode P0 cell and load
+  it back through the judge-pool manifest reader.
+- Committed `896b1ca`: formal P0 analysis now has explicit tests for loading a
+  complete 900-row judged nine-mode JBB cell and for rejecting incomplete mode
+  coverage. The 16+16-worker vLLM judge orchestrator dry-run also succeeds with
+  the A100 model paths and prefix caching enabled.
+- Committed `0db04a0`: the fresh-control gate now requires exact prompt text
+  equality in addition to request IDs, preventing a same-ID prompt change from
+  entering the comparison.
+- Committed `ef21955`: eight completed rank-50 prefixes (all cells except
+  MiniCPM/StrongREJECT) passed an early fresh-control diagnostic. P0 and frozen
+  request IDs/prompts align; the largest mean-token change is `+2.68` tokens and
+  every mean-acceptance change is below `0.005`. This remains explicitly
+  labelled partial diagnostic, not a completed-cell or judge-ready result.
+- Committed `fa87534`: P0 and E13 judge manifests now use fsynced temporary
+  files and atomic replacement, so an interrupted builder cannot leave a
+  half-written frozen manifest.
+- Committed `5c0bafb`: the 2×2 interaction p-value now uses a dataset-stratified
+  paired sign-flip randomization test. The reported 95% interval continues to
+  use the separately documented stratified paired bootstrap.
+- Committed `73abb73`: the Fig. 4 generator now ignores the extra model-level
+  `dataset="all"` records emitted by the formal analyzer and requires all nine
+  real model/dataset cells. A full 25,191-row synthetic analysis JSON was run
+  through `analyze_p0`, Fig. 2(b), and Fig. 4; both 600-dpi PNG/PDF outputs were
+  generated and visually checked without clipping or label collisions.
+- Committed `216fc7b`: the final three-seed Table 1 renderer validates the full
+  7-condition × 3-model × 3-dataset ASR grid plus the 21 utility rows, emits
+  mean and observed min–max, and compiles cleanly with the actual
+  `IEEEtran` journal class without overfull boxes after concise labels and 2pt
+  column spacing.
+- Committed `038f950`: Fig. 1 now has a real-data generator and reviewed
+  600-dpi PNG/PDF outputs. The figure uses all 18 frozen primary-judge exact
+  effects in six panels, keeps the small Target comparison and large rank-50
+  comparison on separate scales, and records the source hash and pairing rule.
+- Committed `5dc0d2f`: the three-seed Table 1 renderer now filters ASR rows by
+  the requested judge before validating the 63-cell grid. Without this,
+  real analysis JSON containing both primary and auxiliary judges would always
+  fail as having unexpected rows. The dual-judge synthetic table recompiles
+  under IEEEtran without overfull boxes.
+- Committed `46d82c1`: Table 1 now marks TAP with a protocol footnote because
+  its seed-0 output used the historical 150-token budget while seeds 1/2 use
+  160. The updated dual-judge table compiles cleanly under IEEEtran.
+- Committed `f89dfed`: restored the seed-0 training-text overlap and
+  five-removal sensitivity evidence omitted by the current builder, and fixed
+  recursive creation of `paper/generated_evidence`. A full rebuild reproduced
+  the committed `evidence.json` byte-for-byte (`4a6de6ca…`) and validated 135
+  cells plus 486 comparisons.
+- The regenerated K-sweep, probability-rule, defense, and overlap table
+  fragments compile together under the actual IEEEtran journal class with no
+  overfull box.
+- The E13 analyzer loaded all 63 real seed-0 model/dataset/condition cells with
+  both judges and validated all 21 seed-0 utility aliases. New-seed loading is
+  intentionally strict and will fail until the complete seed 1/2 grid and IFEval
+  summaries exist.
+- All 17 P0/E13 generation, manifest, judge, scoring, aggregation, plotting, and
+  queue entry modules import successfully from the pinned generation venv.
+- Re-reviewed the live forced-token implementation while P0 runs are in those
+  modes: target cache cropping, policy synchronization, position offsets, and
+  proposal/accepted/intervention accounting match the declared semantics.
+  Forced-token, EOS-stop, and verifier regressions pass (`10 passed`).
+- The seven generation-critical `src/` files currently running on s109 and
+  s111 have byte-identical SHA-256 hashes to the local source of truth. The
+  remote `scripts/run_p0_model.py` hash differs only because stricter
+  post-run validation was added locally after launch; the running parent has
+  already imported its earlier validator, so every returned cell will still be
+  revalidated locally before manifest creation.
+- The stricter P0 validator/analyzer suite passes (`6 passed`) and Ruff passes
+  on the changed files. The complete suite was split by environment: core CPU
+  `110 passed, 5 subtests passed`, IFEval `7 passed`, and loopback judge pool
+  `5 passed`.
 
 ## Deployment
 
@@ -27,10 +130,29 @@ Updated: 2026-11-18
 | s111 | `/mnt/3871a8e9-4418-474f-a523-a992ce4830b4/user1/spec-sampling-safety` | `/home/user1/envs/unlearn/bin/python` plus pinned transformers 4.57.6 overlay; torch 2.6.0 | 2 x RTX 6000 Ada 48 GB |
 | local | `/mnt/disk/cwh/Interest/spec-sampling-safety` | `/home/cwh/.venvs/spec4576_pt26/bin/python`; exact generation environment, shared GPU | RTX 4090 |
 
+The local interpreter path is a venv symlink whose file resolves to the base
+Anaconda executable, but the active `sys.prefix` is
+`/home/cwh/.venvs/spec4576_pt26`; the imported versions are torch 2.6.0+cu124
+and transformers 4.57.6. The package environment is therefore the intended
+project venv despite the recorded base-interpreter path.
+
+- The authoritative Chapter 5 section-to-experiment and card mapping is in
+  [`EXPERIMENTS.md` §3.1](../../../EXPERIMENTS.md#31-第-5-章小节e-编号与四卡分工).
+  The merged P0 batch is split by model, not by paper subsection: the E4 and E9 views share the same nine conditions.
+  The local card is precomputing the E13 TAP/FlipAttack replay and IFEval
+  cells because the three remote GPUs are
+  occupied by P0 generation.
 - Code snapshots are synchronized from the local source of truth.
 - MiniCPM target/draft copied to s109.
 - Gemma and Qwen target/draft pairs copied to shared storage on s111.
 - gpt-oss-safeguard-20b and Qwen3Guard-Gen-4B copied to s109.
+- s109 judge readiness rechecked on 2026-11-18: gpt-oss model directory is
+  13 GB, Qwen3Guard is 8.3 GB, both configs exist, and the judge environment
+  imports vLLM 0.14.1. The A100 remains exclusively on P0 generation until it
+  finishes; no conflicting judge server was started.
+- Storage preflight: local has 2.4 TB free, s109 has 3.5 TB free, and s111 has
+  6.6 TB free on the selected project filesystems. No experiment is near a
+  capacity limit.
 - Remote outbound PyPI access is blocked by the campus authentication page.
   Existing compatible environments are used read-only; no other user's
   environment is modified.
@@ -48,6 +170,11 @@ Updated: 2026-11-18
 ## Full P0
 
 - Full P0 generation is running on three remote GPUs.
+- Snapshot at 2026-11-18 05:50 Asia/Shanghai: MiniCPM `1,755/8,397`
+  records (JBB 701, AdvBench 1,054, StrongREJECT not started), Gemma
+  `2,173/8,397` (JBB 607, AdvBench 811, StrongREJECT 755), and Qwen
+  `3,590/8,397` (JBB 732, AdvBench 1,581, StrongREJECT 1,277). No dataset cell is
+  complete yet.
 - Each model/dataset uses all nine modes, `max_new=160`, seed 0, and one sample.
 - The runner validates record counts, mode coverage, duplicate keys, response
   presence, intervention sources, and intervention counts before marking a
@@ -67,14 +194,40 @@ Updated: 2026-11-18
 - Qwen3-4B IFEval seed-1 Bare completed all 200 items and was scored in the
   isolated CPU environment: strict prompt accuracy 78.0%, loose prompt accuracy
   81.5%, 7 truncated responses, 0 empty responses.
+- Qwen3-4B IFEval seed-1 Draft completed all 200 items and was scored with the
+  required `--limit 200`: strict prompt accuracy 38.5%, loose prompt accuracy
+  39.5%, 24 truncated responses, 0 empty responses. The answer hash in the
+  score file matches the completed output marker.
+- Qwen3-4B IFEval seed-1 rank-50 completed and passed both the generator
+  validator and the run-identity checks. Strict prompt/instruction accuracy is
+  55.0%/66.35%; loose prompt/instruction accuracy is 60.0%/70.44%. The 200
+  responses include 44 truncations and no empty answers, and the score hash
+  matches the completed output marker. Committed `d989a2e`.
+- Committed `298f273`: the benign scorer now checks response count before
+  ID/prompt alignment and explicitly tells the caller to pass the matching
+  `--limit` for subset runs. This removes the misleading identity error found
+  during the Draft scoring attempt.
 - Qwen3-4B frozen TAP replay seed 1 is also running locally on the same GPU.
   Its protocol temperature is 0 to match the frozen attack arm; measured total
   GPU use for TAP plus IFEval is about 17 GB and utilization is near 100%.
+- Qwen3-4B frozen-input TAP replay seed 1 completed all three datasets: JBB
+  100, AdvBench 520, StrongREJECT 313. All 933 records passed source-ID order,
+  seed/temperature, done-hash, and run-manifest validation. A compact
+  completion summary records each output/run/done hash without forcing the
+  multi-megabyte raw answers into Git.
+- Committed `d3feefa`: TAP prefix validation extended seed 0's 150-token
+  answers with seed 1's 160-token answers. Raw string prefixes match 931/933;
+  the two exceptions are frozen decodes ending in a split UTF-8 replacement
+  character. After removing that terminal replacement, all 933 normalize to
+  prefix matches.
 - TAP replay validation caught a chat-template mismatch: the first attempt did
   not pass `enable_thinking=False`, so none of 84 answers matched the frozen
   seed-0 response. Those outputs were quarantined, the matcher was fixed, and a
   new one-record comparison reproduced the complete frozen answer as a prefix
   (322 identical leading characters).
+- The persistent tmux job `cwh-e13-local` is active and waiting for the two
+  current local jobs to release the RTX 4090. Its status is
+  `results/_local_e13_queue_20261118/status.json`; it contains 20 serial tasks.
 - Fresh rank-50 raw-control checks against frozen seed-0 JBB cells:
   Qwen has 94/100 identical responses, 96/100 identical token lengths, and
   mean token count 144.53 vs 144.06; Gemma has 22/100 identical responses but
@@ -86,9 +239,9 @@ Updated: 2026-11-18
 - A live fresh-control read takes the new rank-50 rows and compares them with
   frozen seed-0 outputs. Exact response identity is not required because the
   remote generation runtime differs; ASR agreement is the acceptance target.
-- Local GPU availability was restored by running NVIDIA diagnostics with the
-  required device permission. The card is currently occupied by an unrelated
-  `ns_sweep.py` process, which is left untouched.
+- Local GPU availability is restricted to the exact generation environment.
+  The tmux queue checks free memory immediately before every new task and does
+  not contend with an unrelated process that may appear later.
 - A local E13 smoke showed that the RTX 4090 is dynamically shared: an unrelated
   process reserved about 15 GB after model loading began. Concurrent main-model
   and draft-only smoke therefore OOMed, while draft-only succeeded. All local
@@ -127,6 +280,23 @@ Updated: 2026-11-18
   a frozen judge manifest.
 - Existing E11 frozen throughput was regenerated to a temporary directory and
   matched `results/accel_20261111/accel.json` byte-for-byte.
+- Re-verified on 2026-11-18: both `accel.json` and `accel.md` remain
+  byte-identical to the frozen outputs, including same-model/same-host
+  normalization to rank-50. E10 can use the frozen throughput side without
+  rerunning generation.
+- Committed `bd9cf1f`: E11 now includes the previously omitted Typical A/B and
+  Floor 1e-2/1e-3 rules. The complete frozen-rule throughput is in
+  `results/cost_safety_20261118/frozen_rules/`; typical rules retain 36%–67%
+  of rank-50 throughput and floor rules retain 42%–72%.
+- Committed `d56c14e`: P0 analysis now reports total seconds/tokens and pooled
+  per-model mode summaries, providing exact same-run throughput inputs.
+- Committed `e9a84b7`: added the Fig. 3 cost-safety point aggregator. Frozen
+  rules use `evidence + accel`; N points use the P0 analysis; both normalize to
+  rank-50 only within the same model and source run. Real aggregation remains
+  gated on complete P0 judge results.
+- Committed `0b92465`: unresolved labels are retained in the ASR denominator as
+  specified. A real-evidence plus 25,191-row synthetic-P0 drill produced the
+  expected 54 points: 36 frozen-rule points and 18 N-sweep points.
 - Targeted tests for the runner, judge manifest/orchestrator, hook, and analysis
   pass. The full judge-pool cases also pass when split to remain within the
   tooling execution window.
@@ -134,9 +304,26 @@ Updated: 2026-11-18
   `/home/cwh/anaconda3/envs/safety-scale/bin/python`; its official IFEval
   strict/loose regression passes. Generation remains pinned to the project
   `spec4576_pt26` environment.
-- CPU regression excluding the separately tested IFEval environment:
-  `78 passed, 1 deselected, 5 subtests passed`; the judge-pool integration
-  tests and IFEval test pass separately.
+- Committed `ae92e59`: added and visually checked the Fig. 3 plotter with three
+  model rows and acceptance/throughput columns. Bare/Draft correctly appear
+  only in the throughput panel when draft acceptance is undefined.
+- Committed `6bcfc88`: direct P0 summary tests now pin total seconds, total
+  tokens, and `tokens_per_second`, protecting the Fig. 3 throughput input from
+  future regressions.
+- Committed `20dd80e`: added the 54-cell Table 5 renderer: nine model/dataset
+  groups by six served conditions, with primary and secondary judge means and
+  min–max in each cell. Draft-alone is excluded because it is not a served
+  decoding configuration. The synthetic dual-judge table compiles under
+  IEEEtran without overfull boxes.
+- Committed `43a5672`: after rendering Table 5 to an image, raised it from
+  scriptsize/2pt spacing to small/3pt spacing. The reviewed IEEEtran output is
+  more legible and still stays within the page width.
+- Publication-artifact audit: Fig. 1 PNG is 5757×4077 at 600 dpi and Fig. 2(a)
+  is 4197×2457 at 600 dpi. Their PDFs are one-page vector outputs with embedded
+  DejaVu Sans fonts, including bold and oblique variants.
+- The current manuscript compiles twice with the real IEEEtran project at 13
+  pages. There are no errors or overfull boxes; only two pre-existing Underfull
+  paragraph warnings remain.
 
 ## Next
 
