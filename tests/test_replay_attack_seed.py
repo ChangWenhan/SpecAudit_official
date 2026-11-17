@@ -4,7 +4,7 @@ import json
 import hashlib
 from pathlib import Path
 
-from scripts.replay_attack_seed import build_messages, validate_output
+from scripts.replay_attack_seed import build_messages, render_prompt, validate_output
 
 
 def test_build_attack_messages_preserve_frozen_roles():
@@ -26,3 +26,13 @@ def test_validate_attack_replay_requires_source_id_order(tmp_path: Path):
     kwargs = {"seed": 1, "temperature": 1.0, "method": "tap", "dataset": "jbb"}
     assert validate_output(path, ["a", "b"], **kwargs) == (True, "validated")
     assert not validate_output(path, ["b", "a"], **kwargs)[0]
+
+
+def test_render_prompt_disables_thinking_like_frozen_scripts():
+    class Tokenizer:
+        def apply_chat_template(self, messages, **kwargs):
+            assert kwargs == {"tokenize": False, "add_generation_prompt": True,
+                              "enable_thinking": False}
+            return "rendered"
+
+    assert render_prompt(Tokenizer(), "tap", {"attack_prompt": "attack"}) == "rendered"

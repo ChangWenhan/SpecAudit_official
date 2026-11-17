@@ -42,8 +42,12 @@ def build_messages(method: str, record: dict) -> list[dict[str, str]]:
 
 
 def render_prompt(tokenizer, method: str, record: dict) -> str:
-    return tokenizer.apply_chat_template(
-        build_messages(method, record), tokenize=False, add_generation_prompt=True)
+    kwargs = {"tokenize": False, "add_generation_prompt": True, "enable_thinking": False}
+    try:
+        return tokenizer.apply_chat_template(build_messages(method, record), **kwargs)
+    except TypeError:
+        kwargs.pop("enable_thinking")
+        return tokenizer.apply_chat_template(build_messages(method, record), **kwargs)
 
 
 def validate_output(path: Path, source_ids: list[str], *, seed: int, temperature: float,

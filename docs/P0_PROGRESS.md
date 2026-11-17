@@ -67,6 +67,11 @@ Updated: 2026-11-18
 - Qwen3-4B frozen TAP replay seed 1 is also running locally on the same GPU.
   Its protocol temperature is 0 to match the frozen attack arm; measured total
   GPU use for TAP plus IFEval is about 17 GB and utilization is near 100%.
+- TAP replay validation caught a chat-template mismatch: the first attempt did
+  not pass `enable_thinking=False`, so none of 84 answers matched the frozen
+  seed-0 response. Those outputs were quarantined, the matcher was fixed, and a
+  new one-record comparison reproduced the complete frozen answer as a prefix
+  (322 identical leading characters).
 - Fresh rank-50 raw-control checks against frozen seed-0 JBB cells:
   Qwen has 94/100 identical responses, 96/100 identical token lengths, and
   mean token count 144.53 vs 144.06; Gemma has 22/100 identical responses but
