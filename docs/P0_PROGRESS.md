@@ -168,6 +168,11 @@ project venv despite the recorded base-interpreter path.
   13 GB, Qwen3Guard is 8.3 GB, both configs exist, and the judge environment
   imports vLLM 0.14.1. The A100 remains exclusively on P0 generation until it
   finishes; no conflicting judge server was started.
+- Synced the reviewed P0/E13 manifest builders, fresh-control checker, vLLM
+  judge orchestrator and P0 analyzer to `code/scripts/` on s109. All five remote
+  SHA-256 hashes now match the local source of truth. The remote api environment
+  passes `py_compile`, and its state-free judge dry-run resolves both localhost
+  endpoints with 16 workers each. No judge service was started.
 - Storage preflight: local has 2.4 TB free, s109 has 3.5 TB free, and s111 has
   6.6 TB free on the selected project filesystems. No experiment is near a
   capacity limit.
