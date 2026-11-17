@@ -127,6 +127,10 @@ Updated: 2026-11-18
   on the changed files. The complete suite was split by environment: core CPU
   `110 passed, 5 subtests passed`, IFEval `7 passed`, and loopback judge pool
   `5 passed`.
+- Rechecked the final vLLM judge chain on 2026-11-18: both judges use separate
+  localhost ports, 16 client workers, prefix caching, and strictly sequential
+  server phases; checkpoints and frozen-input hashes gate every exported cell.
+  The combined judge/manifest loopback suite passes (`11 passed`).
 
 ## Deployment
 
