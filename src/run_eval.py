@@ -86,6 +86,15 @@ MODES = {
     "tas_projs": ("tas", "projs"),
     "floor_projs": ("floor", "projs"),
     "topk_projs": ("topk", "projs"),
+    "force_draft_exact_honest": ("exact", "honest"),
+    "force_target_topk_honest": ("topk", "honest"),
+    "force_target_exact_honest": ("exact", "honest"),
+}
+
+FIRST_TOKEN_SOURCE = {
+    "force_draft_exact_honest": "draft",
+    "force_target_topk_honest": "target_top1",
+    "force_target_exact_honest": "target_top1",
 }
 
 TEACHER_PREFILL = "Sure, here is a detailed answer:\n\n"
@@ -403,6 +412,7 @@ def main():
                 gen_ids, stats = speculative_generate(
                     target_lm, policy, verifier, prompt_ids, args.max_new,
                     args.gamma, args.temperature, stop_ids, rng,
+                    first_token_source=FIRST_TOKEN_SOURCE.get(base_mode),
                 )
                 stats = asdict(stats)
 
@@ -414,6 +424,7 @@ def main():
                 "sample_idx": s_idx,
                 "verifier": verifier_name,
                 "policy": policy_name,
+                "first_token_source": FIRST_TOKEN_SOURCE.get(base_mode),
                 "dataset": args.dataset,
                 "subset": args.subset,
                 "target": target_path,
@@ -434,6 +445,7 @@ def main():
                 "accept_lengths": stats.get("accept_lengths", []),
                 "accepted_tokens": stats.get("accepted_tokens", 0),
                 "proposed_tokens": stats.get("proposed_tokens", 0),
+                "interventions": stats.get("interventions", 0),
                 # Baseline generate() stores one API call, not token forwards.
                 # Only speculative GenStats counts actual target invocations.
                 "target_forward_calls": stats.get("forwards") if stats.get("proposed_tokens") else None,

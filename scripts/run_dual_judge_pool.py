@@ -77,12 +77,18 @@ def load_cells(manifest_path, selected=()):
         rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
         if len(rows) != entry["records"]:
             raise ValueError(f"row count mismatch: {path}")
-        keys = [(str(r["id"]), r.get("sample_idx", 0)) for r in rows]
+        keys = [(str(r["id"]), r.get("sample_idx", 0), r.get("mode")) for r in rows]
         if len(set(keys)) != len(keys):
             raise ValueError(f"duplicate sample key: {path}")
+        allowed_modes = entry.get("modes") or [entry.get("mode")]
+        if not isinstance(allowed_modes, list) or not allowed_modes or not all(
+                isinstance(mode, str) and mode for mode in allowed_modes):
+            raise ValueError(f"invalid mode scope: {path}")
+        if len(set(allowed_modes)) != len(allowed_modes):
+            raise ValueError(f"duplicate modes: {path}")
         if not all(isinstance(r.get("response"), str) and r["response"].strip()
                    and r.get("dataset") == entry["dataset"]
-                   and r.get("mode") == entry["mode"] for r in rows):
+                   and r.get("mode") in allowed_modes for r in rows):
             raise ValueError(f"invalid generation records: {path}")
         if path.name in cells:
             raise ValueError(f"duplicate cell basename: {path.name}; use separate manifests per seed")

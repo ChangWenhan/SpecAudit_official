@@ -145,6 +145,7 @@ class GenStats:
     iterations: int = 0
     accepted_tokens: int = 0
     proposed_tokens: int = 0
+    interventions: int = 0
     accept_lengths: List[int] = field(default_factory=list)
     fallbacks: int = 0
     eos_in_accepted: bool = False
@@ -160,8 +161,19 @@ def speculative_generate(
     temperature: float = 1.0,
     eos_token_id: EosLike = None,
     rng: Optional[torch.Generator] = None,
+    first_token_source: Optional[str] = None,
 ) -> tuple[List[int], GenStats]:
-    """Returns (generated_token_ids, stats)."""
+    """Returns (generated_token_ids, stats).
+
+    ``first_token_source`` optionally intervenes once at response position 0.
+    ``draft`` forces the first token proposed by the policy; ``target_top1``
+    forces the target model's argmax after the prompt. The forced token bypasses
+    the verifier. Any draft state computed for the proposal is synchronised to
+    the forced prefix before the next proposal, so subsequent tokens are never
+    conditioned on a discarded draft chain.
+    """
+    if first_token_source not in (None, "draft", "target_top1"):
+        raise ValueError(f"unknown first_token_source: {first_token_source}")
     device = target.device
     stop_ids = eos_token_set(eos_token_id)
     stats = GenStats()
@@ -172,6 +184,31 @@ def speculative_generate(
 
     generated: List[int] = []
     ctx_len = target.length
+
+    if first_token_source is not None and max_new_tokens > 0:
+        if first_token_source == "draft":
+            first_proposal = policy.propose(1)
+            stats.proposed_tokens += 1
+            if not first_proposal:
+                raise RuntimeError("draft policy returned no token for opening intervention")
+            forced_token = int(first_proposal[0])
+        else:
+            if target.last_logits is None:
+                raise RuntimeError("target logits are unavailable for opening intervention")
+            forced_token = int(target.last_logits.argmax(dim=-1).item())
+
+        generated.append(forced_token)
+        target.extend([forced_token])
+        stats.forwards += 1
+        # Drop the proposal-time draft state and condition the policy on the
+        # forced prefix. The forced token is an intervention, not an accepted
+        # verifier decision.
+        policy.sync([], forced_token)
+        ctx_len += 1
+        stats.interventions += 1
+        if stop_ids and forced_token in stop_ids:
+            return generated[:max_new_tokens], stats
+
     while len(generated) < max_new_tokens:
         g = min(gamma, max_new_tokens - len(generated))
         if g <= 0:
