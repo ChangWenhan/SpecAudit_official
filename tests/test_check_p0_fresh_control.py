@@ -7,8 +7,9 @@ from scripts.build_p0_judge_manifest import main as manifest_main
 from scripts.run_p0_model import DATASET_N, MODEL_ORDER, MODES
 
 
-def row(identifier: str, response: str, tokens: int, accept: float) -> dict:
-    return {"id": identifier, "sample_idx": 0, "response": response,
+def row(identifier: str, response: str, tokens: int, accept: float,
+        prompt: str = "prompt") -> dict:
+    return {"id": identifier, "sample_idx": 0, "prompt": prompt, "response": response,
             "n_tokens": tokens, "accept_rate": accept}
 
 
@@ -26,6 +27,12 @@ def test_compare_rows_reports_identity_and_deltas():
 def test_compare_rows_rejects_key_mismatch():
     with pytest.raises(ValueError, match="request keys"):
         compare_rows([row("a", "x", 1, 0.1)], [row("b", "x", 1, 0.1)])
+
+
+def test_compare_rows_rejects_prompt_drift():
+    with pytest.raises(ValueError, match="prompt differs"):
+        compare_rows([row("a", "x", 1, 0.1)],
+                     [row("a", "x", 1, 0.1, prompt="changed")])
 
 
 def test_p0_manifest_imports_canonical_model_order():

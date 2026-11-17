@@ -38,6 +38,9 @@ def compare_rows(fresh: list[dict], frozen: list[dict]) -> dict:
         extra = sorted(set(fresh_by_key) - set(frozen_by_key))[:3]
         raise ValueError(f"request keys differ: missing={missing}, extra={extra}")
     keys = sorted(fresh_by_key)
+    for key in keys:
+        if fresh_by_key[key].get("prompt") != frozen_by_key[key].get("prompt"):
+            raise ValueError(f"prompt differs for key {key}")
     identical = sum(
         fresh_by_key[key].get("response") == frozen_by_key[key].get("response") for key in keys)
     same_length = sum(
