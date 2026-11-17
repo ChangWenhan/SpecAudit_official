@@ -272,6 +272,9 @@ project venv despite the recorded base-interpreter path.
   s109/local artifact hashes match, and the judge loader dry-run resolves 1,800
   labels with the same 32-thread signature. The compact record is in
   `results/p0_20261118/s109_completed/MiniCPM4_8B__jbb.validation.json`.
+- A combined temporary manifest of the two completed JBB cells also passed:
+  two source files resolved to 3,600 labels (2 × 900 × two judges), 32 client
+  threads, and the same judge-policy signature. No model was loaded.
 - Each model/dataset uses all nine modes, `max_new=160`, seed 0, and one sample.
 - The runner validates record counts, mode coverage, duplicate keys, response
   presence, intervention sources, and intervention counts before marking a
