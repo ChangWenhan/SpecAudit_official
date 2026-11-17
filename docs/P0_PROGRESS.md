@@ -293,7 +293,7 @@ project venv despite the recorded base-interpreter path.
   responses include 44 truncations and no empty answers, and the score hash
   matches the completed output marker. Committed `d989a2e`.
 - Qwen3-4B IFEval seed-1 exact is running after the completed rank-50 cell;
-  the detached parent has written `88/200` checkpointed answers and remains
+  the detached parent has written `101/200` checkpointed answers and remains
   live. The E13 queue has not started and will gate on all five utility cells.
 - Committed `298f273`: the benign scorer now checks response count before
   ID/prompt alignment and explicitly tells the caller to pass the matching
