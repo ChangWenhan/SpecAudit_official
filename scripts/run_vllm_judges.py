@@ -58,6 +58,7 @@ def server_command(python: str, model: Path, judge: str) -> tuple[list[str], int
                "--host", "127.0.0.1", "--port", str(port),
                "--gpu-memory-utilization", "0.85", "--max-model-len", "8192",
                "--max-num-seqs", "16" if judge == "gptoss" else "32",
+               "--enable-prefix-caching",
                "--disable-log-requests"]
     if judge == "gptoss":
         command.append("--enforce-eager")

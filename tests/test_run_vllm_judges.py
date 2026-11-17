@@ -19,3 +19,4 @@ def test_server_commands_use_vllm_and_expected_models():
     assert gptoss[:3] == ["python", "-m", "vllm.entrypoints.openai.api_server"]
     assert JUDGE_IDS["gptoss"] in gptoss and JUDGE_IDS["guard"] in guard
     assert "--max-num-seqs" in gptoss and "--max-num-seqs" in guard
+    assert "--enable-prefix-caching" in gptoss and "--enable-prefix-caching" in guard
