@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 
@@ -17,6 +19,7 @@ CONDITIONS = {
     "exact": "exact_honest",
     "securesd": "securesd_topk_honest@50:10",
 }
+EXPECTED_LIMIT = 200
 SHARED_IDENTITY_FIELDS = (
     "dataset", "target", "draft", "draft_alt", "prompts_sha256", "n", "subset",
     "split", "gamma", "temperature", "max_new", "samples", "seed", "device",
@@ -32,6 +35,18 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def atomic_json(path: Path, value: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent,
+                                     prefix="." + path.name, delete=False) as stream:
+        temporary = Path(stream.name)
+        json.dump(value, stream, indent=2, ensure_ascii=False)
+        stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(temporary, path)
 
 
 def parse_cell(path: Path) -> tuple[str, str]:
@@ -84,7 +99,8 @@ def main() -> None:
         done = json.loads(done_path.read_text())
         if done.get("sha256") != sha256_file(path):
             raise ValueError(f"utility answer hash mismatch: {path}")
-        if done.get("dataset") != "ifeval" or done.get("mode") != CONDITIONS[slug]:
+        if (done.get("dataset") != "ifeval" or done.get("mode") != CONDITIONS[slug]
+                or done.get("records") != EXPECTED_LIMIT):
             raise ValueError(f"utility protocol mismatch: {path}")
         run_path = path.with_suffix(".run.json")
         if not run_path.is_file():
@@ -92,7 +108,7 @@ def main() -> None:
         identity = json.loads(run_path.read_text()).get("run_identity") or {}
         if (identity.get("dataset") != "ifeval" or identity.get("seed") != args.seed
                 or identity.get("modes") != [CONDITIONS[slug]]
-                or identity.get("n") != done.get("records")
+                or identity.get("n") != EXPECTED_LIMIT
                 or identity.get("max_new") != 2048):
             raise ValueError(f"utility run identity mismatch: {path}")
         identities.setdefault(model, {})[slug] = identity
@@ -102,7 +118,9 @@ def main() -> None:
                             "--assets", str(args.assets.resolve()), "--benchmark", "ifeval",
                             "--answers", str(path)], check=True)
         score = json.loads(score_path.read_text())
-        if score.get("answer_sha256") != done["sha256"] or score.get("n") != done["records"]:
+        if (score.get("answer_sha256") != done["sha256"]
+                or score.get("n") != EXPECTED_LIMIT
+                or score.get("benchmark") != "ifeval"):
             raise ValueError(f"stale utility score: {path}")
         cells.append({"model": model, "method": slug, "n": score["n"],
                       "metrics": score["metrics"], "truncated": score["truncated"],
@@ -112,7 +130,7 @@ def main() -> None:
     validate_shared_provenance(identities)
     summary = {"seed": args.seed, "cells": cells}
     out = args.root.resolve() / f"utility_summary_seed_{args.seed}.json"
-    out.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+    atomic_json(out, summary)
     print(f"wrote {out}: {len(cells)} cells")
 
 

@@ -47,7 +47,9 @@ Updated: 2026-11-18
   same target/draft files, prompt hash, source hashes, package versions,
   runtime, decoding settings, cache mode and benign assets hash. This rejects
   a grid assembled from different code snapshots even when each cell is
-  individually valid. Targeted provenance tests pass (`4 passed`).
+  individually valid. Formal utility scoring now requires exactly 200 answers,
+  validates the IFEval benchmark identity, and atomically replaces the summary
+  after fsync. Targeted provenance tests pass (`4 passed`).
 - Committed `1c7e5dd`: E13 generation now checks formal run parameters and
   per-row token accounting. The E13 judge manifest now requires exact per-mode
   counts, row temperatures, main/draft run sidecars, and hashed attack done
