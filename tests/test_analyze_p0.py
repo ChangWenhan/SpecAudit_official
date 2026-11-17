@@ -1,6 +1,18 @@
 from __future__ import annotations
 
-from scripts.analyze_p0 import N_MODES, interaction_analysis, n_sweep, wilson_interval
+import hashlib
+import json
+from pathlib import Path
+
+import pytest
+
+from scripts.analyze_p0 import (
+    N_MODES,
+    interaction_analysis,
+    n_sweep,
+    verify_judge_provenance,
+    wilson_interval,
+)
 
 
 def row(identifier: int, mode: str, unsafe: bool, dataset: str = "jbb") -> dict:
@@ -31,3 +43,23 @@ def test_interaction_and_n_sweep():
     assert combined["interaction_pp"] == 50.0
     sweep = n_sweep(cells, ("Model",), "guard_gptoss")
     assert sweep[0]["n_star_within_5pp_exact"] == 20
+
+
+def test_judge_provenance_binds_source_and_output(tmp_path: Path):
+    base = tmp_path / "Model__jbb.jsonl"
+    judged = tmp_path / "Model__jbb.gptoss.jsonl"
+    base.write_text('{"response":"raw"}\n')
+    judged.write_text('{"response":"raw","guard_gptoss":{"safety":"safe"}}\n')
+    meta = {
+        "pipeline": "run_dual_judge_pool",
+        "judge": "gptoss",
+        "source_sha256": hashlib.sha256(base.read_bytes()).hexdigest(),
+        "sha256": hashlib.sha256(judged.read_bytes()).hexdigest(),
+        "records": 1,
+    }
+    meta_path = Path(str(judged) + ".meta.json")
+    meta_path.write_text(json.dumps(meta))
+    assert verify_judge_provenance(base, judged, "guard_gptoss")["judge"] == "gptoss"
+    base.write_text('{"response":"changed"}\n')
+    with pytest.raises(ValueError, match="source hash"):
+        verify_judge_provenance(base, judged, "guard_gptoss")

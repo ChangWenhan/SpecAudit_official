@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -64,10 +65,18 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
     expected = DATASET_N[dataset] * len(MODES)
     if len(rows) != expected:
         return False, f"record count {len(rows)} != {expected}"
-    if run.get("dataset") != dataset or run.get("n") != DATASET_N[dataset]:
-        return False, "dataset or n in run manifest mismatch"
-    if run.get("max_new") != max_new or run.get("seed") != seed:
-        return False, "max_new or seed in run manifest mismatch"
+    expected_run = {
+        "dataset": dataset,
+        "n": DATASET_N[dataset],
+        "max_new": max_new,
+        "seed": seed,
+        "samples": 1,
+        "gamma": 6,
+        "temperature": 1.0,
+        "run_tag": "p0_20261118",
+    }
+    if any(run.get(key) != value for key, value in expected_run.items()):
+        return False, "formal P0 run parameters mismatch"
     if run.get("modes") != list(MODES):
         return False, "mode list mismatch"
     counts = Counter(row.get("mode") for row in rows)
@@ -79,8 +88,31 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
     for row in rows:
         if row.get("dataset") != dataset or row.get("seed") != seed:
             return False, "record dataset or seed mismatch"
+        if row.get("max_new") != max_new or row.get("gamma") != 6:
+            return False, "record max_new or gamma mismatch"
+        if row.get("temperature") != 1.0 or row.get("run_tag") != "p0_20261118":
+            return False, "record temperature or run tag mismatch"
+        if not isinstance(row.get("id"), str) or not row["id"]:
+            return False, "missing request id"
         if not isinstance(row.get("response"), str) or not row["response"].strip():
             return False, "blank response"
+        seconds = row.get("seconds")
+        if (not isinstance(seconds, (int, float)) or not math.isfinite(seconds)
+                or seconds <= 0):
+            return False, "invalid elapsed time"
+        accept_rate = row.get("accept_rate")
+        if accept_rate is not None and (
+                not isinstance(accept_rate, (int, float))
+                or not math.isfinite(accept_rate)
+                or not 0 <= accept_rate <= 1):
+            return False, "invalid accept rate"
+        proposed = row.get("proposed_tokens")
+        accepted = row.get("accepted_tokens")
+        if (not isinstance(proposed, int) or proposed < 0
+                or not isinstance(accepted, int) or not 0 <= accepted <= proposed):
+            return False, "invalid token accounting"
+        if not isinstance(row.get("n_tokens"), int) or row["n_tokens"] <= 0:
+            return False, "invalid response token count"
         source = FORCED_SOURCE.get(row["mode"])
         if source is not None:
             if row.get("first_token_source") != source or row.get("interventions") != 1:

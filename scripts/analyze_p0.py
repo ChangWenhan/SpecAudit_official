@@ -5,9 +5,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +24,9 @@ N_MODES = {
     40: "topk_start_honest@50:40",
 }
 EXACT_MODE = "exact_honest"
+ALL_MODES = (*N_MODES.values(), EXACT_MODE,
+             "force_draft_exact_honest", "force_target_topk_honest",
+             "force_target_exact_honest")
 FACTOR_MODES = {
     "A0B0": "topk_honest@50:0",
     "A0B1": "force_draft_exact_honest",
@@ -31,6 +35,32 @@ FACTOR_MODES = {
 }
 VALID = {"safe", "unsafe"}
 POSITIVE = {"unsafe"}
+JUDGE_BY_FIELD = {"guard_gptoss": "gptoss", "guard_strong": "guard"}
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def verify_judge_provenance(base: Path, judged: Path, field: str) -> dict:
+    judge = JUDGE_BY_FIELD.get(field)
+    if judge is None:
+        raise ValueError(f"unsupported judge field: {field}")
+    meta_path = Path(str(judged) + ".meta.json")
+    if not meta_path.is_file():
+        raise ValueError(f"missing judge provenance: {meta_path}")
+    meta = json.loads(meta_path.read_text())
+    if meta.get("pipeline") != "run_dual_judge_pool" or meta.get("judge") != judge:
+        raise ValueError(f"judge provenance identity mismatch: {meta_path}")
+    if not base.is_file() or meta.get("source_sha256") != sha256_file(base):
+        raise ValueError(f"judge source hash mismatch: {judged}")
+    if meta.get("sha256") != sha256_file(judged):
+        raise ValueError(f"judge output hash mismatch: {judged}")
+    return meta
 
 
 def wilson_interval(positive: int, total: int, z: float = 1.959963984540054) -> list[float] | None:
@@ -74,7 +104,12 @@ def summarize(rows: list[dict], field: str) -> dict:
     }
 
 
-def load_cells(root: Path, models: tuple[str, ...], field: str) -> dict[tuple[str, str], list[dict]]:
+def load_cells(
+    root: Path,
+    models: tuple[str, ...],
+    field: str,
+    allow_partial: bool = False,
+) -> dict[tuple[str, str], list[dict]]:
     cells = {}
     for model in models:
         for dataset in DATASET_N:
@@ -83,12 +118,26 @@ def load_cells(root: Path, models: tuple[str, ...], field: str) -> dict[tuple[st
             source = judged if judged.is_file() else base
             if not source.is_file():
                 continue
+            if judged.is_file():
+                meta = verify_judge_provenance(base, judged, field)
             rows = [json.loads(line) for line in source.read_text().splitlines() if line.strip()]
+            if not allow_partial:
+                expected_rows = DATASET_N[dataset] * len(ALL_MODES)
+                if len(rows) != expected_rows:
+                    raise ValueError(
+                        f"record count {len(rows)} != {expected_rows}: {source}")
+                mode_counts = Counter(row.get("mode") for row in rows)
+                if mode_counts != Counter({mode: DATASET_N[dataset] for mode in ALL_MODES}):
+                    raise ValueError(f"mode coverage mismatch: {source}")
             keys = [(row.get("id"), row.get("sample_idx", 0), row.get("mode")) for row in rows]
             if len(keys) != len(set(keys)):
                 raise ValueError(f"duplicate keys in {source}")
             for row in rows:
+                if row.get("dataset") != dataset:
+                    raise ValueError(f"dataset mismatch in {source}")
                 outcome(row, field)
+            if judged.is_file() and meta.get("records") != len(rows):
+                raise ValueError(f"judge record count mismatch: {source}")
             cells[model, dataset] = rows
     return cells
 
@@ -208,7 +257,7 @@ def main() -> None:
     models = tuple(model.strip() for model in args.models.split(",") if model.strip())
     if not models:
         raise ValueError("models must be nonempty")
-    cells = load_cells(args.root, models, args.judge_field)
+    cells = load_cells(args.root, models, args.judge_field, args.allow_partial)
     expected = {(model, dataset) for model in models for dataset in DATASET_N}
     if not args.allow_partial and set(cells) != expected:
         raise ValueError(f"missing cells: {sorted(expected - set(cells))}")
