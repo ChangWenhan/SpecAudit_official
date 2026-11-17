@@ -247,6 +247,10 @@ project venv despite the recorded base-interpreter path.
   run identity's version map, preserved the old versions and original identity
   hash, and recomputed the identity digest; answer and summary bytes were not
   changed. The repaired cell passes the stricter identity validator.
+- All remaining P0 parents started before this fix and will still write the
+  old version map for their in-flight cells. Each completed cell must therefore
+  run through `scripts/repair_run_runtime_versions.py` before local acceptance;
+  the stricter validator will reject an un-repaired manifest by design.
 - Generation-level sanity for that cell is also recorded: N=0/5/10/20/40/∞
   mean acceptance decreases `0.864/0.654/0.571/0.485/0.359/0.177`, all nine
   modes contain 100 records, forced-target-topk has zero accepted draft tokens
