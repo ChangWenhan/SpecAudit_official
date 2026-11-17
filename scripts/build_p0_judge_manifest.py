@@ -5,10 +5,9 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 from pathlib import Path
 
-from scripts.run_p0_model import DATASET_N, MODEL_ORDER, MODES, validate_cell
+from scripts.run_p0_model import DATASET_N, MODEL_ORDER, MODES, atomic_json, validate_cell
 
 
 def sha256_file(path: Path) -> str:
@@ -48,7 +47,7 @@ def main() -> None:
                 "model": model,
             })
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps({"cells": entries}, indent=2) + "\n")
+    atomic_json(args.out, {"cells": entries})
     print(f"wrote {args.out}: {len(entries)} cells")
 
 

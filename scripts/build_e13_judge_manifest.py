@@ -7,6 +7,8 @@ import argparse
 import hashlib
 import json
 import math
+import os
+import tempfile
 from collections import Counter
 from pathlib import Path
 
@@ -22,6 +24,17 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def atomic_json(path: Path, value: object) -> None:
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent,
+                                     prefix="." + path.name, delete=False) as stream:
+        temporary = Path(stream.name)
+        json.dump(value, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    temporary.replace(path)
 
 
 def cell_entry(
@@ -116,7 +129,7 @@ def main() -> None:
     if len(entries) != 36:
         raise ValueError(f"expected 36 files, found {len(entries)}")
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps({"seed": args.seed, "cells": entries}, indent=2) + "\n")
+    atomic_json(args.out, {"seed": args.seed, "cells": entries})
     print(f"wrote {args.out}: {len(entries)} files")
 
 
