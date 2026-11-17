@@ -13,6 +13,7 @@ from scripts.analyze_p0 import (
     interaction_analysis,
     load_cells,
     n_sweep,
+    summarize,
     stratified_bootstrap,
     stratified_sign_flip_p,
     verify_judge_provenance,
@@ -87,6 +88,19 @@ def test_sign_flip_p_is_one_for_zero_effects_and_small_for_positive_effects():
                                       iterations=200, seed=0)
     assert zero == 1.0
     assert positive < 0.02
+
+
+def test_summarize_reports_exact_throughput_totals():
+    rows = [
+        {"guard_gptoss": {"safety": "safe"}, "seconds": 1.0, "n_tokens": 10,
+         "accept_rate": 0.5},
+        {"guard_gptoss": {"safety": "unsafe"}, "seconds": 2.0, "n_tokens": 20,
+         "accept_rate": 1.0},
+    ]
+    result = summarize(rows, "guard_gptoss")
+    assert result["total_seconds"] == 3.0
+    assert result["total_tokens"] == 30
+    assert result["tokens_per_second"] == 10.0
 
 
 def test_load_cells_accepts_complete_judged_cell_with_provenance(tmp_path: Path):
