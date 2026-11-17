@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import json
 import os
 import sys
-from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,17 +43,22 @@ def model_files(path: str) -> list[dict]:
              "mtime_ns": p.stat().st_mtime_ns} for p in names]
 
 
+def runtime_versions() -> dict[str, str | None]:
+    versions = {}
+    for name in ("torch", "transformers"):
+        try:
+            module = importlib.import_module(name)
+            versions[name] = str(module.__version__)
+        except (ImportError, AttributeError):
+            versions[name] = None
+    return versions
+
+
 def generation_identity(*, target, draft, dataset, modes, prompts, gamma,
                         temperature, max_new, samples, seed, cache_mode=None,
                         device="cuda", draft_alt=None, subset=None, split=None):
     sources = SOURCE_FILES + (SECURESD_FILES if any(
         m.split("@", 1)[0] == "securesd_topk_honest" for m in modes) else ())
-    versions = {}
-    for name in ("torch", "transformers"):
-        try:
-            versions[name] = version(name)
-        except PackageNotFoundError:
-            versions[name] = None
     return {
         "target": str(Path(target).resolve()), "draft": str(Path(draft).resolve()),
         "draft_alt": str(Path(draft_alt).resolve()) if draft_alt else None,
@@ -67,7 +72,7 @@ def generation_identity(*, target, draft, dataset, modes, prompts, gamma,
         "model_files": {"target": model_files(target), "draft": model_files(draft),
                         "draft_alt": model_files(draft_alt) if draft_alt else []},
         "sources": {name: sha256_file(ROOT / name) for name in sources},
-        "versions": versions,
+        "versions": runtime_versions(),
         "python": str(Path(sys.executable).resolve()),
     }
 

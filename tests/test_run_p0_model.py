@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from scripts.run_p0_model import DATASET_N, FORCED_SOURCE, MODES, validate_cell
+from src.run_provenance import digest_json
 
 
 def p0_rows(dataset: str) -> list[dict]:
@@ -15,6 +16,7 @@ def p0_rows(dataset: str) -> list[dict]:
                 "id": str(index), "sample_idx": 0, "mode": mode, "dataset": dataset,
                 "prompt": f"prompt-{index}",
                 "seed": 0, "response": "answer", "first_token_source": source,
+                "transformers_version": "4.57.6",
                 "interventions": int(source is not None), "max_new": 160,
                 "gamma": 6, "temperature": 1.0, "run_tag": "p0_20261118",
                 "seconds": 0.5, "n_tokens": 1, "accept_rate": 0.5,
@@ -24,10 +26,16 @@ def p0_rows(dataset: str) -> list[dict]:
 
 
 def write_run(out: Path, dataset: str) -> None:
-    out.with_suffix(".run.json").write_text(json.dumps({
+    identity = {
         "dataset": dataset, "n": DATASET_N[dataset], "max_new": 160, "seed": 0,
         "modes": list(MODES), "samples": 1, "gamma": 6, "temperature": 1.0,
-        "run_tag": "p0_20261118",
+        "target": "target", "draft": "draft",
+        "versions": {"torch": "2.6.0+cu124", "transformers": "4.57.6"},
+    }
+    out.with_suffix(".run.json").write_text(json.dumps({
+        **identity, "run_tag": "p0_20261118", "run_identity": identity,
+        "run_identity_sha256": digest_json(identity),
+        "versions": {"torch": "2.6.0+cu124", "transformers": "4.57.6"},
     }))
     out.with_suffix(".summary.json").write_text(json.dumps({
         mode: {"n": DATASET_N[dataset], "mean_accept_rate": 0.5,

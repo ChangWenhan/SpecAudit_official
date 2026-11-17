@@ -158,7 +158,7 @@ Updated: 2026-11-18
   are never collected as duplicate test modules. IFEval scorer coverage is
   marked `requires_ifeval` and skipped only when the pinned generation venv
   lacks `nltk`. The current complete generation-environment suite passes
-  `145 passed, 1 skipped, 5 subtests passed`; the six benchmark tests pass in
+  `151 passed, 1 skipped, 5 subtests passed`; the six benchmark tests pass in
   the isolated `safety-scale` environment.
 - Rechecked the final vLLM judge chain on 2026-11-18: both judges use separate
   localhost ports, 16 client workers, prefix caching, and strictly sequential
@@ -240,6 +240,13 @@ project venv despite the recorded base-interpreter path.
   `results/p0_20261118/s111_completed/Qwen3_4B__jbb.validation.json`; large raw
   answers remain local only. The s111 and local SHA-256 values match for all
   three copied artifacts (JSONL, run manifest and summary).
+- Found a runtime-provenance bug exposed by the first cell: an overlay package
+  imports as transformers 4.57.6, while distribution metadata still reports the
+  base env's 4.57.0. `generation_identity` now records imported-module
+  `__version__` values. A reviewed repair utility corrected only the completed
+  run identity's version map, preserved the old versions and original identity
+  hash, and recomputed the identity digest; answer and summary bytes were not
+  changed. The repaired cell passes the stricter identity validator.
 - Generation-level sanity for that cell is also recorded: N=0/5/10/20/40/∞
   mean acceptance decreases `0.864/0.654/0.571/0.485/0.359/0.177`, all nine
   modes contain 100 records, forced-target-topk has zero accepted draft tokens
@@ -270,7 +277,7 @@ project venv despite the recorded base-interpreter path.
   generation was complete. The score command is now covered by regression test
   (`11 passed, 1 environment skip`).
 - Synced the finalized `run_p0_model.py` to s109 and s111. Its current SHA-256
-  (`2c2452d2…`) matches locally and on both remote hosts. The running parents
+  (`1b751606…`) matches locally and on both remote hosts. The running parents
   keep their already-imported code; the update applies only if a formal cell is
   retried later.
 - Dataset-level concurrency is used while preserving batch size 1 and the

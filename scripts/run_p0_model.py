@@ -16,6 +16,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 
+from src.run_provenance import digest_json
+
 
 DATASET_N = {"jbb": 100, "advbench": 520, "strongreject": 313}
 MODEL_ORDER = ("Qwen3_4B", "Gemma_3_4B", "MiniCPM4_8B")
@@ -81,6 +83,22 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
         return False, "formal P0 run parameters mismatch"
     if run.get("modes") != list(MODES):
         return False, "mode list mismatch"
+    identity = run.get("run_identity")
+    if not isinstance(identity, dict):
+        return False, "missing run identity"
+    if run.get("run_identity_sha256") != digest_json(identity):
+        return False, "run identity digest mismatch"
+    for key in ("dataset", "n", "max_new", "seed", "samples", "gamma",
+                "temperature"):
+        if identity.get(key) != expected_run[key]:
+            return False, f"run identity mismatch: {key}"
+    if identity.get("modes") != list(MODES):
+        return False, "run identity modes mismatch"
+    versions = run.get("versions") or {}
+    identity_versions = identity.get("versions") or {}
+    if (not versions.get("torch") or not versions.get("transformers")
+            or identity_versions != versions):
+        return False, "runtime version metadata mismatch"
     if set(summary) != set(MODES):
         return False, "summary mode coverage mismatch"
     for mode in MODES:
@@ -111,6 +129,8 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
             return False, "record max_new or gamma mismatch"
         if row.get("temperature") != 1.0 or row.get("run_tag") != "p0_20261118":
             return False, "record temperature or run tag mismatch"
+        if row.get("transformers_version") != versions["transformers"]:
+            return False, "row transformers version mismatch"
         if not isinstance(row.get("id"), str) or not row["id"]:
             return False, "missing request id"
         if not isinstance(row.get("prompt"), str) or not row["prompt"]:

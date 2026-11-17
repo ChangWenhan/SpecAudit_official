@@ -6,7 +6,13 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from pathlib import Path
 
-from src.run_provenance import completed_run_matches, digest_json, output_directory, sha256_file
+from src.run_provenance import (
+    completed_run_matches,
+    digest_json,
+    output_directory,
+    runtime_versions,
+    sha256_file,
+)
 
 
 class RunProvenanceTest(unittest.TestCase):
@@ -85,6 +91,16 @@ class RunProvenanceTest(unittest.TestCase):
         command = run.call_args.args[0]
         self.assertIn("scripts.run_dual_judge_pool", command)
         self.assertNotIn("src.run_eval", command)
+
+    def test_runtime_versions_use_imported_modules(self):
+        modules = {"torch": SimpleNamespace(__version__="actual-torch"),
+                   "transformers": SimpleNamespace(__version__="actual-transformers")}
+        with patch("src.run_provenance.importlib.import_module",
+                   side_effect=lambda name: modules[name]):
+            self.assertEqual(runtime_versions(), {
+                "torch": "actual-torch",
+                "transformers": "actual-transformers",
+            })
 
 
 if __name__ == "__main__":
