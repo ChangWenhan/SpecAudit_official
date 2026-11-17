@@ -103,6 +103,11 @@ Updated: 2026-11-18
 - `scripts/analyze_p0.py` computes condition summaries, Wilson intervals,
   2x2 paired-bootstrap interaction effects, Holm correction across the three
   model interactions, and N* criteria.
+- `scripts/plot_acceptance_by_position.py` produced the reviewed Fig. 2(a)
+  PNG/PDF and data source manifest at 600 dpi.
+- `scripts/plot_opening_interaction.py` and `scripts/plot_n_sweep.py` implement
+  reviewed synthetic-layout checks for Fig. 2(b) and Fig. 4; real outputs wait
+  for judge data and the complete P0 analysis JSON.
 - `scripts/run_main_seed_model.py` prepares E13's five non-attack conditions
   per model/seed, with separate validated target-mode and draft-only artifacts.
 - `scripts/run_utility_seed_model.py` prepares the five E13 IFEval conditions
