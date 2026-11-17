@@ -4,7 +4,9 @@ import hashlib
 import json
 from pathlib import Path
 
-from scripts.build_e13_judge_manifest import MAIN_MODES, cell_entry
+import pytest
+
+from scripts.build_e13_judge_manifest import MAIN_MODES, cell_entry, validate_manifest_location
 
 
 def test_e13_main_cell_entry_validates_modes_and_hash(tmp_path: Path):
@@ -43,3 +45,9 @@ def test_e13_attack_cell_checks_done_marker(tmp_path: Path):
     entry = cell_entry(path, "jbb", ("tap",), 1, 0.0, "tap")
     assert entry["condition"] == "tap"
     assert entry["sha256"] == digest
+
+
+def test_e13_manifest_must_live_in_seed_root(tmp_path: Path):
+    validate_manifest_location(tmp_path, tmp_path / "manifest.json")
+    with pytest.raises(ValueError, match="seed result root"):
+        validate_manifest_location(tmp_path, tmp_path.parent / "manifest.json")

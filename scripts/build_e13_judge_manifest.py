@@ -85,12 +85,18 @@ def cell_entry(
             "condition": condition, "temperature": temperature}
 
 
+def validate_manifest_location(root: Path, out: Path) -> None:
+    if out.resolve().parent != root.resolve():
+        raise ValueError("manifest must be written inside the seed result root")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
+    validate_manifest_location(args.root, args.out)
     entries = []
     for model in MODELS:
         for dataset in DATASET_N:
