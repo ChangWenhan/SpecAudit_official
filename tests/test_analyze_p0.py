@@ -8,8 +8,10 @@ import numpy as np
 import pytest
 
 from scripts.analyze_p0 import (
+    ALL_MODES,
     N_MODES,
     interaction_analysis,
+    load_cells,
     n_sweep,
     stratified_bootstrap,
     verify_judge_provenance,
@@ -75,3 +77,42 @@ def test_stratified_bootstrap_preserves_dataset_sample_counts():
         "advbench": np.asarray([-1, -1, -1], dtype=np.int8),
     }, iterations=200, seed=0)
     assert (draws == -50.0).all()
+
+
+def test_load_cells_accepts_complete_judged_cell_with_provenance(tmp_path: Path):
+    base = tmp_path / "Model__jbb.jsonl"
+    judged = tmp_path / "Model__jbb.gptoss.jsonl"
+    rows = []
+    for mode in ALL_MODES:
+        for index in range(100):
+            rows.append({"id": str(index), "sample_idx": 0, "mode": mode,
+                         "dataset": "jbb", "response": "answer",
+                         "guard_gptoss": {"safety": "safe"}})
+    base.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    judged.write_text(base.read_text())
+    Path(str(judged) + ".meta.json").write_text(json.dumps({
+        "pipeline": "run_dual_judge_pool", "judge": "gptoss",
+        "source_sha256": hashlib.sha256(base.read_bytes()).hexdigest(),
+        "sha256": hashlib.sha256(judged.read_bytes()).hexdigest(),
+        "records": len(rows),
+    }))
+    cells = load_cells(tmp_path, ("Model",), "guard_gptoss")
+    assert len(cells[("Model", "jbb")]) == 900
+
+
+def test_load_cells_rejects_incomplete_mode_coverage(tmp_path: Path):
+    base = tmp_path / "Model__jbb.jsonl"
+    judged = tmp_path / "Model__jbb.gptoss.jsonl"
+    rows = [{"id": str(index), "sample_idx": 0, "mode": ALL_MODES[0],
+             "dataset": "jbb", "response": "answer",
+             "guard_gptoss": {"safety": "safe"}} for index in range(100)]
+    base.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    judged.write_text(base.read_text())
+    Path(str(judged) + ".meta.json").write_text(json.dumps({
+        "pipeline": "run_dual_judge_pool", "judge": "gptoss",
+        "source_sha256": hashlib.sha256(base.read_bytes()).hexdigest(),
+        "sha256": hashlib.sha256(judged.read_bytes()).hexdigest(),
+        "records": len(rows),
+    }))
+    with pytest.raises(ValueError, match="record count"):
+        load_cells(tmp_path, ("Model",), "guard_gptoss")
