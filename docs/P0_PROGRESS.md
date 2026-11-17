@@ -150,6 +150,12 @@ Updated: 2026-11-18
   on the changed files. The complete suite was split by environment: core CPU
   `110 passed, 5 subtests passed`, IFEval `7 passed`, and loopback judge pool
   `5 passed`.
+- Added a root `pytest.ini` with `testpaths=tests` so archived server snapshots
+  are never collected as duplicate test modules. IFEval scorer coverage is
+  marked `requires_ifeval` and skipped only when the pinned generation venv
+  lacks `nltk`. The current complete generation-environment suite passes
+  `141 passed, 1 skipped, 5 subtests passed`; the six benchmark tests pass in
+  the isolated `safety-scale` environment.
 - Rechecked the final vLLM judge chain on 2026-11-18: both judges use separate
   localhost ports, 16 client workers, prefix caching, and strictly sequential
   server phases; checkpoints and frozen-input hashes gate every exported cell.
