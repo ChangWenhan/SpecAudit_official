@@ -64,6 +64,9 @@ Updated: 2026-11-18
   Qwen draft; the five-condition IFEval smoke also passed after the GPU became
   exclusive.
 - Qwen3-4B IFEval seed 1 is now running locally as a detached, resumable job.
+- Qwen3-4B IFEval seed-1 Bare completed all 200 items and was scored in the
+  isolated CPU environment: strict prompt accuracy 78.0%, loose prompt accuracy
+  81.5%, 7 truncated responses, 0 empty responses.
 - Qwen3-4B frozen TAP replay seed 1 is also running locally on the same GPU.
   Its protocol temperature is 0 to match the frozen attack arm; measured total
   GPU use for TAP plus IFEval is about 17 GB and utilization is near 100%.
