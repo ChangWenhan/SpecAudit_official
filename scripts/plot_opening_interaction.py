@@ -75,8 +75,8 @@ def main() -> None:
                     fontweight="bold")
         ax.set_title(label, fontsize=12, pad=8)
         if col == 0:
-            ax.text(0.0, -0.23, "(b)", transform=ax.transAxes, fontsize=16,
-                    fontweight="bold", ha="left", va="top")
+            ax.text(-0.30, 1.16, "(b)", transform=ax.transAxes, fontsize=16,
+                    fontweight="bold", ha="left", va="bottom")
 
     forest = fig.add_subplot(grid[0, 3])
     ys = np.arange(len(MODELS))[::-1]

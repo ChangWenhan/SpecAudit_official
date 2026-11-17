@@ -86,6 +86,10 @@ Updated: 2026-11-18
   real model/dataset cells. A full 25,191-row synthetic analysis JSON was run
   through `analyze_p0`, Fig. 2(b), and Fig. 4; both 600-dpi PNG/PDF outputs were
   generated and visually checked without clipping or label collisions.
+- Rechecked Fig. 2(b) with the scientific-figure skill on the retained 3-model
+  synthetic drill. The panel marker was moved from below the first heatmap to
+  the top-left of the composite to avoid confusion with x-axis labels. The
+  regenerated PNG is 600 dpi and the PDF embeds DejaVu Sans with no clipping.
 - Committed `216fc7b`: the final three-seed Table 1 renderer validates the full
   7-condition × 3-model × 3-dataset ASR grid plus the 21 utility rows, emits
   mean and observed min–max, and compiles cleanly with the actual
