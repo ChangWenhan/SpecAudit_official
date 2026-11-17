@@ -227,6 +227,15 @@ project venv despite the recorded base-interpreter path.
   Gemma is in JBB `force_target_topk`, AdvBench N=10 and StrongREJECT N=20;
   Qwen is in JBB `force_target_exact`, AdvBench N=40 and StrongREJECT exact.
   No dataset cell is complete yet.
+- The first complete P0 cell is Qwen3-4B/JBB at seed 0 (`900/900`). It passed
+  the current strict validator, including all nine mode counts, one sample per
+  request/mode, forced-token provenance, summary mode statistics and
+  `accept_rate = accepted/proposed`. The fresh rank-50 control has 94/100
+  identical responses, 96/100 identical token lengths, mean-token delta `+0.47`
+  and mean-acceptance delta `+0.00046`, with no warning. The compact validation
+  record and source hashes are in
+  `results/p0_20261118/s111_completed/Qwen3_4B__jbb.validation.json`; large raw
+  answers remain local only.
 - Each model/dataset uses all nine modes, `max_new=160`, seed 0, and one sample.
 - The runner validates record counts, mode coverage, duplicate keys, response
   presence, intervention sources, and intervention counts before marking a

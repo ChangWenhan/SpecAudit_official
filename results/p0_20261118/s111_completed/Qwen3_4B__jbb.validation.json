@@ -1,0 +1,29 @@
+{
+  "model": "Qwen3_4B",
+  "dataset": "jbb",
+  "source_host": "s111",
+  "remote_root": "/mnt/3871a8e9-4418-474f-a523-a992ce4830b4/user1/spec-sampling-safety/results/p0_20261118",
+  "validation": {
+    "ok": true,
+    "detail": "validated"
+  },
+  "fresh_control_mode": "topk_honest@50:0",
+  "fresh_control": {
+    "n": 100,
+    "identical_responses": 94,
+    "identical_token_lengths": 96,
+    "fresh_mean_tokens": 144.53,
+    "frozen_mean_tokens": 144.06,
+    "mean_token_delta": 0.46999999999999886,
+    "fresh_mean_accept_rate": 0.864124864955219,
+    "frozen_mean_accept_rate": 0.8636682734917552,
+    "mean_accept_delta": 0.00045659146346377355,
+    "warnings": []
+  },
+  "files": {
+    "Qwen3_4B__jbb.jsonl": "d4badabb7976593e9a25b0ac2d04d3a71ed3bfb2a65efb5629c34d1dd6aa61f6",
+    "Qwen3_4B__jbb.run.json": "dfdf7f0255843235281333e0e9185098494f1fa4c17c0f3a717c441b3ac15a94",
+    "Qwen3_4B__jbb.summary.json": "4ff2a94e503ffc72eb51041da7a78e90e7a28ca8acb33706118fec4cb97ea4e1",
+    "topk50__Qwen3_4B__jbb__tf4576.jsonl": "374525233e0bd99026d793bccbe55e9bc5713fc35f07bd1fe9d0c795c2934dd3"
+  }
+}
