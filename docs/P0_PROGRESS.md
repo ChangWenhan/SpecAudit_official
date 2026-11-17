@@ -75,6 +75,10 @@ Updated: 2026-11-18
 - `scripts/analyze_p0.py` computes condition summaries, Wilson intervals,
   2x2 paired-bootstrap interaction effects, Holm correction across the three
   model interactions, and N* criteria.
+- `scripts/run_main_seed_model.py` prepares E13's five non-attack conditions
+  per model/seed, with separate validated target-mode and draft-only artifacts.
+- Existing E11 frozen throughput was regenerated to a temporary directory and
+  matched `results/accel_20261111/accel.json` byte-for-byte.
 - Targeted tests for the runner, judge manifest/orchestrator, hook, and analysis
   pass. The full judge-pool cases also pass when split to remain within the
   tooling execution window.
