@@ -1,0 +1,23 @@
+from __future__ import annotations
+
+from scripts.run_local_e13_queue import build_tasks, source_paths
+
+
+def test_queue_covers_both_seeds_without_duplicate_names():
+    tasks = build_tasks()
+    names = [task["name"] for task in tasks]
+    assert len(tasks) == 20
+    assert len(names) == len(set(names))
+    assert names[0] == "tap__Qwen3_4B__seed_1"
+    assert names[-1] == "score_utility__seed_2"
+
+
+def test_source_paths_exclude_decorated_judge_files(tmp_path):
+    raw = tmp_path / "tap__Qwen3_4B__jbb__tf5180.jsonl"
+    raw.write_text("{}\n")
+    (tmp_path / "tap__Qwen3_4B__jbb__tf5180.gptoss.jsonl").write_text("{}\n")
+    for dataset in ("advbench", "strongreject"):
+        (tmp_path / f"tap__Qwen3_4B__{dataset}__tf5180.jsonl").write_text("{}\n")
+    paths = source_paths(tmp_path, "tap", "Qwen3_4B")
+    assert paths[0] == raw
+    assert all(".gptoss" not in path.name for path in paths)
