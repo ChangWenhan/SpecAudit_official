@@ -366,7 +366,8 @@ project venv despite the recorded base-interpreter path.
   each other or the axes, and the legend is below the x-axis title instead of
   covering the Qwen/Gemma curves. The replacement PNG is 4317×2971 at 600 dpi;
   the PDF remains one page with embedded DejaVu Sans fonts. A separate audit
-  confirmed all nine source hashes and recomputed every accepted/evaluated rate.
+  confirmed all nine source hashes and recomputed every accepted/evaluated rate;
+  this is now enforced by a lightweight regression test.
 - The current manuscript compiles twice with the real IEEEtran project at 13
   pages. There are no errors or overfull boxes; only two pre-existing Underfull
   paragraph warnings remain.
