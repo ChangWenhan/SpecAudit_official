@@ -25,7 +25,7 @@ Updated: 2026-11-18
 |---|---|---|---|
 | s109 | `/mnt/d5f4cfb6-8afe-40a4-8650-2965046cd208/vicuna/spec-sampling-safety` | generation: copied exact environment `env/speclab-exact` plus pinned overlay, torch 2.6.0+cu124 / transformers 4.57.6 / tokenizers 0.22.2; judging: `anaconda3/envs/api` with vLLM 0.14.1 | A100 80 GB |
 | s111 | `/mnt/3871a8e9-4418-474f-a523-a992ce4830b4/user1/spec-sampling-safety` | `/home/user1/envs/unlearn/bin/python` plus pinned transformers 4.57.6 overlay; torch 2.6.0 | 2 x RTX 6000 Ada 48 GB |
-| local | `/mnt/disk/cwh/Interest/spec-sampling-safety` | `/home/cwh/.venvs/spec4576_pt26/bin/python` | RTX 4090 currently unavailable: NVML/driver error |
+| local | `/mnt/disk/cwh/Interest/spec-sampling-safety` | `/home/cwh/.venvs/spec4576_pt26/bin/python`; exact generation environment, shared GPU | RTX 4090 |
 
 - Code snapshots are synchronized from the local source of truth.
 - MiniCPM target/draft copied to s109.
@@ -100,6 +100,9 @@ Updated: 2026-11-18
 - `scripts/replay_attack_seed.py` replays frozen TAP/FlipAttack inputs without
   repeating the attack search; manifests preserve source hashes, temperature,
   run seed, and per-prompt sampling seed.
+- `scripts/build_e13_judge_manifest.py` validates the complete per-seed E13
+  matrix (36 files, nine model/dataset cells, seven conditions) before writing
+  a frozen judge manifest.
 - Existing E11 frozen throughput was regenerated to a temporary directory and
   matched `results/accel_20261111/accel.json` byte-for-byte.
 - Targeted tests for the runner, judge manifest/orchestrator, hook, and analysis
