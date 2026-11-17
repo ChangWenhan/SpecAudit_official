@@ -43,6 +43,11 @@ Updated: 2026-11-18
   failed, the queue stops before starting any attack-replay GPU task. The new
   preflight and accelerated-replay tests pass (`11 passed`), including a
   positive five-cell pass case and the failure cases.
+- Utility scoring now requires all five conditions for a model to share the
+  same target/draft files, prompt hash, source hashes, package versions,
+  runtime, decoding settings, cache mode and benign assets hash. This rejects
+  a grid assembled from different code snapshots even when each cell is
+  individually valid. Targeted provenance tests pass (`4 passed`).
 - Committed `1c7e5dd`: E13 generation now checks formal run parameters and
   per-row token accounting. The E13 judge manifest now requires exact per-mode
   counts, row temperatures, main/draft run sidecars, and hashed attack done

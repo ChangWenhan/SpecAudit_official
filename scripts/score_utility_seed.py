@@ -17,6 +17,12 @@ CONDITIONS = {
     "exact": "exact_honest",
     "securesd": "securesd_topk_honest@50:10",
 }
+SHARED_IDENTITY_FIELDS = (
+    "dataset", "target", "draft", "draft_alt", "prompts_sha256", "n", "subset",
+    "split", "gamma", "temperature", "max_new", "samples", "seed", "device",
+    "cache_mode", "model_files", "sources", "versions", "python",
+    "benign_manifest_sha256", "benign_sources",
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -46,6 +52,18 @@ def validate_scope(cells: list[dict]) -> None:
         raise ValueError(f"expected {len(expected)} utility cells, found {len(cells)}")
 
 
+def validate_shared_provenance(identities: dict[str, dict[str, dict]]) -> None:
+    for model, by_condition in identities.items():
+        if set(by_condition) != set(CONDITIONS):
+            raise ValueError(f"incomplete utility provenance for {model}")
+        reference = by_condition["bare"]
+        for condition, identity in by_condition.items():
+            for field in SHARED_IDENTITY_FIELDS:
+                if identity.get(field) != reference.get(field):
+                    raise ValueError(
+                        f"utility provenance mismatch for {model}/{condition}: {field}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
@@ -55,6 +73,7 @@ def main() -> None:
     args = parser.parse_args()
     directory = args.root.resolve() / f"seed_{args.seed}"
     cells = []
+    identities: dict[str, dict[str, dict]] = {}
     for path in sorted(directory.glob("*__ifeval.jsonl")):
         slug, model = parse_cell(path)
         if model not in MODELS or slug not in CONDITIONS:
@@ -76,6 +95,7 @@ def main() -> None:
                 or identity.get("n") != done.get("records")
                 or identity.get("max_new") != 2048):
             raise ValueError(f"utility run identity mismatch: {path}")
+        identities.setdefault(model, {})[slug] = identity
         score_path = path.with_suffix(".scores.json")
         if not score_path.is_file():
             subprocess.run([args.scorer_python, "-u", "-m", "scripts.score_benign",
@@ -89,6 +109,7 @@ def main() -> None:
                       "empty_responses": score["empty_responses"],
                       "source": str(path), "source_sha256": done["sha256"]})
     validate_scope(cells)
+    validate_shared_provenance(identities)
     summary = {"seed": args.seed, "cells": cells}
     out = args.root.resolve() / f"utility_summary_seed_{args.seed}.json"
     out.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
