@@ -177,6 +177,31 @@ def stratified_bootstrap(
     return 100 * totals / denominator
 
 
+def stratified_sign_flip_p(
+    dataset_effects: dict[str, np.ndarray], iterations: int, seed: int
+) -> float:
+    """Two-sided paired randomization test under a stratified mean-zero null."""
+    rng = np.random.default_rng(seed)
+    totals = np.zeros(iterations, dtype=float)
+    observed_total = 0.0
+    denominator = 0
+    for dataset in DATASET_N:
+        effects = dataset_effects.get(dataset)
+        if effects is None or not len(effects):
+            continue
+        signs = rng.choice(np.asarray([-1, 1], dtype=np.int8),
+                           size=(iterations, len(effects)))
+        totals += (effects[None, :] * signs).sum(axis=1)
+        observed_total += float(effects.sum())
+        denominator += len(effects)
+    if denominator == 0:
+        raise ValueError("no paired effects to test")
+    observed_mean = observed_total / denominator
+    null_mean = totals / denominator
+    exceed = np.count_nonzero(np.abs(null_mean) >= abs(observed_mean) - 1e-12)
+    return (exceed + 1) / (iterations + 1)
+
+
 def interaction_analysis(
     cells: dict[tuple[str, str], list[dict]],
     models: tuple[str, ...],
@@ -219,10 +244,11 @@ def interaction_analysis(
                 seed,
             )
             low, high = np.percentile(draws, [2.5, 97.5]).tolist()
-            p_value = max(
-                1 / (iterations + 1),
-                min(1.0, 2 * min(float((draws <= 0).mean()),
-                                  float((draws >= 0).mean()))),
+            p_value = stratified_sign_flip_p(
+                {name: np.asarray(items, dtype=np.int8)
+                 for name, items in dataset_effects.items()},
+                iterations,
+                seed,
             )
             asr = {name: summarize(by_mode[mode], field) for name, mode in FACTOR_MODES.items()}
             records.append({

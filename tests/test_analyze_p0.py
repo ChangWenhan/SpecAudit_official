@@ -14,6 +14,7 @@ from scripts.analyze_p0 import (
     load_cells,
     n_sweep,
     stratified_bootstrap,
+    stratified_sign_flip_p,
     verify_judge_provenance,
     wilson_interval,
 )
@@ -77,6 +78,15 @@ def test_stratified_bootstrap_preserves_dataset_sample_counts():
         "advbench": np.asarray([-1, -1, -1], dtype=np.int8),
     }, iterations=200, seed=0)
     assert (draws == -50.0).all()
+
+
+def test_sign_flip_p_is_one_for_zero_effects_and_small_for_positive_effects():
+    zero = stratified_sign_flip_p({"jbb": np.zeros(20, dtype=np.int8)},
+                                  iterations=200, seed=0)
+    positive = stratified_sign_flip_p({"jbb": np.ones(20, dtype=np.int8)},
+                                      iterations=200, seed=0)
+    assert zero == 1.0
+    assert positive < 0.02
 
 
 def test_load_cells_accepts_complete_judged_cell_with_provenance(tmp_path: Path):
