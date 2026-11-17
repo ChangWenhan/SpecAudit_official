@@ -309,7 +309,7 @@ project venv despite the recorded base-interpreter path.
   generation was complete. The score command is now covered by regression test
   (`11 passed, 1 environment skip`).
 - Synced the finalized `run_p0_model.py` to s109 and s111. Its current SHA-256
-  (`1b751606…`) matches locally and on both remote hosts. The running parents
+  (`bb419909…`) matches locally and on both remote hosts. The running parents
   keep their already-imported code; the update applies only if a formal cell is
   retried later.
 - Dataset-level concurrency is used while preserving batch size 1 and the
