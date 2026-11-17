@@ -135,6 +135,19 @@ class PoolIntegrationTest(unittest.TestCase):
         self.assertEqual(len(self.requests), before)
         self.assertFalse(self.source.with_suffix(".guard_strong.jsonl").exists())
 
+    def test_manifest_accepts_multimode_cell(self):
+        from scripts.run_dual_judge_pool import load_cells
+
+        rows = [dict(row, mode=mode) for row in self.rows for mode in ("mode-a", "mode-b")]
+        self.source.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        entry = {"file": self.source.name,
+                 "sha256": hashlib.sha256(self.source.read_bytes()).hexdigest(),
+                 "records": len(rows), "dataset": "fixture",
+                 "modes": ["mode-a", "mode-b"]}
+        self.manifest.write_text(json.dumps({"cells": [entry]}))
+        cells = load_cells(self.manifest)
+        self.assertEqual(len(cells[self.source.name]["rows"]), len(rows))
+
     def test_low_repair_changes_only_unknown_gptoss_and_preserves_guard(self):
         initial = self.run_pool()
         self.assertEqual(initial.returncode, 0, initial.stderr)
