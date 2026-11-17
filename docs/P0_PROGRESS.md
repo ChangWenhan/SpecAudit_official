@@ -258,7 +258,7 @@ project venv despite the recorded base-interpreter path.
   equal the rounded values recomputed from the JSONL rows. The
   runner/manifest/fresh-control regression subset passes (`11 passed`).
 - Synced the finalized `run_p0_model.py` to s109 and s111. Its current SHA-256
-  (`26467127…`) matches locally and on both remote hosts. The running parents
+  (`35e1bfd5…`) matches locally and on both remote hosts. The running parents
   keep their already-imported code; the update applies only if a formal cell is
   retried later.
 - Dataset-level concurrency is used while preserving batch size 1 and the
