@@ -41,7 +41,8 @@ Updated: 2026-11-18
 - The local queue now validates the completed Qwen seed-1 IFEval status and all
   five cell artifacts immediately after its waited parent exits. If the parent
   failed, the queue stops before starting any attack-replay GPU task. The new
-  preflight and accelerated-replay tests pass (`10 passed`).
+  preflight and accelerated-replay tests pass (`11 passed`), including a
+  positive five-cell pass case and the failure cases.
 - Committed `1c7e5dd`: E13 generation now checks formal run parameters and
   per-row token accounting. The E13 judge manifest now requires exact per-mode
   counts, row temperatures, main/draft run sidecars, and hashed attack done

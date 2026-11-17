@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import hashlib
 import json
 
 import pytest
 
 from scripts.run_local_e13_queue import (
+    MODELS,
     build_tasks,
     require_completed_utility,
     source_paths,
 )
+from scripts.run_utility_seed_model import CONDITIONS
 
 
 def test_queue_covers_both_seeds_without_duplicate_names():
@@ -42,3 +45,31 @@ def test_utility_preflight_rejects_a_failed_parent(tmp_path):
 def test_utility_preflight_requires_a_status_file(tmp_path):
     with pytest.raises(ValueError, match="missing completed utility status"):
         require_completed_utility(tmp_path, "Qwen3_4B", 1)
+
+
+def test_utility_preflight_accepts_five_validated_cells(tmp_path):
+    directory = tmp_path / "results/utility200_20261118/seed_1"
+    status = directory / "_status/Qwen3_4B.json"
+    status.parent.mkdir(parents=True)
+    status.write_text(json.dumps({"state": "complete"}))
+    spec = MODELS["Qwen3_4B"]
+    for slug, (mode, source) in CONDITIONS.items():
+        target = spec[source]
+        path = directory / f"{slug}__Qwen3_4B__ifeval.jsonl"
+        path.write_text(json.dumps({
+            "dataset": "ifeval",
+            "seed": 1,
+            "mode": mode,
+            "response": "answer",
+            "target": str(target),
+        }) + "\n")
+        path.with_suffix(".run.json").write_text("{}\n")
+        path.with_name(path.name + ".done").write_text(json.dumps({
+            "records": 1,
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "dataset": "ifeval",
+            "mode": mode,
+        }) + "\n")
+    result = require_completed_utility(tmp_path, "Qwen3_4B", 1, limit=1)
+    assert result["cells"] == 5
+    assert result["model"] == "Qwen3_4B"
