@@ -206,6 +206,9 @@ project venv despite the recorded base-interpreter path.
 - The runner validates record counts, mode coverage, duplicate keys, response
   presence, intervention sources, and intervention counts before marking a
   dataset complete.
+- Tightened formal P0 completion validation to require `sample_idx=0` on every
+  row; one-sample protocol rows with another index are now rejected. The
+  runner/manifest/fresh-control regression subset passes (`8 passed`).
 - Dataset-level concurrency is used while preserving batch size 1 and the
   original seed protocol; partially written files are archived rather than
   reused.

@@ -89,6 +89,8 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
     for row in rows:
         if row.get("dataset") != dataset or row.get("seed") != seed:
             return False, "record dataset or seed mismatch"
+        if row.get("sample_idx") != 0:
+            return False, "record sample_idx mismatch"
         if row.get("max_new") != max_new or row.get("gamma") != 6:
             return False, "record max_new or gamma mismatch"
         if row.get("temperature") != 1.0 or row.get("run_tag") != "p0_20261118":

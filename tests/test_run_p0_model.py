@@ -50,3 +50,15 @@ def test_validate_p0_cell_rejects_missing_intervention(tmp_path: Path):
     ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
     assert not ok
     assert "intervention" in detail
+
+
+def test_validate_p0_cell_rejects_nonzero_sample_idx(tmp_path: Path):
+    dataset = "jbb"
+    out = tmp_path / "Model__jbb.jsonl"
+    rows = p0_rows(dataset)
+    rows[0]["sample_idx"] = 1
+    out.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    write_run(out, dataset)
+    ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
+    assert not ok
+    assert "sample_idx" in detail
