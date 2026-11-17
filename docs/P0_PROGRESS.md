@@ -43,6 +43,11 @@ Updated: 2026-11-18
   failed, the queue stops before starting any attack-replay GPU task. The new
   preflight and accelerated-replay tests pass (`11 passed`), including a
   positive five-cell pass case and the failure cases.
+- Utility cell validation now checks the complete run identity, including its
+  canonical SHA-256, dataset, seed, mode, answer count, max-new and target path;
+  a present but malformed `.run.json` no longer passes preflight. The three
+  currently completed Qwen seed-1 cells still validate under the stricter rule,
+  and utility/preflight tests pass (`8 passed`).
 - Utility scoring now requires all five conditions for a model to share the
   same target/draft files, prompt hash, source hashes, package versions,
   runtime, decoding settings, cache mode and benign assets hash. This rejects

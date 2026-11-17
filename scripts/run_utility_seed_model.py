@@ -15,6 +15,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 
+from src.run_provenance import digest_json
+
 
 CONDITIONS = {
     "bare": ("baseline", "target"),
@@ -49,7 +51,8 @@ def atomic_json(path: Path, value: object) -> None:
     os.replace(tmp, path)
 
 
-def validate_output(path: Path, seed: int, limit: int, mode: str, expected_target: str) -> tuple[bool, str]:
+def validate_output(path: Path, seed: int, limit: int, mode: str, expected_target: str,
+                    expected_max_new: int = 2048) -> tuple[bool, str]:
     done_path = Path(str(path) + ".done")
     run_path = path.with_suffix(".run.json")
     if not path.is_file() or not done_path.is_file() or not run_path.is_file():
@@ -57,6 +60,7 @@ def validate_output(path: Path, seed: int, limit: int, mode: str, expected_targe
     try:
         rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
         done = json.loads(done_path.read_text())
+        run = json.loads(run_path.read_text())
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         return False, f"unreadable utility artifact: {exc}"
     if len(rows) != limit or done.get("records") != limit:
@@ -65,6 +69,14 @@ def validate_output(path: Path, seed: int, limit: int, mode: str, expected_targe
         return False, "done marker hash or dataset mismatch"
     if done.get("mode") != mode:
         return False, "mode mismatch"
+    identity = run.get("run_identity") or {}
+    if (run.get("run_identity_sha256") != digest_json(identity)
+            or identity.get("dataset") != "ifeval" or identity.get("seed") != seed
+            or identity.get("modes") != [mode] or identity.get("n") != limit
+            or identity.get("max_new") != expected_max_new):
+        return False, "run identity mismatch"
+    if Path(identity.get("target", "")).resolve() != Path(expected_target).resolve():
+        return False, "run identity target mismatch"
     for row in rows:
         if (row.get("dataset") != "ifeval" or row.get("seed") != seed
                 or row.get("mode") != mode or not isinstance(row.get("response"), str)

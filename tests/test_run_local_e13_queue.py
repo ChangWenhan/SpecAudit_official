@@ -12,6 +12,7 @@ from scripts.run_local_e13_queue import (
     source_paths,
 )
 from scripts.run_utility_seed_model import CONDITIONS
+from src.run_provenance import digest_json
 
 
 def test_queue_covers_both_seeds_without_duplicate_names():
@@ -63,7 +64,12 @@ def test_utility_preflight_accepts_five_validated_cells(tmp_path):
             "response": "answer",
             "target": str(target),
         }) + "\n")
-        path.with_suffix(".run.json").write_text("{}\n")
+        identity = {"dataset": "ifeval", "seed": 1, "modes": [mode], "n": 1,
+                    "max_new": 2048, "target": str(target)}
+        path.with_suffix(".run.json").write_text(json.dumps({
+            "run_identity": identity,
+            "run_identity_sha256": digest_json(identity),
+        }) + "\n")
         path.with_name(path.name + ".done").write_text(json.dumps({
             "records": 1,
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
