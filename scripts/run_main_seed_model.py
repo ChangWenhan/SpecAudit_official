@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -54,10 +55,18 @@ def validate_output(path: Path, dataset: str, seed: int, max_new: int,
     expected = len(modes) * DATASET_N[dataset]
     if len(rows) != expected:
         return False, f"record count {len(rows)} != {expected}"
-    if run.get("dataset") != dataset or run.get("n") != DATASET_N[dataset]:
-        return False, "dataset or n mismatch"
-    if run.get("seed") != seed or run.get("max_new") != max_new:
-        return False, "seed or max_new mismatch"
+    expected_run = {
+        "dataset": dataset,
+        "n": DATASET_N[dataset],
+        "seed": seed,
+        "max_new": max_new,
+        "samples": 1,
+        "gamma": 6,
+        "temperature": 1.0,
+        "run_tag": "main_seeds_20261118",
+    }
+    if any(run.get(key) != value for key, value in expected_run.items()):
+        return False, "E13 run parameters mismatch"
     if run.get("modes") != list(modes):
         return False, "mode list mismatch"
     if Path(run.get("target", "")).resolve() != Path(target).resolve():
@@ -68,10 +77,36 @@ def validate_output(path: Path, dataset: str, seed: int, max_new: int,
     keys = [(str(row.get("id")), row.get("sample_idx"), row.get("mode")) for row in rows]
     if len(keys) != len(set(keys)):
         return False, "duplicate sample keys"
-    if any(row.get("dataset") != dataset or row.get("seed") != seed
-           or not isinstance(row.get("response"), str) or not row["response"].strip()
-           or row.get("interventions", 0) != 0 for row in rows):
-        return False, "invalid row metadata or content"
+    for row in rows:
+        if row.get("dataset") != dataset or row.get("seed") != seed:
+            return False, "record dataset or seed mismatch"
+        if (row.get("max_new") != max_new or row.get("gamma") != 6
+                or row.get("temperature") != 1.0
+                or row.get("run_tag") != "main_seeds_20261118"):
+            return False, "record run parameters mismatch"
+        if not isinstance(row.get("id"), str) or not row["id"]:
+            return False, "missing request id"
+        if not isinstance(row.get("response"), str) or not row["response"].strip():
+            return False, "blank response"
+        seconds = row.get("seconds")
+        if (not isinstance(seconds, (int, float)) or not math.isfinite(seconds)
+                or seconds <= 0):
+            return False, "invalid elapsed time"
+        accept_rate = row.get("accept_rate")
+        if accept_rate is not None and (
+                not isinstance(accept_rate, (int, float))
+                or not math.isfinite(accept_rate)
+                or not 0 <= accept_rate <= 1):
+            return False, "invalid accept rate"
+        proposed = row.get("proposed_tokens")
+        accepted = row.get("accepted_tokens")
+        if (not isinstance(proposed, int) or proposed < 0
+                or not isinstance(accepted, int) or not 0 <= accepted <= proposed):
+            return False, "invalid token accounting"
+        if not isinstance(row.get("n_tokens"), int) or row["n_tokens"] <= 0:
+            return False, "invalid response token count"
+        if row.get("interventions", 0) != 0:
+            return False, "unexpected intervention"
     return True, "validated"
 
 
