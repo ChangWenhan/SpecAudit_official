@@ -78,6 +78,10 @@ Updated: 2026-11-18
 - Targeted tests for the runner, judge manifest/orchestrator, hook, and analysis
   pass. The full judge-pool cases also pass when split to remain within the
   tooling execution window.
+- IFEval scoring can use the existing CPU-capable
+  `/home/cwh/anaconda3/envs/safety-scale/bin/python`; its official IFEval
+  strict/loose regression passes. Generation remains pinned to the project
+  `spec4576_pt26` environment.
 
 ## Next
 
