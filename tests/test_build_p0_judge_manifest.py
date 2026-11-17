@@ -33,7 +33,7 @@ def test_manifest_freezes_complete_multimode_cell_for_judge_pool(tmp_path: Path,
     }))
     cell.with_suffix(".summary.json").write_text(json.dumps({
         mode: {"n": DATASET_N["jbb"], "mean_accept_rate": 0.5,
-               "tokens_per_sec": 10.0}
+               "tokens_per_sec": 2.0}
         for mode in MODES
     }))
     manifest = root / "manifest.json"

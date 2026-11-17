@@ -141,6 +141,17 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
                 return False, f"invalid intervention record for {row['mode']}"
         elif row.get("first_token_source") is not None or row.get("interventions") != 0:
             return False, f"unexpected intervention record for {row['mode']}"
+    for mode in MODES:
+        mode_rows = [row for row in rows if row["mode"] == mode]
+        expected_accept = round(
+            sum(float(row["accept_rate"]) for row in mode_rows) / len(mode_rows), 3)
+        expected_throughput = round(
+            sum(int(row["n_tokens"]) for row in mode_rows)
+            / sum(float(row["seconds"]) for row in mode_rows), 1)
+        if summary[mode]["mean_accept_rate"] != expected_accept:
+            return False, f"summary acceptance does not match rows for {mode}"
+        if summary[mode]["tokens_per_sec"] != expected_throughput:
+            return False, f"summary throughput does not match rows for {mode}"
     return True, "validated"
 
 

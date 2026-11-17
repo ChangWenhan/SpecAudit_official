@@ -254,8 +254,9 @@ project venv despite the recorded base-interpreter path.
   must also have at least one proposed draft token and satisfy
   `accept_rate = accepted_tokens / proposed_tokens`. The summary sidecar must
   cover all nine modes with the exact dataset count, a bounded mean acceptance
-  rate and positive throughput. The runner/manifest/fresh-control regression
-  subset passes (`10 passed`).
+  rate and positive throughput; its acceptance and throughput values must also
+  equal the rounded values recomputed from the JSONL rows. The
+  runner/manifest/fresh-control regression subset passes (`11 passed`).
 - Synced the finalized `run_p0_model.py` to s109 and s111. Its current SHA-256
   (`26467127…`) matches locally and on both remote hosts. The running parents
   keep their already-imported code; the update applies only if a formal cell is
