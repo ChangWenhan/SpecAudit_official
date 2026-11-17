@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import json
+from collections import Counter
+from pathlib import Path
+
 from scripts.analyze_cost_safety import (DATASETS, MODELS, RULES, existing_points,
                                          n_sweep_points)
 from scripts.analyze_p0 import EXACT_MODE, N_MODES
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_existing_cost_points_pool_datasets_and_acceptance():
@@ -33,3 +40,25 @@ def test_n_sweep_points_normalize_to_p0_rank50_throughput():
     points = n_sweep_points({"condition_summaries": summaries})
     assert len(points) == len(MODELS) * (len(N_MODES) + 1)
     assert all(point["throughput_retains_rank50_pct"] == 100.0 for point in points)
+
+
+def test_real_frozen_inputs_produce_twelve_points_per_model():
+    evidence = json.loads(
+        (ROOT / "results/paper_evidence_20261011/evidence.json").read_text())
+    accel = json.loads(
+        (ROOT / "results/cost_safety_20261118/frozen_rules/accel.json").read_text())
+    points = existing_points(evidence, accel)
+    assert Counter(point["model"] for point in points) == {
+        model: 12 for model in MODELS
+    }
+    ranges = {
+        model: (
+            round(min(point["asr_pct"] for point in points if point["model"] == model), 2),
+            round(max(point["asr_pct"] for point in points if point["model"] == model), 2),
+        ) for model in MODELS
+    }
+    assert ranges == {
+        "Qwen3_4B": (1.39, 80.71),
+        "Gemma_3_4B": (3.0, 81.35),
+        "MiniCPM4_8B": (10.83, 75.46),
+    }

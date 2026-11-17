@@ -366,7 +366,9 @@ project venv despite the recorded base-interpreter path.
   spans 1.39–80.71% for Qwen, 3.00–81.35% for Gemma and 10.83–75.46% for
   MiniCPM; rank-50-relative throughput spans 32.2–157.1%, 32.1–184.9% and
   49.7–217.1%, respectively. This is an intermediate audit only; the final
-  figure remains gated on the 18 real N-sweep points.
+  figure remains gated on the 18 real N-sweep points. A regression test now
+  reads the committed evidence and throughput artifacts directly and pins the
+  12-point-per-model count and ASR ranges.
 - Targeted tests for the runner, judge manifest/orchestrator, hook, and analysis
   pass. The full judge-pool cases also pass when split to remain within the
   tooling execution window.
