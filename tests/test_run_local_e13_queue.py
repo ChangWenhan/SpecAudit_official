@@ -1,6 +1,14 @@
 from __future__ import annotations
 
-from scripts.run_local_e13_queue import build_tasks, source_paths
+import json
+
+import pytest
+
+from scripts.run_local_e13_queue import (
+    build_tasks,
+    require_completed_utility,
+    source_paths,
+)
 
 
 def test_queue_covers_both_seeds_without_duplicate_names():
@@ -21,3 +29,16 @@ def test_source_paths_exclude_decorated_judge_files(tmp_path):
     paths = source_paths(tmp_path, "tap", "Qwen3_4B")
     assert paths[0] == raw
     assert all(".gptoss" not in path.name for path in paths)
+
+
+def test_utility_preflight_rejects_a_failed_parent(tmp_path):
+    status = tmp_path / "results/utility200_20261118/seed_1/_status/Qwen3_4B.json"
+    status.parent.mkdir(parents=True)
+    status.write_text(json.dumps({"state": "failed", "error": "boom"}))
+    with pytest.raises(ValueError, match="without success"):
+        require_completed_utility(tmp_path, "Qwen3_4B", 1)
+
+
+def test_utility_preflight_requires_a_status_file(tmp_path):
+    with pytest.raises(ValueError, match="missing completed utility status"):
+        require_completed_utility(tmp_path, "Qwen3_4B", 1)

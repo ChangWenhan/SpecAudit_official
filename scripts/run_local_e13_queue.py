@@ -13,6 +13,11 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from scripts.run_utility_seed_model import (
+    CONDITIONS as UTILITY_CONDITIONS,
+    validate_output as validate_utility_output,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATION_PYTHON = Path("/home/cwh/.venvs/spec4576_pt26/bin/python")
@@ -136,6 +141,33 @@ def wait_for_pids(pids: tuple[int, ...], status_path: Path, status: dict) -> Non
         time.sleep(15)
 
 
+def require_completed_utility(root: Path, model: str, seed: int, limit: int = 200) -> dict:
+    directory = root / "results" / "utility200_20261118" / f"seed_{seed}"
+    status_path = directory / "_status" / f"{model}.json"
+    if not status_path.is_file():
+        raise ValueError(f"missing completed utility status: {status_path}")
+    status = json.loads(status_path.read_text())
+    if status.get("state") != "complete":
+        raise ValueError(
+            f"utility parent ended without success for {model}/seed {seed}: "
+            f"state={status.get('state')!r}, error={status.get('error')!r}")
+    target = MODELS[model]["target"]
+    for slug, (mode, source) in UTILITY_CONDITIONS.items():
+        expected_target = str(target if source == "target" else MODELS[model]["draft"])
+        path = directory / f"{slug}__{model}__ifeval.jsonl"
+        ok, detail = validate_utility_output(
+            path, seed, limit, mode, expected_target)
+        if not ok:
+            raise ValueError(f"utility preflight failed for {path}: {detail}")
+    return {
+        "model": model,
+        "seed": seed,
+        "cells": len(UTILITY_CONDITIONS),
+        "status": str(status_path),
+        "checked_at": now(),
+    }
+
+
 def free_memory_mib(device: int) -> int:
     output = subprocess.check_output([
         "nvidia-smi", f"--id={device}", "--query-gpu=memory.free",
@@ -185,6 +217,12 @@ def main() -> int:
     atomic_json(status_path, status)
     try:
         wait_for_pids(tuple(args.wait_pid), status_path, status)
+        if args.wait_pid:
+            status.update(state="checking_existing_tasks", updated_at=now())
+            atomic_json(status_path, status)
+            status["preflight"] = require_completed_utility(
+                ROOT, "Qwen3_4B", 1)
+            atomic_json(status_path, status)
         env = {**os.environ, "PYTHONUNBUFFERED": "1", "PYTHONPATH": str(ROOT),
                "MPLCONFIGDIR": "/tmp/matplotlib-specaudit"}
         for index, task in enumerate(tasks):
