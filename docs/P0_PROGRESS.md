@@ -234,8 +234,10 @@ project venv despite the recorded base-interpreter path.
 - Tightened formal P0 completion validation to require `sample_idx=0` on every
   row; one-sample protocol rows with another index are now rejected. P0 rows
   must also have at least one proposed draft token and satisfy
-  `accept_rate = accepted_tokens / proposed_tokens`. The
-  runner/manifest/fresh-control regression subset passes (`9 passed`).
+  `accept_rate = accepted_tokens / proposed_tokens`. The summary sidecar must
+  cover all nine modes with the exact dataset count, a bounded mean acceptance
+  rate and positive throughput. The runner/manifest/fresh-control regression
+  subset passes (`10 passed`).
 - Synced the finalized `run_p0_model.py` to s109 and s111. Its SHA-256
   (`2775d9d0…`) matches locally and on both remote hosts. The running parents
   keep their already-imported code; the update applies only if a formal cell is

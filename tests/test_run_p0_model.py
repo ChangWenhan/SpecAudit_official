@@ -28,7 +28,11 @@ def write_run(out: Path, dataset: str) -> None:
         "modes": list(MODES), "samples": 1, "gamma": 6, "temperature": 1.0,
         "run_tag": "p0_20261118",
     }))
-    out.with_suffix(".summary.json").write_text("{}\n")
+    out.with_suffix(".summary.json").write_text(json.dumps({
+        mode: {"n": DATASET_N[dataset], "mean_accept_rate": 0.5,
+               "tokens_per_sec": 10.0}
+        for mode in MODES
+    }))
 
 
 def test_validate_p0_cell_accepts_complete_intervention_matrix(tmp_path: Path):
@@ -76,3 +80,17 @@ def test_validate_p0_cell_rejects_inconsistent_accept_rate(tmp_path: Path):
     ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
     assert not ok
     assert "accept rate" in detail
+
+
+def test_validate_p0_cell_rejects_incomplete_summary(tmp_path: Path):
+    dataset = "jbb"
+    out = tmp_path / "Model__jbb.jsonl"
+    rows = p0_rows(dataset)
+    out.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    write_run(out, dataset)
+    summary = json.loads(out.with_suffix(".summary.json").read_text())
+    summary.pop(MODES[-1])
+    out.with_suffix(".summary.json").write_text(json.dumps(summary))
+    ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
+    assert not ok
+    assert "summary mode coverage" in detail

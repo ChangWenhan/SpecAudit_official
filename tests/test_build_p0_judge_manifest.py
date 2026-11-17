@@ -31,7 +31,11 @@ def test_manifest_freezes_complete_multimode_cell_for_judge_pool(tmp_path: Path,
         "gamma": 6, "temperature": 1.0, "run_tag": "p0_20261118",
         "modes": list(MODES),
     }))
-    cell.with_suffix(".summary.json").write_text("{}\n")
+    cell.with_suffix(".summary.json").write_text(json.dumps({
+        mode: {"n": DATASET_N["jbb"], "mean_accept_rate": 0.5,
+               "tokens_per_sec": 10.0}
+        for mode in MODES
+    }))
     manifest = root / "manifest.json"
     monkeypatch.setattr(sys, "argv", [
         "build_p0_judge_manifest", "--root", str(root), "--out", str(manifest),

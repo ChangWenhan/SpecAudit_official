@@ -60,6 +60,7 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
         return False, "missing jsonl, run manifest, or summary"
     try:
         run = json.loads(run_path.read_text())
+        summary = json.loads(summary_path.read_text())
         rows = [json.loads(line) for line in out.read_text().splitlines() if line.strip()]
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         return False, f"unreadable artifact: {exc}"
@@ -80,6 +81,20 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
         return False, "formal P0 run parameters mismatch"
     if run.get("modes") != list(MODES):
         return False, "mode list mismatch"
+    if set(summary) != set(MODES):
+        return False, "summary mode coverage mismatch"
+    for mode in MODES:
+        cell = summary[mode]
+        if not isinstance(cell, dict) or cell.get("n") != DATASET_N[dataset]:
+            return False, f"summary count mismatch for {mode}"
+        accept_rate = cell.get("mean_accept_rate")
+        if (not isinstance(accept_rate, (int, float)) or not math.isfinite(accept_rate)
+                or not 0 <= accept_rate <= 1):
+            return False, f"summary acceptance mismatch for {mode}"
+        throughput = cell.get("tokens_per_sec")
+        if (not isinstance(throughput, (int, float)) or not math.isfinite(throughput)
+                or throughput <= 0):
+            return False, f"summary throughput mismatch for {mode}"
     counts = Counter(row.get("mode") for row in rows)
     if counts != Counter({mode: DATASET_N[dataset] for mode in MODES}):
         return False, f"mode counts mismatch: {dict(counts)}"
