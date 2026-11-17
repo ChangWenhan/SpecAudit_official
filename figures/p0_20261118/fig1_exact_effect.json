@@ -1,0 +1,10 @@
+{
+  "evidence": "results/paper_evidence_20261011/evidence.json",
+  "evidence_sha256": "4a6de6cabe923c29c235e28902e44455d28ef2ea1b58805325ffc08bd4204b46",
+  "policy": "gptoss",
+  "comparisons": [
+    "exact_vs_bare",
+    "exact_vs_rank"
+  ],
+  "note": "95% pointwise paired-bootstrap intervals; Holm p within each nine-cell family"
+}
