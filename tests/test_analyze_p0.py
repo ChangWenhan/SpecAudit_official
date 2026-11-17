@@ -4,12 +4,14 @@ import hashlib
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from scripts.analyze_p0 import (
     N_MODES,
     interaction_analysis,
     n_sweep,
+    stratified_bootstrap,
     verify_judge_provenance,
     wilson_interval,
 )
@@ -63,3 +65,13 @@ def test_judge_provenance_binds_source_and_output(tmp_path: Path):
     base.write_text('{"response":"changed"}\n')
     with pytest.raises(ValueError, match="source hash"):
         verify_judge_provenance(base, judged, "guard_gptoss")
+
+
+def test_stratified_bootstrap_preserves_dataset_sample_counts():
+    # JBB has one +1 effect and AdvBench has three -1 effects. Pooling must
+    # preserve 1:3 weights, giving -50 points rather than a random mix.
+    draws = stratified_bootstrap({
+        "jbb": np.asarray([1], dtype=np.int8),
+        "advbench": np.asarray([-1, -1, -1], dtype=np.int8),
+    }, iterations=200, seed=0)
+    assert (draws == -50.0).all()

@@ -158,6 +158,25 @@ def keyed_outcomes(rows: list[dict], field: str) -> dict[tuple[str, int], int]:
     return result
 
 
+def stratified_bootstrap(
+    dataset_effects: dict[str, np.ndarray], iterations: int, seed: int
+) -> np.ndarray:
+    """Resample paired requests within each dataset, preserving dataset counts."""
+    rng = np.random.default_rng(seed)
+    totals = np.zeros(iterations, dtype=float)
+    denominator = 0
+    for dataset in DATASET_N:
+        effects = dataset_effects.get(dataset)
+        if effects is None or not len(effects):
+            continue
+        indices = rng.integers(0, len(effects), size=(iterations, len(effects)))
+        totals += effects[indices].sum(axis=1)
+        denominator += len(effects)
+    if denominator == 0:
+        raise ValueError("no paired effects to bootstrap")
+    return 100 * totals / denominator
+
+
 def interaction_analysis(
     cells: dict[tuple[str, str], list[dict]],
     models: tuple[str, ...],
@@ -186,11 +205,25 @@ def interaction_analysis(
             ], dtype=np.int8)
             effects = (values[:, 3] - values[:, 2]) - (values[:, 1] - values[:, 0])
             point = 100 * float(effects.mean())
-            rng = np.random.default_rng(seed)
-            indices = rng.integers(0, len(effects), size=(iterations, len(effects)))
-            draws = 100 * effects[indices].mean(axis=1)
+            dataset_by_key = {
+                (str(row["id"]), row.get("sample_idx", 0)): row["dataset"]
+                for row in by_mode[FACTOR_MODES["A0B0"]]
+            }
+            dataset_effects = {name: [] for name in DATASET_N}
+            for key, effect in zip(keys, effects):
+                dataset_effects[dataset_by_key[key]].append(int(effect))
+            draws = stratified_bootstrap(
+                {name: np.asarray(items, dtype=np.int8)
+                 for name, items in dataset_effects.items()},
+                iterations,
+                seed,
+            )
             low, high = np.percentile(draws, [2.5, 97.5]).tolist()
-            p_value = min(1.0, 2 * min(float((draws <= 0).mean()), float((draws >= 0).mean())))
+            p_value = max(
+                1 / (iterations + 1),
+                min(1.0, 2 * min(float((draws <= 0).mean()),
+                                  float((draws >= 0).mean()))),
+            )
             asr = {name: summarize(by_mode[mode], field) for name, mode in FACTOR_MODES.items()}
             records.append({
                 "model": model,
