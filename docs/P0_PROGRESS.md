@@ -238,7 +238,8 @@ project venv despite the recorded base-interpreter path.
   and mean-acceptance delta `+0.00046`, with no warning. The compact validation
   record and source hashes are in
   `results/p0_20261118/s111_completed/Qwen3_4B__jbb.validation.json`; large raw
-  answers remain local only.
+  answers remain local only. The s111 and local SHA-256 values match for all
+  three copied artifacts (JSONL, run manifest and summary).
 - Generation-level sanity for that cell is also recorded: N=0/5/10/20/40/∞
   mean acceptance decreases `0.864/0.654/0.571/0.485/0.359/0.177`, all nine
   modes contain 100 records, forced-target-topk has zero accepted draft tokens

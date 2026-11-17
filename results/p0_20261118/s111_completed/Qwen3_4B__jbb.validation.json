@@ -50,5 +50,11 @@
     "threads": 32,
     "signature": "821019ed453fce10e2540089d2bf64c7368f99b329b31a655c9ca177c1604cbf",
     "service_started": false
+  },
+  "remote_copy_verified": {
+    "jsonl": true,
+    "run_manifest": true,
+    "summary": true,
+    "method": "sha256 compared between s111 source and local copy"
   }
 }
