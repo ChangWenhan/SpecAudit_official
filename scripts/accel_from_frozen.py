@@ -19,11 +19,14 @@ from collections import defaultdict
 from pathlib import Path
 
 CONDITIONS = ["bare", "draft", "topk50", "defense-headexact-k50-n10",
-              "defense-massfloor-k50-f0.001", "exact", "topk20", "topk100"]
+              "defense-massfloor-k50-f0.001", "exact", "topk20", "topk100",
+              "tas-e0.03-d0.1", "tas-e0.25-d0.3", "floor-t0.01", "floor-t0.001"]
 LABEL = {"bare": "Bare target", "draft": "Draft alone", "topk50": "Rank-50 (K=50)",
          "defense-headexact-k50-n10": "Head-exact (N=10)",
          "defense-massfloor-k50-f0.001": "Mass floor 1e-3", "exact": "Exact",
-         "topk20": "Rank-20", "topk100": "Rank-100"}
+         "topk20": "Rank-20", "topk100": "Rank-100",
+         "tas-e0.03-d0.1": "Typical A", "tas-e0.25-d0.3": "Typical B",
+         "floor-t0.01": "Floor 1e-2", "floor-t0.001": "Floor 1e-3"}
 
 
 def collect(results: Path):
