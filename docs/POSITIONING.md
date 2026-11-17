@@ -55,11 +55,12 @@ the core story within the tested scope. Reorganize these results before
 launching additional matrices. See [EVIDENCE.md](EVIDENCE.md).
 
 Human reviewers are unavailable; review is not scheduled in this execution
-scope, and automatic labels remain unvalidated by humans. The active run covers
-IFEval (first 200 items) for the five main-table configurations, including
-SecureSD Step, with the completed nine-cell SecureSD harmful results reused.
-Additional seeds and attack searches were cancelled on 2026-11-11 and their
-partial data deleted. See
+scope, and automatic labels remain unvalidated by humans. Seed-0 IFEval (first
+200 items) is complete for the five main-table configurations, including
+SecureSD Step, and the nine-cell SecureSD harmful results are reused. The
+2026-11-11 cancellation of the 108-cell seed expansion and its attack searches
+stands; the 2026-11-18 plan restores only a 3-seed main-table rerun plus IFEval
+seeds 1/2, scheduled last. See
 [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md). Existing single-seed, judge, hardware and implementation
 limitations remain in [LIMITATIONS.md](LIMITATIONS.md). Add deployment, speed,
 natural-underalignment or adaptive-robustness evidence only when making the

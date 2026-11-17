@@ -1,13 +1,19 @@
 # Results
 
-## Current supplement (2026-11-10)
+## Current supplement (2026-11-18)
 
-`utility_20261110/` holds the current 36-cell utility job: per-host raw answers,
-checkpoints, metadata, return-sync status and objective scores. See
-[the current experiment scope](../docs/CURRENT_EXPERIMENTS.md). The nine
-SecureSD harmful-request cells in `securesd_20261110/seed_0/` are complete and
-reused. Older seed/attack job directories are retained but their queues are
-stopped. These private raw directories are not included in the public release.
+`utility200_20261111/` holds the completed seed-0 IFEval first-200 run: 15
+cells / 3,000 answers, per-host raw answers, checkpoints, metadata,
+return-sync status and objective scores. `utility_20261110/` and the other
+earlier utility roots are historical and are not resumed. The nine SecureSD
+harmful-request cells in `securesd_20261110/seed_0/` are complete and reused.
+`prefix_sweep_20261111/` is a JBB-only pilot, not the formal N sweep.
+
+New batches go to new dated roots — `p0_20261118/`, `pareto_20261118/`,
+`main_seeds_20261118/`, `utility200_20261118/` — never into a frozen one. See
+[the current experiment scope](../docs/CURRENT_EXPERIMENTS.md) and the
+project-level [EXPERIMENTS.md](../../../EXPERIMENTS.md). These private raw
+directories are not included in the public release.
 
 ## Frozen release evidence
 

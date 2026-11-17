@@ -11,9 +11,12 @@ comparisons.  No raw prompts or answers are included in this repository.
 
 The SecureSD Step baseline added on 2026-11-09 is a separate condition. It uses the upstream verifier with the same rank-50 and ten-position exact-prefix settings as the existing head-exact control. All nine harmful-request cells completed on 2026-11-10, with generation and both automatic judges. The Qwen3-4B/JBB cell has 12/100 primary positives and no unknowns. These completed results are separate in `results/securesd_20261110/`; this does not change the frozen tables below. The tables below report the frozen SpecAudit conditions, including the original head-exact measurements. See [the baseline protocol](REPRODUCIBILITY.md#securesd-step-baseline).
 
-Current utility is running separately in `results/utility_20261110/`; extra
-seeds and attack searches are stopped. See [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md).
-Incomplete utility checkpoints are not frozen paper results or final scores.
+Utility is separate from this export: seed-0 IFEval first-200 results are in
+`results/utility200_20261111/`. The 2026-11-11 cancellation of the 108-cell seed
+expansion stands; the 2026-11-18 plan restores only a 3-seed main-table rerun
+(plus IFEval seeds 1/2), scheduled last and not yet reflected in any frozen
+number. See [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md). Incomplete
+utility checkpoints are not frozen paper results or final scores.
 
 ## 1. What is in the export
 

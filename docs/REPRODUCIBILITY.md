@@ -248,10 +248,13 @@ python -m scripts.run_ablation_cells \
   --results-root results/securesd_20261110 --seed 0 --judge none --dry-run
 ```
 
-The current run uses seed 0 to match the existing main table. The earlier
-three-seed supplement was cancelled on 2026-11-11 and its partial outputs and
-protocol document were deleted; only seed 0 exists in this repository. This fix
-permits seed-separated outputs but the current scope does not use them.
+The current frozen scope uses seed 0 to match the existing main table. The
+earlier 108-cell three-seed supplement was cancelled on 2026-11-11 and its
+partial outputs and protocol document were deleted; that cancellation stands.
+The 2026-11-18 plan restores only a 3-seed rerun of the seven main-table
+conditions (plus IFEval seeds 1/2), to be written under
+`results/main_seeds_20261118/seed_{1,2}/` and `results/utility200_20261118/`.
+The seed-separated output support described here is what that rerun uses.
 `--ablation all` still selects 1–4.
 
 `--judge both` now requires `--judge-config` and calls the formal resumable judge

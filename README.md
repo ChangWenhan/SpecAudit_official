@@ -9,15 +9,21 @@ Released drafts and controlled higher-risk artifacts expose the risk source,
 its propagation through the selected policy, and the final response outcome.
 The target and original requests stay fixed in the relevant comparisons.
 
-Documentation updated 2026-11-10; evidence remains frozen at 2026-10-11. The
+Documentation updated 2026-11-18; evidence remains frozen at 2026-10-11. The
 current framing and the original Introduction structure are recorded in
 [docs/POSITIONING.md](docs/POSITIONING.md).
 
-The active supplement runs full IFEval/GSM8K utility for five main-table
-configurations on three model pairs (30 cells, one fixed seed). The nine-cell
-SecureSD harmful-request supplement is complete and reused. Extra seeds and
-FlipAttack/TAP searches are stopped; earlier data is retained. Human reviewers
-are unavailable. See [current experiments and result locations](docs/CURRENT_EXPERIMENTS.md).
+The active work is the experimental-section rebuild: two P0 mechanism
+experiments (2×2 opening-token intervention and the N sweep, merged into one
+25,191-answer batch), the matched-acceptance/Pareto analysis, and a final
+3-seed rerun of the seven main-table conditions. Every new ablation covers all
+three datasets and all three model pairs; the 2×2 requires a new forced-token
+hook in `src/spec_decode.py`. Seed-0 IFEval utility (15 cells), the nine-cell
+SecureSD supplement and the JBB-only prefix pilot are complete and reused. The
+2026-11-11 cancellation of the 108-cell seed expansion stands. Human reviewers
+are unavailable. See
+[CURRENT_EXPERIMENTS.md](docs/CURRENT_EXPERIMENTS.md) and the project-level
+[EXPERIMENTS.md](../../EXPERIMENTS.md).
 
 This repository retains the release-era title
 *SpecAudit: Draft Supply-Chain Risk under Lossy Speculative Verification*.

@@ -1,19 +1,26 @@
 # Limitations
 
-Documentation updated 2026-11-10; frozen experiments are unchanged. The
+Documentation updated 2026-11-18; frozen experiments are unchanged. The
 evidence supports conditional supply-chain risk from the combination of lossy
 verification and external draft behavior. See [POSITIONING.md](POSITIONING.md).
 It does not imply that every external draft or relaxation is unsafe. The
 existing core story does not require running all possible extensions below;
 each missing capability limits the corresponding claim.
 
-## 1. Single generation seed and one decoding schedule
+## 1. Seed coverage and one decoding schedule
 
-The main protocol uses temperature `1.0`, `gamma=6`, `max_new_tokens=160` and
+The frozen evidence uses temperature `1.0`, `gamma=6`, `max_new_tokens=160` and
 one generation seed (`0`).  The results therefore do not establish stability
 across sampling seeds or across different `gamma`/`max_new` budgets.  The
 papers' confidence intervals describe resampling uncertainty over the observed
 paired outcomes, not run-to-run generation variance.
+
+The 2026-11-18 plan restores a **3-seed main table only** (seed 0/1/2, all seven
+main-table conditions, plus IFEval seeds 1/2), as the last batch after the new
+mechanism experiments. The 108-cell seed expansion cancelled on 2026-11-11 is
+not restored. Until that main-table rerun finishes, every statement about seed
+stability is unsupported, and after it finishes only the main table has
+multi-seed evidence.
 
 ## 2. Automatic judges, not human-confirmed harm
 
@@ -134,14 +141,19 @@ the wild. The available cells are not a full released/modified × exact/rank
 factorial design; released-draft exact cells were not run. Local acceptance
 properties do not by themselves prove sequence-level harmfulness.
 
-## 15. Single-seed evidence; extra seeds cancelled and deleted
+## 15. Seed coverage: main table only
 
 Utility is IFEval only (first 200 items), five main-table configurations
 (Bare, Draft alone, rank-50, Exact, SecureSD Step) and three model pairs
 (15 cells), with a single fixed seed. The completed nine-cell SecureSD harmful
-results are reused. Extra generation seeds and attack searches were cancelled
-at the user's request on 2026-11-11, and the partial outputs were deleted; no
-multi-seed evidence exists. See [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md).
-No multi-seed stability claim can be made. Speed is reported only as relative
-cost between verification rules on the same host, never as a production
-throughput claim.
+results are reused. The 108-cell seed expansion and its attack-search
+companion were cancelled on 2026-11-11 and their partial outputs deleted; that
+cancellation stands. The 2026-11-18 plan restores only a 3-seed rerun of the
+seven main-table conditions plus IFEval seeds 1/2, scheduled last. See
+[CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md).
+
+Until that rerun completes, no multi-seed evidence exists and no stability
+claim can be made. After it completes, multi-seed evidence covers the main
+table only; K sweeps, probability rules, defense cells and the auxiliary judge
+matrix remain single-seed. Speed is reported only as relative cost between
+verification rules on the same host, never as a production throughput claim.
