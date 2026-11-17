@@ -66,7 +66,7 @@ def attack_task(root: Path, method: str, model: str, seed: int) -> dict:
     spec = MODELS[model]
     sources = source_paths(root / "results", method, model)
     command = [
-        str(GENERATION_PYTHON), "-u", "-m", "scripts.replay_attack_seed",
+        str(GENERATION_PYTHON), "-u", "-m", "scripts.replay_attack_seed_accelerated",
         "--method", method, "--model", model, "--target", str(spec["target"]),
         "--sources", *(str(path) for path in sources),
         "--out-root", "results/main_seeds_20261118", "--seed", str(seed),
@@ -158,7 +158,7 @@ def wait_for_memory(device: int, minimum: int, status_path: Path, status: dict) 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--wait-pid", type=int, action="append", default=[])
-    parser.add_argument("--min-free-mib", type=int, default=18000)
+    parser.add_argument("--min-free-mib", type=int, default=21000)
     parser.add_argument("--device", type=int, default=0)
     parser.add_argument("--runtime", type=Path, default=Path("results/_local_e13_queue_20261118"))
     parser.add_argument("--dry-run", action="store_true")
