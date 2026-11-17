@@ -61,3 +61,13 @@ def test_in_vocab_target_token_extends_normally():
     assert policy.prefix_resets == 0
     assert draft.extends == [[7]]
     assert draft.tokens == [1, 2, 7]
+
+
+def test_reset_clears_prefix_resets_for_reused_policy():
+    draft = Draft(vocab=8)
+    policy = DraftModelPolicy(draft)
+    policy.reset(torch.tensor([[1, 2]]), ctx_len=2)
+    policy.sync([], next_token=9)
+    assert policy.prefix_resets == 1
+    policy.reset(torch.tensor([[3, 4]]), ctx_len=2)
+    assert policy.prefix_resets == 0

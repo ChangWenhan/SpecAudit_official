@@ -109,6 +109,7 @@ class DraftModelPolicy:
     def reset(self, prompt_ids: torch.Tensor, ctx_len: int) -> None:
         self.prompt_ids = prompt_ids.detach().clone()
         self.initial_ctx_len = ctx_len
+        self.prefix_resets = 0
         self.draft.prefill(prompt_ids)
         self.ctx_len = ctx_len
         self.next_logits = self.draft.last_logits
