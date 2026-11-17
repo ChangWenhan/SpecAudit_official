@@ -219,14 +219,13 @@ project venv despite the recorded base-interpreter path.
 ## Full P0
 
 - Full P0 generation is running on three remote GPUs.
-- Snapshot at 2026-11-18 06:55 Asia/Shanghai: MiniCPM `2,444/8,397`
-  records (JBB 771, AdvBench 1,673, StrongREJECT not started), Gemma
-  `2,943/8,397` (JBB 724, AdvBench 1,153, StrongREJECT 1,066), and Qwen
-  `4,663/8,397` (JBB 843, AdvBench 2,207, StrongREJECT 1,613). The remote total
-  is `10,050/25,191`. MiniCPM is in JBB `force_target_topk` and AdvBench N=20;
+- Snapshot at 2026-11-18 07:14 Asia/Shanghai: MiniCPM `2,642/8,397`
+  records (JBB 792, AdvBench 1,850, StrongREJECT not started), Gemma
+  `3,154/8,397` (JBB 745, AdvBench 1,253, StrongREJECT 1,156), and Qwen
+  `4,930/8,397` (JBB 900, AdvBench 2,354, StrongREJECT 1,676). The remote total
+  is `10,726/25,191`. MiniCPM is in JBB `force_target_topk` and AdvBench N=20;
   Gemma is in JBB `force_target_topk`, AdvBench N=10 and StrongREJECT N=20;
-  Qwen is in JBB `force_target_exact`, AdvBench N=40 and StrongREJECT exact.
-  No dataset cell is complete yet.
+  Qwen JBB is complete, AdvBench is in N=40 and StrongREJECT is in exact.
 - The first complete P0 cell is Qwen3-4B/JBB at seed 0 (`900/900`). It passed
   the current strict validator, including all nine mode counts, one sample per
   request/mode, forced-token provenance, summary mode statistics and
@@ -286,7 +285,7 @@ project venv despite the recorded base-interpreter path.
   responses include 44 truncations and no empty answers, and the score hash
   matches the completed output marker. Committed `d989a2e`.
 - Qwen3-4B IFEval seed-1 exact is running after the completed rank-50 cell;
-  the detached parent has written `59/200` checkpointed answers and remains
+  the detached parent has written `88/200` checkpointed answers and remains
   live. The E13 queue has not started and will gate on all five utility cells.
 - Committed `298f273`: the benign scorer now checks response count before
   ID/prompt alignment and explicitly tells the caller to pass the matching
