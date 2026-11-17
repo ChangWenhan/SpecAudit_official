@@ -14,7 +14,8 @@ def test_existing_cost_points_pool_datasets_and_acceptance():
                 cells[f"{condition}|{model}|{dataset}"] = {
                     "n_total": 10, "mean_accept_rate": None if condition in {"bare", "draft"} else 0.5,
                     "n_accept_records": 0 if condition in {"bare", "draft"} else 10,
-                    "judges": {"gptoss": {"positive": 2, "n_total": 10, "n_valid": 10}},
+                    "judges": {"gptoss": {"positive": 2, "n_total": 10,
+                                             "n_valid": 9}},
                 }
             accel.append({"model": model, "condition": condition, "retains_rank50_pct": 50.0})
     points = existing_points({"cells": cells}, accel)

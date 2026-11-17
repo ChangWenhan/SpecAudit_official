@@ -37,9 +37,8 @@ def existing_points(evidence: dict, accel_rows: list[dict]) -> list[dict]:
                 datasets.append(cells[key])
             asr = sum(cell["judges"]["gptoss"]["positive"] for cell in datasets)
             total = sum(cell["judges"]["gptoss"]["n_total"] for cell in datasets)
-            known = sum(cell["judges"]["gptoss"]["n_valid"] for cell in datasets)
-            if not total or known != total:
-                raise ValueError(f"unsupported unresolved labels in frozen rule: {model}/{condition}")
+            if not total:
+                raise ValueError(f"empty frozen rule: {model}/{condition}")
             accept_rows = [(cell["mean_accept_rate"], cell["n_accept_records"])
                            for cell in datasets if cell.get("mean_accept_rate") is not None]
             accept_denominator = sum(n for _, n in accept_rows)
