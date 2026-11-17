@@ -23,7 +23,7 @@ Updated: 2026-11-18
 
 | Host | Project root | Runtime | Assigned GPUs |
 |---|---|---|---|
-| s109 | `/mnt/d5f4cfb6-8afe-40a4-8650-2965046cd208/vicuna/spec-sampling-safety` | `/home/vicuna/anaconda3/envs/api/bin/python`; torch 2.9.1, transformers 4.57.6, vLLM 0.14.1 | A100 80 GB |
+| s109 | `/mnt/d5f4cfb6-8afe-40a4-8650-2965046cd208/vicuna/spec-sampling-safety` | generation: copied exact environment `env/speclab-exact` plus pinned overlay, torch 2.6.0+cu124 / transformers 4.57.6 / tokenizers 0.22.2; judging: `anaconda3/envs/api` with vLLM 0.14.1 | A100 80 GB |
 | s111 | `/mnt/3871a8e9-4418-474f-a523-a992ce4830b4/user1/spec-sampling-safety` | `/home/user1/envs/unlearn/bin/python` plus pinned transformers 4.57.6 overlay; torch 2.6.0 | 2 x RTX 6000 Ada 48 GB |
 | local | `/mnt/disk/cwh/Interest/spec-sampling-safety` | `/home/cwh/.venvs/spec4576_pt26/bin/python` | RTX 4090 currently unavailable: NVML/driver error |
 
@@ -57,6 +57,9 @@ Updated: 2026-11-18
   reused.
 - Three parallel dataset workers are active per Ada GPU and two are active on
   the A100. GPU utilization is approximately 99% on all three remote devices.
+- The first A100 P0 attempt used torch 2.9.1 and was discarded before formal
+  completion. MiniCPM restarted under the verified torch 2.6.0 environment;
+  partial files were archived automatically.
 - A live fresh-control read takes the new rank-50 rows and compares them with
   frozen seed-0 outputs. Exact response identity is not required because the
   remote generation runtime differs; ASR agreement is the acceptance target.
