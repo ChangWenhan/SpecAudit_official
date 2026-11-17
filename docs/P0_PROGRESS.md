@@ -361,6 +361,12 @@ project venv despite the recorded base-interpreter path.
 - Committed `0b92465`: unresolved labels are retained in the ASR denominator as
   specified. A real-evidence plus 25,191-row synthetic-P0 drill produced the
   expected 54 points: 36 frozen-rule points and 18 N-sweep points.
+- Joined the real frozen side of Fig. 3 on 2026-11-18: `evidence.json` plus the
+  completed 36-row throughput table produces exactly 12 points per model. ASR
+  spans 1.39–80.71% for Qwen, 3.00–81.35% for Gemma and 10.83–75.46% for
+  MiniCPM; rank-50-relative throughput spans 32.2–157.1%, 32.1–184.9% and
+  49.7–217.1%, respectively. This is an intermediate audit only; the final
+  figure remains gated on the 18 real N-sweep points.
 - Targeted tests for the runner, judge manifest/orchestrator, hook, and analysis
   pass. The full judge-pool cases also pass when split to remain within the
   tooling execution window.
