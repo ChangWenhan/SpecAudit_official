@@ -8,6 +8,7 @@ from scripts.score_utility_seed import (
     CONDITIONS,
     MODELS,
     parse_cell,
+    score_command,
     validate_file_scope,
     validate_scope,
     validate_shared_provenance,
@@ -16,6 +17,12 @@ from scripts.score_utility_seed import (
 
 def test_parse_utility_cell_name():
     assert parse_cell(Path("rank50__Qwen3_4B__ifeval.jsonl")) == ("rank50", "Qwen3_4B")
+
+
+def test_score_command_explicitly_limits_official_ifeval_to_200(tmp_path):
+    command = score_command("python", tmp_path / "assets", tmp_path / "answers.jsonl")
+    assert command[command.index("--limit") + 1] == "200"
+    assert command[command.index("--benchmark") + 1] == "ifeval"
 
 
 def test_validate_scope_requires_exact_model_condition_grid():

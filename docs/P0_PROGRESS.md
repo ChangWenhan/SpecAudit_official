@@ -264,6 +264,11 @@ project venv despite the recorded base-interpreter path.
   runner/manifest/fresh-control regression subset passes (`13 passed`). Formal
   cells also require identical request-key sets and prompt text across all nine
   modes, preventing cross-mode prompt drift.
+- Fixed the E13 utility wrapper to invoke the official IFEval scorer with an
+  explicit `--limit 200`. Without this, a missing score file for exact or
+  SecureSD would fail at final seed aggregation even though its 200-answer
+  generation was complete. The score command is now covered by regression test
+  (`11 passed, 1 environment skip`).
 - Synced the finalized `run_p0_model.py` to s109 and s111. Its current SHA-256
   (`2c2452d2…`) matches locally and on both remote hosts. The running parents
   keep their already-imported code; the update applies only if a formal cell is

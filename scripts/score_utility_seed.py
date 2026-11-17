@@ -49,6 +49,14 @@ def atomic_json(path: Path, value: object) -> None:
     os.replace(temporary, path)
 
 
+def score_command(scorer_python: str, assets: Path, answers: Path) -> list[str]:
+    return [
+        scorer_python, "-u", "-m", "scripts.score_benign",
+        "--assets", str(assets.resolve()), "--benchmark", "ifeval",
+        "--answers", str(answers), "--limit", str(EXPECTED_LIMIT),
+    ]
+
+
 def parse_cell(path: Path) -> tuple[str, str]:
     parts = path.stem.split("__")
     if len(parts) != 3 or parts[2] != "ifeval":
@@ -128,9 +136,7 @@ def main() -> None:
         identities.setdefault(model, {})[slug] = identity
         score_path = path.with_suffix(".scores.json")
         if not score_path.is_file():
-            subprocess.run([args.scorer_python, "-u", "-m", "scripts.score_benign",
-                            "--assets", str(args.assets.resolve()), "--benchmark", "ifeval",
-                            "--answers", str(path)], check=True)
+            subprocess.run(score_command(args.scorer_python, args.assets, path), check=True)
         score = json.loads(score_path.read_text())
         if (score.get("answer_sha256") != done["sha256"]
                 or score.get("n") != EXPECTED_LIMIT
