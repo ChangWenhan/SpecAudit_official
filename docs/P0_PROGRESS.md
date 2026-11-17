@@ -60,6 +60,10 @@ Updated: 2026-11-18
 - The first A100 P0 attempt used torch 2.9.1 and was discarded before formal
   completion. MiniCPM restarted under the verified torch 2.6.0 environment;
   partial files were archived automatically.
+- TAP and FlipAttack replay smoke passed on the local RTX 4090 with the small
+  Qwen draft; the five-condition IFEval smoke also passed after the GPU became
+  exclusive.
+- Qwen3-4B IFEval seed 1 is now running locally as a detached, resumable job.
 - A live fresh-control read takes the new rank-50 rows and compares them with
   frozen seed-0 outputs. Exact response identity is not required because the
   remote generation runtime differs; ASR agreement is the acceptance target.
