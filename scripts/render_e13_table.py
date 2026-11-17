@@ -38,10 +38,16 @@ def format_rate(row: dict) -> str:
 
 
 def render(analysis: dict, judge: str = "gptoss") -> str:
-    asr = {(row["model"], row["dataset"], row["condition"], row["judge"]): row
-           for row in analysis.get("asr", [])}
+    asr = {}
+    for row in analysis.get("asr", []):
+        if row.get("judge") != judge:
+            continue
+        key = (row["model"], row["dataset"], row["condition"])
+        if key in asr:
+            raise ValueError(f"duplicate ASR row: {key}")
+        asr[key] = row
     utility = {(row["model"], row["condition"]): row for row in analysis.get("utility", [])}
-    expected_asr = {(model, dataset, condition, judge)
+    expected_asr = {(model, dataset, condition)
                     for model, _ in MODELS for dataset, _ in DATASETS
                     for condition, _ in CONDITIONS}
     expected_utility = {(model, condition)
@@ -70,7 +76,7 @@ def render(analysis: dict, judge: str = "gptoss") -> str:
     for condition, label in CONDITIONS:
         row = [label]
         for model, _ in MODELS:
-            row.extend(format_rate(asr[model, dataset, condition, judge])
+            row.extend(format_rate(asr[model, dataset, condition])
                        for dataset, _ in DATASETS)
             row.append(format_rate(utility[model, condition]))
         lines.append(" & ".join(row) + r" \\")
