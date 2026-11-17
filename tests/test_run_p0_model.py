@@ -20,7 +20,7 @@ def p0_rows(dataset: str) -> list[dict]:
                 "interventions": int(source is not None), "max_new": 160,
                 "gamma": 6, "temperature": 1.0, "run_tag": "p0_20261118",
                 "seconds": 0.5, "n_tokens": 1, "accept_rate": 0.5,
-                "proposed_tokens": 2, "accepted_tokens": 1,
+                "proposed_tokens": 2, "accepted_tokens": 1, "draft_prefix_resets": 0,
             })
     return rows
 
@@ -141,3 +141,15 @@ def test_validate_p0_cell_rejects_request_key_drift_between_modes(tmp_path: Path
     ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
     assert not ok
     assert "request-key sets differ" in detail
+
+
+def test_validate_p0_cell_rejects_negative_draft_reset_count(tmp_path: Path):
+    dataset = "jbb"
+    out = tmp_path / "Model__jbb.jsonl"
+    rows = p0_rows(dataset)
+    rows[0]["draft_prefix_resets"] = -1
+    out.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    write_run(out, dataset)
+    ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
+    assert not ok
+    assert "draft prefix reset" in detail

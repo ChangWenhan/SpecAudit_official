@@ -282,7 +282,9 @@ project venv despite the recorded base-interpreter path.
   `DraftModelPolicy` restart from the original prompt when a target fallback
   token is outside the draft vocabulary; verifier sampling semantics remain
   unchanged, with only potential acceptance loss. The exact failed prompt and
-  normal in-vocabulary paths are covered by tests (`13 passed`). A separate
+  normal in-vocabulary paths are covered by tests (`15 passed`). P0 records
+  accept the additive `draft_prefix_resets` field only as a nonnegative integer;
+  older cells without the field remain valid and are treated as zero. A separate
   retry root, `results/p0_retry_20261118`, was launched from the corrected code
   so Gemma's AdvBench/StrongREJECT workers continue uninterrupted. Partial hash
   and failure details are in

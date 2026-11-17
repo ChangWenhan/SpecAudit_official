@@ -26,7 +26,7 @@ def test_manifest_freezes_complete_multimode_cell_for_judge_pool(tmp_path: Path,
                 "interventions": int(source is not None), "max_new": 160,
                 "gamma": 6, "temperature": 1.0, "run_tag": "p0_20261118",
                 "seconds": 0.5, "n_tokens": 1, "accept_rate": 0.5,
-                "proposed_tokens": 2, "accepted_tokens": 1,
+                "proposed_tokens": 2, "accepted_tokens": 1, "draft_prefix_resets": 0,
             })
     cell.write_text("".join(json.dumps(row) + "\n" for row in rows))
     identity = {

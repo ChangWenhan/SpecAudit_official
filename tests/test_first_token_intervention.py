@@ -95,6 +95,7 @@ def test_force_draft_token_bypasses_verifier_and_syncs_policy_to_forced_prefix()
 def test_force_target_top1_discards_old_draft_state_before_reproposal():
     target = FakeTarget(top1=5)
     policy = FakePolicy([[6]])
+    policy.prefix_resets = 2
     prompt = torch.tensor([[1, 2]])
 
     generated, stats = speculative_generate(
@@ -115,6 +116,7 @@ def test_force_target_top1_discards_old_draft_state_before_reproposal():
     assert stats.interventions == 1
     assert stats.proposed_tokens == 1
     assert stats.accepted_tokens == 1
+    assert stats.draft_prefix_resets == 2
 
 
 def test_unknown_opening_intervention_is_rejected():

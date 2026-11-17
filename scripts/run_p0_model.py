@@ -160,6 +160,9 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
             return False, "accept rate does not match token accounting"
         if not isinstance(row.get("n_tokens"), int) or row["n_tokens"] <= 0:
             return False, "invalid response token count"
+        resets = row.get("draft_prefix_resets", 0)
+        if not isinstance(resets, int) or resets < 0:
+            return False, "invalid draft prefix reset count"
         source = FORCED_SOURCE.get(row["mode"])
         if source is not None:
             if row.get("first_token_source") != source or row.get("interventions") != 1:
