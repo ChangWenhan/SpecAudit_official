@@ -238,8 +238,8 @@ project venv despite the recorded base-interpreter path.
   cover all nine modes with the exact dataset count, a bounded mean acceptance
   rate and positive throughput. The runner/manifest/fresh-control regression
   subset passes (`10 passed`).
-- Synced the finalized `run_p0_model.py` to s109 and s111. Its SHA-256
-  (`2775d9d0…`) matches locally and on both remote hosts. The running parents
+- Synced the finalized `run_p0_model.py` to s109 and s111. Its current SHA-256
+  (`26467127…`) matches locally and on both remote hosts. The running parents
   keep their already-imported code; the update applies only if a formal cell is
   retried later.
 - Dataset-level concurrency is used while preserving batch size 1 and the
