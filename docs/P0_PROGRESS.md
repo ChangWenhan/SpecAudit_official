@@ -30,8 +30,14 @@ Updated: 2026-11-18
   replicate. Bootstrap p-values are bounded below by `1/(B+1)`.
 - Committed `69c308d`: a resumable local E13 queue serializes both seeds'
   TAP/FlipAttack replay, all three models' IFEval generation, and final IFEval
-  scoring. It waits for the current local jobs, requires at least 18 GiB free
+  scoring. It waits for the current local jobs, requires sufficient free
   memory before each task, and stops on the first failed task.
+- Committed `6c8c62e`: temperature-0 TAP/FlipAttack replay now tries batched
+  vLLM first. The accelerated path checks the frozen answer prefix on three
+  examples per dataset before writing results and falls back to the original
+  HF implementation on any load, parity, or execution failure. The queue now
+  requires 21 GiB free before each task so vLLM's 80% memory reservation can
+  initialize safely. Static checks and 15 targeted tests pass.
 - Committed `1c7e5dd`: E13 generation now checks formal run parameters and
   per-row token accounting. The E13 judge manifest now requires exact per-mode
   counts, row temperatures, main/draft run sidecars, and hashed attack done
