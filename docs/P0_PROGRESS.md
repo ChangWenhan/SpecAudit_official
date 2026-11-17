@@ -261,6 +261,16 @@ project venv despite the recorded base-interpreter path.
   temporary root: the manifest builder froze one cell, and the dual-judge
   loader resolved 1,800 labels (900 × two judges) across 32 client threads with
   signature `821019ed…`. No judge model or service was started.
+- MiniCPM4-8B/JBB is the second completed P0 cell (`900/900`). It passed the
+  strict validator after an audited runtime-version metadata repair. Fresh
+  rank-50 control has 21/100 identical responses, 89/100 identical token
+  lengths, mean-token delta `+2.68` and mean-acceptance delta `+0.00446`, with
+  no warning. Its generation sanity is also clean: N-scan acceptance decreases
+  `0.911/0.685/0.660/0.573/0.446/0.263`, forced-target-topk accepts zero drafts
+  with mean length 160, and forced-exact acceptance is `0.247/0.266`. The
+  s109/local artifact hashes match, and the judge loader dry-run resolves 1,800
+  labels with the same 32-thread signature. The compact record is in
+  `results/p0_20261118/s109_completed/MiniCPM4_8B__jbb.validation.json`.
 - Each model/dataset uses all nine modes, `max_new=160`, seed 0, and one sample.
 - The runner validates record counts, mode coverage, duplicate keys, response
   presence, intervention sources, and intervention counts before marking a
