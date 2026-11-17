@@ -82,6 +82,22 @@ def x_value(point: dict, metric: str) -> float | None:
     raise ValueError(f"unknown cost metric: {metric}")
 
 
+def shared_ylim(grouped: dict[str, list[dict]]) -> tuple[float, float]:
+    lows = []
+    highs = []
+    for rows in grouped.values():
+        for point in rows:
+            low, high = map(float, point["asr_ci95_pct"])
+            lows.append(low)
+            highs.append(high)
+    lower = max(0.0, min(lows))
+    upper = min(100.0, max(highs))
+    if lower >= upper:
+        raise ValueError("invalid shared ASR range")
+    padding = max(2.0, 0.04 * (upper - lower))
+    return max(0.0, lower - padding), min(100.0, upper + padding)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cost", type=Path, required=True)
@@ -89,10 +105,13 @@ def main() -> None:
     args = parser.parse_args()
     payload = json.loads(args.cost.read_text())
     grouped = validate_points(payload.get("points", []))
+    y_limits = shared_ylim(grouped)
+    y_ticks = [tick for tick in (0, 20, 40, 60, 80, 100)
+               if y_limits[0] <= tick <= y_limits[1]]
     plt.rcParams.update({
         "font.family": ["DejaVu Sans", "sans-serif"], "font.size": 10.5,
         "axes.linewidth": 1.7, "axes.spines.top": False, "axes.spines.right": False,
-        "legend.frameon": False, "pdf.fonttype": 42,
+        "legend.frameon": False, "svg.fonttype": "none", "pdf.fonttype": 42,
     })
     fig, axes = plt.subplots(3, 2, figsize=(10.2, 7.4), sharex="col",
                              constrained_layout=True)
@@ -116,6 +135,8 @@ def main() -> None:
                             ecolor="#B0B0B0", elinewidth=0.7, capsize=0, alpha=0.9)
             if metric == "throughput":
                 ax.axvline(100, color="#777777", linestyle="--", linewidth=1.0)
+            ax.set_ylim(*y_limits)
+            ax.set_yticks(y_ticks)
             ax.grid(color="#D3D3D3", linewidth=0.55, alpha=0.55)
             ax.set_axisbelow(True)
             if row_index == 2:
@@ -134,6 +155,7 @@ def main() -> None:
         labels.append(family_label)
     fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, -0.045),
                ncols=6, fontsize=10)
+    fig.align_ylabels([axes[row, 0] for row in range(len(MODELS))])
     args.out.parent.mkdir(parents=True, exist_ok=True)
     for suffix in ("png", "pdf"):
         fig.savefig(args.out.with_suffix("." + suffix), dpi=600 if suffix == "png" else None,
@@ -141,6 +163,7 @@ def main() -> None:
     plt.close(fig)
     metadata = {"cost": str(args.cost), "cost_sha256": sha256_file(args.cost),
                 "points": sum(len(rows) for rows in grouped.values()),
+                "shared_ylim_pct": list(y_limits),
                 "note": "ASR intervals are Wilson; throughput normalization is same-model/same-source rank-50"}
     args.out.with_suffix(".json").write_text(json.dumps(metadata, indent=2) + "\n")
     print(f"wrote {args.out}.png/.pdf/.json")

@@ -327,6 +327,11 @@ project venv despite the recorded base-interpreter path.
 - Committed `ae92e59`: added and visually checked the Fig. 3 plotter with three
   model rows and acceptance/throughput columns. Bare/Draft correctly appear
   only in the throughput panel when draft acceptance is undefined.
+- Re-audited Fig. 3 with the scientific-figure skill on a full 54-point
+  synthetic drill. All six panels now share one dynamically bounded ASR y-axis
+  (clipped to 0–100) so model-to-model heights are directly comparable. The
+  reviewed PNG is 600 dpi and the one-page PDF embeds DejaVu Sans; the figure
+  has no clipping or legend overlap. Real output remains gated on complete P0.
 - Committed `6bcfc88`: direct P0 summary tests now pin total seconds, total
   tokens, and `tokens_per_second`, protecting the Fig. 3 throughput input from
   future regressions.
