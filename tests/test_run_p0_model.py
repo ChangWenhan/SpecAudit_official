@@ -62,3 +62,17 @@ def test_validate_p0_cell_rejects_nonzero_sample_idx(tmp_path: Path):
     ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
     assert not ok
     assert "sample_idx" in detail
+
+
+def test_validate_p0_cell_rejects_inconsistent_accept_rate(tmp_path: Path):
+    dataset = "jbb"
+    out = tmp_path / "Model__jbb.jsonl"
+    rows = p0_rows(dataset)
+    rows[0]["accepted_tokens"] = 2
+    rows[0]["proposed_tokens"] = 4
+    rows[0]["accept_rate"] = 0.7
+    out.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    write_run(out, dataset)
+    ok, detail = validate_cell(out, dataset, seed=0, max_new=160)
+    assert not ok
+    assert "accept rate" in detail

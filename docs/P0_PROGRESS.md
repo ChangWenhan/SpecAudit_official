@@ -207,8 +207,10 @@ project venv despite the recorded base-interpreter path.
   presence, intervention sources, and intervention counts before marking a
   dataset complete.
 - Tightened formal P0 completion validation to require `sample_idx=0` on every
-  row; one-sample protocol rows with another index are now rejected. The
-  runner/manifest/fresh-control regression subset passes (`8 passed`).
+  row; one-sample protocol rows with another index are now rejected. P0 rows
+  must also have at least one proposed draft token and satisfy
+  `accept_rate = accepted_tokens / proposed_tokens`. The
+  runner/manifest/fresh-control regression subset passes (`9 passed`).
 - Dataset-level concurrency is used while preserving batch size 1 and the
   original seed protocol; partially written files are archived rather than
   reused.

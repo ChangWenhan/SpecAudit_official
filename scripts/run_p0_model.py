@@ -111,9 +111,13 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
             return False, "invalid accept rate"
         proposed = row.get("proposed_tokens")
         accepted = row.get("accepted_tokens")
-        if (not isinstance(proposed, int) or proposed < 0
+        if (not isinstance(proposed, int) or proposed <= 0
                 or not isinstance(accepted, int) or not 0 <= accepted <= proposed):
             return False, "invalid token accounting"
+        if (accept_rate is None
+                or not math.isclose(accept_rate, accepted / proposed, rel_tol=1e-12,
+                                    abs_tol=1e-12)):
+            return False, "accept rate does not match token accounting"
         if not isinstance(row.get("n_tokens"), int) or row["n_tokens"] <= 0:
             return False, "invalid response token count"
         source = FORCED_SOURCE.get(row["mode"])
