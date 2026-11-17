@@ -8,6 +8,13 @@ from src.benign_benchmarks import DEFAULT_ASSETS, load_items, score
 from src.run_provenance import digest_json, sha256_file
 
 
+def validate_record_count(items: list[dict], records: list[dict]) -> None:
+    if len(records) != len(items):
+        raise ValueError(
+            f"record count {len(records)} != expected {len(items)}; "
+            "pass --limit matching the generated subset")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--assets", type=Path, default=DEFAULT_ASSETS)
@@ -17,6 +24,7 @@ def main():
     a = p.parse_args()
     items, manifest = load_items(a.assets, a.benchmark, a.limit)
     records = [json.loads(x) for x in a.answers.read_text().splitlines()]
+    validate_record_count(items, records)
     if any(x.get("dataset") != a.benchmark for x in records):
         raise ValueError("response benchmark mismatch")
     result = score(a.benchmark, items, records, a.assets)
