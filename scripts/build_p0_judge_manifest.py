@@ -28,6 +28,8 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--max-new", type=int, default=160)
     args = parser.parse_args()
+    if args.out.resolve().parent != args.root.resolve():
+        raise ValueError("manifest must be written inside the P0 result root")
     models = tuple(model.strip() for model in args.models.split(",") if model.strip())
     datasets = tuple(dataset.strip() for dataset in args.datasets.split(",") if dataset.strip())
     entries = []
