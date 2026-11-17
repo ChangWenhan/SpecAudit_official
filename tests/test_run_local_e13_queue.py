@@ -8,6 +8,7 @@ import pytest
 from scripts.run_local_e13_queue import (
     MODELS,
     build_tasks,
+    process_alive,
     require_completed_utility,
     source_paths,
 )
@@ -79,3 +80,22 @@ def test_utility_preflight_accepts_five_validated_cells(tmp_path):
     result = require_completed_utility(tmp_path, "Qwen3_4B", 1, limit=1)
     assert result["cells"] == 5
     assert result["model"] == "Qwen3_4B"
+
+
+def test_zombie_process_is_not_live(tmp_path, monkeypatch):
+    proc = tmp_path / "123"
+    proc.mkdir()
+    (proc / "stat").write_text("123 (python) Z 1 2 3\n")
+    monkeypatch.setattr("scripts.run_local_e13_queue.os.kill", lambda pid, sig: None)
+    assert process_alive(123, tmp_path) is False
+
+
+def test_live_process_state_uses_kill_fallback(tmp_path, monkeypatch):
+    proc = tmp_path / "123"
+    proc.mkdir()
+    (proc / "stat").write_text("123 (python) S 1 2 3\n")
+    called = []
+    monkeypatch.setattr(
+        "scripts.run_local_e13_queue.os.kill", lambda pid, sig: called.append((pid, sig)))
+    assert process_alive(123, tmp_path) is True
+    assert called == [(123, 0)]

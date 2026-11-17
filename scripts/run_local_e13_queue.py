@@ -121,7 +121,13 @@ def build_tasks(root: Path = ROOT) -> list[dict]:
     return tasks
 
 
-def process_alive(pid: int) -> bool:
+def process_alive(pid: int, proc_root: Path = Path("/proc")) -> bool:
+    try:
+        fields = (proc_root / str(pid) / "stat").read_text().rsplit(")", 1)[1].split()
+        if fields and fields[0] in {"Z", "X"}:
+            return False
+    except (FileNotFoundError, IndexError, OSError):
+        pass
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
