@@ -17,7 +17,7 @@ CONDITIONS = (("target", "Target"), ("draft", "Draft"),
               ("rank50", r"\textbf{Draft + rank-50}"),
               ("exact", "Draft + exact"),
               ("securesd", "Draft + SecureSD"),
-              ("tap", "TAP"), ("flipattack", "FlipAttack"))
+              ("tap", r"TAP$^{\dagger}$"), ("flipattack", "FlipAttack"))
 
 
 def atomic_text(path: Path, text: str) -> None:
@@ -65,7 +65,9 @@ def render(analysis: dict, judge: str = "gptoss") -> str:
         (r"\caption{Three-seed primary-judge ASR and IFEval utility. Each ASR cell is "
          r"the mean over seeds 0/1/2 with the observed min--max range below it. "
          r"IFEval is strict prompt-level accuracy; TAP and FlipAttack reuse the "
-         r"Target-only utility because they do not change the served model.}"),
+         r"Target-only utility because they do not change the served model. "
+         r"$^{\dagger}$Seed-0 TAP uses its legacy 150-token budget; seeds 1/2 "
+         r"use 160 tokens.}"),
         r"\label{tab:main}", r"\begin{tabular}{l cccc|cccc|cccc}", r"\toprule",
         (r"& \multicolumn{4}{c|}{Qwen3-4B} & \multicolumn{4}{c|}{Gemma-3-4B} "
          r"& \multicolumn{4}{c}{MiniCPM4-8B} \\"),
