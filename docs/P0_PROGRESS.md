@@ -77,6 +77,11 @@ Updated: 2026-11-18
   model interactions, and N* criteria.
 - `scripts/run_main_seed_model.py` prepares E13's five non-attack conditions
   per model/seed, with separate validated target-mode and draft-only artifacts.
+- `scripts/run_utility_seed_model.py` prepares the five E13 IFEval conditions
+  for seeds 1/2 and resumes from `src.run_benign_eval` partial files.
+- `scripts/replay_attack_seed.py` replays frozen TAP/FlipAttack inputs without
+  repeating the attack search; manifests preserve source hashes, temperature,
+  run seed, and per-prompt sampling seed.
 - Existing E11 frozen throughput was regenerated to a temporary directory and
   matched `results/accel_20261111/accel.json` byte-for-byte.
 - Targeted tests for the runner, judge manifest/orchestrator, hook, and analysis
