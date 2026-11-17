@@ -8,6 +8,7 @@ from scripts.score_utility_seed import (
     CONDITIONS,
     MODELS,
     parse_cell,
+    validate_file_scope,
     validate_scope,
     validate_shared_provenance,
 )
@@ -25,6 +26,16 @@ def test_validate_scope_requires_exact_model_condition_grid():
         validate_scope(cells[:-1])
     with pytest.raises(ValueError, match="unexpected"):
         validate_scope(cells[:-1] + [{"model": "Unknown", "method": "bare"}])
+
+
+def test_file_scope_is_checked_before_any_cell_is_scored():
+    paths = [Path(f"{condition}__{model}__ifeval.jsonl")
+             for model in MODELS for condition in CONDITIONS]
+    validate_file_scope(paths)
+    with pytest.raises(ValueError, match="missing"):
+        validate_file_scope(paths[:-1])
+    with pytest.raises(ValueError, match="unexpected"):
+        validate_file_scope(paths + [Path("other__result__ifeval.jsonl")])
 
 
 def test_shared_provenance_must_match_across_all_conditions():

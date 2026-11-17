@@ -54,7 +54,9 @@ Updated: 2026-11-18
   a grid assembled from different code snapshots even when each cell is
   individually valid. Formal utility scoring now requires exactly 200 answers,
   validates the IFEval benchmark identity, and atomically replaces the summary
-  after fsync. Targeted provenance tests pass (`4 passed`).
+  after fsync. The exact 15-file grid is checked before any scoring process can
+  start, preventing partial-grid CPU work. Targeted provenance tests pass
+  (`5 passed`).
 - Committed `1c7e5dd`: E13 generation now checks formal run parameters and
   per-row token accounting. The E13 judge manifest now requires exact per-mode
   counts, row temperatures, main/draft run sidecars, and hashed attack done

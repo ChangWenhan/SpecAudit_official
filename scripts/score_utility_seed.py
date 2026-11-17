@@ -67,6 +67,18 @@ def validate_scope(cells: list[dict]) -> None:
         raise ValueError(f"expected {len(expected)} utility cells, found {len(cells)}")
 
 
+def validate_file_scope(paths: list[Path]) -> None:
+    expected = {
+        f"{condition}__{model}__ifeval.jsonl"
+        for model in MODELS for condition in CONDITIONS
+    }
+    actual = {path.name for path in paths}
+    if actual != expected:
+        raise ValueError(
+            f"utility file scope mismatch: missing={sorted(expected - actual)}, "
+            f"unexpected={sorted(actual - expected)}")
+
+
 def validate_shared_provenance(identities: dict[str, dict[str, dict]]) -> None:
     for model, by_condition in identities.items():
         if set(by_condition) != set(CONDITIONS):
@@ -87,9 +99,11 @@ def main() -> None:
     parser.add_argument("--assets", type=Path, default=Path("data/benign_benchmarks"))
     args = parser.parse_args()
     directory = args.root.resolve() / f"seed_{args.seed}"
+    paths = sorted(directory.glob("*__ifeval.jsonl"))
+    validate_file_scope(paths)
     cells = []
     identities: dict[str, dict[str, dict]] = {}
-    for path in sorted(directory.glob("*__ifeval.jsonl")):
+    for path in paths:
         slug, model = parse_cell(path)
         if model not in MODELS or slug not in CONDITIONS:
             raise ValueError(f"unexpected utility identity: {path.name}")
