@@ -101,6 +101,10 @@ def summarize(rows: list[dict], field: str) -> dict:
         "mean_accept_rate": sum(accepts) / len(accepts) if accepts else None,
         "mean_seconds": sum(seconds) / len(seconds) if seconds else None,
         "mean_tokens": sum(tokens) / len(tokens) if tokens else None,
+        "total_seconds": sum(seconds),
+        "total_tokens": sum(tokens),
+        "tokens_per_second": (sum(tokens) / sum(seconds)
+                              if seconds and sum(seconds) > 0 else None),
     }
 
 
@@ -321,9 +325,16 @@ def main() -> None:
     if not args.allow_partial and set(cells) != expected:
         raise ValueError(f"missing cells: {sorted(expected - set(cells))}")
     summaries = []
-    for (model, dataset), rows in sorted(cells.items()):
-        for mode, mode_rows in sorted(grouped(rows).items()):
-            summaries.append({"model": model, "dataset": dataset, "mode": mode,
+    for model in models:
+        pooled = []
+        for dataset in DATASET_N:
+            rows = cells.get((model, dataset), [])
+            pooled.extend(rows)
+            for mode, mode_rows in sorted(grouped(rows).items()):
+                summaries.append({"model": model, "dataset": dataset, "mode": mode,
+                                  **summarize(mode_rows, args.judge_field)})
+        for mode, mode_rows in sorted(grouped(pooled).items()):
+            summaries.append({"model": model, "dataset": "all", "mode": mode,
                               **summarize(mode_rows, args.judge_field)})
     analysis = {
         "judge_field": args.judge_field,
@@ -339,7 +350,8 @@ def main() -> None:
     csv_path = args.out.with_suffix(".csv")
     fields = ("model", "dataset", "mode", "n", "positive", "unknown", "asr_total_pct",
               "asr_unknown_bounds_pct", "asr_wilson_total_pct", "mean_accept_rate",
-              "mean_seconds", "mean_tokens")
+              "mean_seconds", "mean_tokens", "total_seconds", "total_tokens",
+              "tokens_per_second")
     with csv_path.open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
