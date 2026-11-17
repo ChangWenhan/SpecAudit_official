@@ -288,6 +288,12 @@ project venv despite the recorded base-interpreter path.
   Floor 1e-2/1e-3 rules. The complete frozen-rule throughput is in
   `results/cost_safety_20261118/frozen_rules/`; typical rules retain 36%–67%
   of rank-50 throughput and floor rules retain 42%–72%.
+- Revalidated the completed E11 input on 2026-11-18: the frozen table has all
+  36 model × rule points at 933 answers each, all three rank-50 anchors are
+  100%, and the nine originally frozen rules match `accel.json` field for
+  field. The reviewed input hash is
+  `054a1066982cf3958b8ee70d84ae050984d59238fcd8a1cb7cd7f3e168d7ecc7`.
+  Fig. 3 remains gated on the 18 P0 N-sweep points.
 - Committed `d56c14e`: P0 analysis now reports total seconds/tokens and pooled
   per-model mode summaries, providing exact same-run throughput inputs.
 - Committed `e9a84b7`: added the Fig. 3 cost-safety point aggregator. Frozen
