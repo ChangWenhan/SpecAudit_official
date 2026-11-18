@@ -517,6 +517,10 @@ project venv despite the recorded base-interpreter path.
   rebuild validated 135 cells and 486 comparisons while preserving the
   authoritative `evidence.json` hash `4a6de6ca...` exactly. The complete suite
   passes `162 passed, 1 skipped, 5 subtests passed`.
+- The final Table 2, K-sweep and probability-rule fragments were compiled
+  together in the actual IEEEtran journal class. The two-page bundle has zero
+  overfull boxes and zero undefined references, and the rendered page was
+  visually checked for row, caption and column collisions.
 - Committed `d56c14e`: P0 analysis now reports total seconds/tokens and pooled
   per-model mode summaries, providing exact same-run throughput inputs.
 - Committed `e9a84b7`: added the Fig. 3 cost-safety point aggregator. Frozen
