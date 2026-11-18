@@ -254,6 +254,12 @@ project venv despite the recorded base-interpreter path.
   validated prefix (`sha256 827c7b9d...`), and the corrected run resumed at
   row 2252. The compact failure record is
   `results/p0_20261118/s111_completed/Gemma_3_4B__strongreject.failure.json`.
+- Gemma3-4B/AdvBench exposed the same boundary failure at `3700/4680`, after
+  all six initial modes and 60 rows of `force_target_topk_honest` completed.
+  The original partial is retained and the byte-identical prefix
+  (`sha256 c172eeb4...`) was copied into the retry root; the corrected run
+  resumed at row 3701. The compact failure record is
+  `results/p0_20261118/s111_completed/Gemma_3_4B__advbench.failure.json`.
 - Snapshot at 2026-11-18 12:42 Asia/Shanghai: MiniCPM `6,266/8,397`
   valid records (JBB 900 complete, AdvBench 3,497, StrongREJECT 1,869), Gemma
   `5,590/8,397` valid records (retry JBB 827, AdvBench 2,686, StrongREJECT
