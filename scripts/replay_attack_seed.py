@@ -124,13 +124,28 @@ def generate_batch(
     if temperature > 0 and len(prompts) != 1:
         raise ValueError("sampled replay does not support batching")
     tokenizer.padding_side = "left"
-    encoded = tokenizer(prompts, padding=len(prompts) > 1, return_tensors="pt")
+    needs_padding = len(prompts) > 1
+    pad_token_id = getattr(tokenizer, "pad_token_id", None)
+    if needs_padding and pad_token_id is None:
+        eos_token_id = getattr(tokenizer, "eos_token_id", None)
+        eos_token = getattr(tokenizer, "eos_token", None)
+        if eos_token_id is None:
+            raise ValueError("batched replay requires a padding or EOS token")
+        if eos_token is not None:
+            tokenizer.pad_token = eos_token
+            pad_token_id = getattr(tokenizer, "pad_token_id", None)
+        else:
+            tokenizer.pad_token_id = eos_token_id
+            pad_token_id = eos_token_id
+    if pad_token_id is None:
+        pad_token_id = getattr(tokenizer, "eos_token_id", None)
+    encoded = tokenizer(prompts, padding=needs_padding, return_tensors="pt")
     input_ids = encoded.input_ids.to(model.device)
     kwargs = {
         "input_ids": input_ids,
         "attention_mask": encoded.attention_mask.to(model.device),
         "max_new_tokens": max_new,
-        "pad_token_id": tokenizer.eos_token_id,
+        "pad_token_id": pad_token_id,
     }
     if model_needs_no_cache(model):
         kwargs["use_cache"] = False

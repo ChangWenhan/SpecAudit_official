@@ -98,6 +98,36 @@ def test_generate_batch_trims_per_sequence_eos_and_marks_seconds():
     assert all(row["seconds"] >= 0 for row in rows)
 
 
+def test_generate_batch_uses_eos_when_padding_token_is_missing():
+    class Tokenizer:
+        eos_token_id = 2
+        padding_side = "right"
+
+        def __call__(self, prompts, padding, return_tensors):
+            assert self.padding_side == "left"
+            assert self.pad_token_id == self.eos_token_id
+            return SimpleNamespace(
+                input_ids=torch.tensor([[0, 1], [0, 1]]),
+                attention_mask=torch.ones(2, 2, dtype=torch.long),
+            )
+
+        def decode(self, token_ids, skip_special_tokens):
+            return "answer"
+
+    class Model:
+        device = "cpu"
+        config = SimpleNamespace(model_type="plain")
+
+        def generate(self, **kwargs):
+            assert kwargs["pad_token_id"] == 2
+            return torch.tensor([[0, 1, 2], [0, 1, 2]])
+
+    rows = generate_batch(
+        Model(), Tokenizer(), ["a", "b"], max_new=1, temperature=0.0,
+        sampling_seeds=[10, 11], eos_ids={2})
+    assert [row["token_ids"] for row in rows] == [[2], [2]]
+
+
 def test_generate_batch_rejects_sampled_batch():
     with pytest.raises(ValueError, match="sampled replay"):
         generate_batch(
