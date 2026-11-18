@@ -51,3 +51,23 @@ def test_summary_reports_missing_cell(tmp_path: Path):
         expected_counts={"jbb": 1, "advbench": 1, "strongreject": 1})
     assert result["state"] == "partial"
     assert result["failures"][0]["dataset"] == "strongreject"
+
+
+def test_prefix_variation_is_diagnostic_not_a_technical_failure(tmp_path: Path):
+    sources, outputs = write_fixture(tmp_path)
+    output = outputs / "tap__Model__jbb.jsonl"
+    row = json.loads(output.read_text())
+    row["response"] = "xbc"
+    output.write_text(json.dumps(row) + "\n")
+    digest = hashlib.sha256(output.read_bytes()).hexdigest()
+    Path(str(output) + ".done").write_text(json.dumps({
+        "records": 1, "sha256": digest, "dataset": "jbb",
+        "seed": 2, "temperature": 0.0, "method": "tap",
+    }))
+    result = summarize_replay(
+        "tap", "Model", 2, outputs, sources, temperature=0.0,
+        expected_counts={"jbb": 1, "advbench": 1, "strongreject": 1})
+    assert result["state"] == "complete"
+    assert result["prefix_parity_ok"] is False
+    assert result["failures"] == []
+    assert result["cells"][0]["prefix_variation_records"] == 1

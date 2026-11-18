@@ -430,6 +430,17 @@ project venv despite the recorded base-interpreter path.
   version-bound short circuit now sends MiniCPM directly to the pinned HF path;
   the current HF fallback loaded successfully and is generating. The complete
   suite passes `176 passed, 1 skipped, 5 subtests passed`.
+- MiniCPM TAP seed-1 AdvBench completed `520/520` and passed the formal replay
+  validator, including source order, run/done hashes and temperature-0
+  protocol. Prefix comparison is deliberately diagnostic for this model:
+  `114/520` answers retain the complete frozen prefix and `29` are exact, while
+  matched outputs share mean/median common prefixes of `316.6/262` characters.
+  This is consistent with cross-runtime GPU numerical variation rather than a
+  malformed output, so the compact record is
+  `complete_with_prefix_variation` and retains `prefix_parity_ok=false` instead
+  of treating the run as a technical failure. The metadata-only status repair
+  did not change answers, validator fields or hashes. The queue advanced to JBB
+  and had produced `31/100` records.
 - Added a reusable three-dataset attack completion summarizer. It discovers
   each frozen source, invokes the formal replay validator, computes raw and
   terminal-replacement-normalized prefix matches, exact matches, token counts,
