@@ -403,6 +403,14 @@ project venv despite the recorded base-interpreter path.
   pinned `safety-scale` environment (`vLLM 0.8.5`, `transformers 4.51.3`, torch
   `2.6.0+cu124`); focused replay tests and Ruff pass. The complete pinned
   suite now passes `164 passed, 1 skipped, 5 subtests passed`.
+- `run_eval` now resumes the exact ordered prefix it atomically writes instead
+  of requiring the P0/E13 parent to discard it. Recovery checks mode, source
+  ID, prompt text, sample index, seed, target/draft paths, decoding parameters,
+  run tag and imported transformers version. Any mismatch is moved to a stamped
+  `_partial/` audit directory before a clean start, while an aligned complete
+  file can still finish its missing summary/manifest. The helper was validated
+  against all 900 real Qwen/JBB P0 records; targeted runner/resume tests pass
+  (`18 passed`) and Ruff passes on the changed files.
 - TAP replay validation caught a chat-template mismatch: the first attempt did
   not pass `enable_thinking=False`, so none of 84 answers matched the frozen
   seed-0 response. Those outputs were quarantined, the matcher was fixed, and a

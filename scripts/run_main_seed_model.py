@@ -170,8 +170,6 @@ def main() -> int:
             if ok:
                 status["cells"][f"{dataset}/{kind}"] = {"state": "complete", "detail": detail}
                 continue
-            if out.exists():
-                archive_partial(out, detail)
             command = [args.python, "-u", "-m", "src.run_eval",
                        "--target", target, "--draft", str(Path(args.draft).resolve()),
                        "--dataset", dataset, "--n", str(n), "--modes", ",".join(modes),

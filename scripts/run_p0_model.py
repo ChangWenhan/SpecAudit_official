@@ -251,8 +251,6 @@ def main() -> int:
                 atomic_json(status_path, status)
                 print(f"{args.model} {dataset}: already complete")
                 continue
-            if out.exists():
-                archive_partial(out, detail)
             status["cells"][dataset] = {"state": "queued", "detail": detail, "updated_at": now()}
             atomic_json(status_path, status)
             command = [args.python, "-u", "-m", "src.run_eval",

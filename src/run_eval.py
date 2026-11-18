@@ -267,6 +267,76 @@ def parse_mode_spec(spec: str, args) -> tuple[str, float, float]:
     return spec, args.eps, args.delta
 
 
+def archive_nonresumable_output(out_path: str, reason: str) -> Path:
+    path = Path(out_path)
+    bucket = path.parent / "_partial"
+    bucket.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    for artifact in (path, path.with_suffix(".run.json"), path.with_suffix(".summary.json")):
+        if artifact.exists():
+            artifact.rename(bucket / f"{artifact.name}.{stamp}")
+    (bucket / f"{path.name}.{stamp}.reason.txt").write_text(reason + "\n")
+    return bucket
+
+
+def load_resumable_prefix(
+    out_path: str,
+    modes: list[str],
+    prompts: list[dict],
+    args,
+    target_path: str,
+    draft_path: str,
+) -> list[dict]:
+    """Load only the exact ordered prefix written by the same formal run."""
+    path = Path(out_path)
+    if not path.is_file():
+        return []
+    records = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    expected_total = len(modes) * len(prompts) * args.samples
+    if len(records) > expected_total:
+        raise ValueError(
+            f"resume file has {len(records)} records, above expected {expected_total}")
+    position = 0
+    for mode_spec in modes:
+        base_mode, _, _ = parse_mode_spec(mode_spec, args)
+        if base_mode not in MODES:
+            raise ValueError(f"unknown mode {base_mode}")
+        verifier_name, policy_name = MODES[base_mode]
+        for item in prompts:
+            for sample_idx in range(args.samples):
+                if position >= len(records):
+                    return records
+                record = records[position]
+                expected = {
+                    "mode": mode_spec,
+                    "sample_idx": sample_idx,
+                    "verifier": verifier_name,
+                    "policy": policy_name,
+                    "first_token_source": FIRST_TOKEN_SOURCE.get(base_mode),
+                    "dataset": args.dataset,
+                    "subset": args.subset,
+                    "target": target_path,
+                    "draft": draft_path,
+                    "seed": args.seed,
+                    "max_new": args.max_new,
+                    "run_tag": args.run_tag,
+                    "transformers_version": transformers.__version__,
+                    "id": str(item["id"]),
+                    "prompt": item["prompt"],
+                    "temperature": args.temperature,
+                    "gamma": args.gamma,
+                }
+                mismatch = [key for key, value in expected.items()
+                            if record.get(key) != value]
+                if mismatch:
+                    raise ValueError(
+                        f"resume mismatch at record {position}: {', '.join(mismatch)}")
+                if not isinstance(record.get("response"), str):
+                    raise ValueError(f"resume record {position} has no text response")
+                position += 1
+    return records
+
+
 def main():
     args = parse_args()
     started_at = datetime.now().astimezone().isoformat(timespec="seconds")
@@ -281,6 +351,16 @@ def main():
         if args.split else load_prompts(args.dataset, args.n, args.seed, args.subset)
     )
     modes = [m.strip() for m in args.modes.split(",") if m.strip()]
+    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
+    try:
+        records: List[Dict] = load_resumable_prefix(
+            args.out, modes, prompts, args, target_path, draft_path)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        bucket = archive_nonresumable_output(args.out, f"non-resumable output: {exc}")
+        print(f"archived non-resumable output to {bucket}: {exc}", flush=True)
+        records = []
+    if records:
+        print(f"resuming {args.out} after {len(records)} validated records", flush=True)
     args.run_identity = generation_identity(
         target=args.target, draft=args.draft, draft_alt=args.draft_alt,
         dataset=args.dataset, modes=modes, prompts=prompts, gamma=args.gamma,
@@ -315,9 +395,9 @@ def main():
 
     guard = Qwen3Guard(args.guard, args.device) if args.guard else None
 
-    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
-    records: List[Dict] = []
     t_start = time.time()
+    resumed = len(records)
+    job_index = 0
 
     for mode_spec in modes:
         base_mode, eps, delta = parse_mode_spec(mode_spec, args)
@@ -330,6 +410,9 @@ def main():
             for s_idx in range(args.samples)
         ]
         for job_i, (idx, item, s_idx) in enumerate(jobs):
+            if job_index < resumed:
+                job_index += 1
+                continue
             seed = args.seed * 100000 + idx * 100 + s_idx
             text = format_chat_prompt(tokenizer, item["prompt"])
             prompt_ids = tokenizer(text, return_tensors="pt").input_ids.to(args.device)
@@ -477,6 +560,12 @@ def main():
             )
             # incremental dump
             write_jsonl_atomic(args.out, records)
+            job_index += 1
+
+    expected_records = len(modes) * len(prompts) * args.samples
+    if len(records) != expected_records:
+        raise RuntimeError(
+            f"record count {len(records)} != expected {expected_records} after generation")
 
     if guard is not None:
         print("judging with guard model...")
