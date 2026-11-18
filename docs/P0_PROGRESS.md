@@ -483,6 +483,11 @@ project venv despite the recorded base-interpreter path.
   keeps its already-imported serial path; future attack jobs use the checked
   batch path. Full tests pass
   `180 passed, 1 skipped, 5 subtests passed`.
+- After changing batch equivalence from frozen-text to same-model serial
+  token equivalence, the complete suite passes
+  `181 passed, 1 skipped, 5 subtests passed`. This keeps batching valid across
+  hardware/runtime numerical drift without treating those differences as a
+  technical failure.
 - The existing Gemma TAP parity-failure record predated the cache fields. An
   audited metadata-only repair attached the three exact frozen source hashes,
   target, decode fields and `safety-scale` runtime identity without changing
