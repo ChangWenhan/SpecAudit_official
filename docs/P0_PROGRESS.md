@@ -453,6 +453,15 @@ project venv despite the recorded base-interpreter path.
   pinned `safety-scale` environment (`vLLM 0.8.5`, `transformers 4.51.3`, torch
   `2.6.0+cu124`); focused replay tests and Ruff pass. The complete pinned
   suite now passes `164 passed, 1 skipped, 5 subtests passed`.
+- The accelerated replay wrapper now passes a default HF batch size of four
+  when vLLM is unavailable. Every generated batch is checked against all frozen
+  seed-0 answers before it can be written; one mismatch or a CUDA OOM discards
+  that batch and retries it serially. EOS/padding are trimmed per sequence and
+  per-answer elapsed time is the batch wall time divided by batch size, so
+  later throughput aggregation remains comparable. The running MiniCPM process
+  keeps its already-imported serial path; future attack jobs use the checked
+  batch path. Full tests pass
+  `180 passed, 1 skipped, 5 subtests passed`.
 - The existing Gemma TAP parity-failure record predated the cache fields. An
   audited metadata-only repair attached the three exact frozen source hashes,
   target, decode fields and `safety-scale` runtime identity without changing

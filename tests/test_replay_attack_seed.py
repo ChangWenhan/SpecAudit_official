@@ -3,11 +3,15 @@ from __future__ import annotations
 import json
 import hashlib
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
+import torch
 
 from scripts.replay_attack_seed import (
     build_messages,
+    generate_batch,
+    normalized_prefix_match,
     recover_partial,
     render_prompt,
     validate_output,
@@ -59,3 +63,48 @@ def test_recover_partial_requires_source_alignment(tmp_path: Path):
     with pytest.raises(ValueError, match="source row"):
         recover_partial(path, rows, seed=2, temperature=0.0, method="tap",
                         dataset="jbb")
+
+
+def test_generate_batch_trims_per_sequence_eos_and_marks_seconds():
+    class Tokenizer:
+        eos_token_id = 2
+        padding_side = "right"
+
+        def __call__(self, prompts, padding, return_tensors):
+            assert prompts == ["a", "b"] and padding and return_tensors == "pt"
+            return SimpleNamespace(
+                input_ids=torch.tensor([[0, 1], [0, 1]]),
+                attention_mask=torch.ones(2, 2, dtype=torch.long),
+            )
+
+        def decode(self, token_ids, skip_special_tokens):
+            assert skip_special_tokens
+            return " ".join(map(str, token_ids))
+
+    class Model:
+        device = "cpu"
+        config = SimpleNamespace(model_type="plain")
+
+        def generate(self, **kwargs):
+            assert kwargs["attention_mask"].shape == (2, 2)
+            assert kwargs["do_sample"] is False
+            return torch.tensor([[0, 1, 4, 2, 2], [0, 1, 5, 6, 2]])
+
+    rows = generate_batch(
+        Model(), Tokenizer(), ["a", "b"], max_new=3, temperature=0.0,
+        sampling_seeds=[10, 11], eos_ids={2})
+    assert rows[0]["token_ids"] == [4, 2]
+    assert rows[1]["token_ids"] == [5, 6, 2]
+    assert all(row["seconds"] >= 0 for row in rows)
+
+
+def test_generate_batch_rejects_sampled_batch():
+    with pytest.raises(ValueError, match="sampled replay"):
+        generate_batch(
+            None, None, ["a", "b"], max_new=3, temperature=1.0,
+            sampling_seeds=[10, 11], eos_ids={2})
+
+
+def test_normalized_prefix_match_handles_terminal_replacement():
+    assert normalized_prefix_match("完整回答", "完整回�")
+    assert not normalized_prefix_match("abc", "abd")

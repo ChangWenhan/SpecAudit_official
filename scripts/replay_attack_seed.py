@@ -108,6 +108,63 @@ def recover_partial(
     return records
 
 
+def generate_batch(
+    model,
+    tokenizer,
+    prompts: list[str],
+    *,
+    max_new: int,
+    temperature: float,
+    sampling_seeds: list[int],
+    eos_ids: set[int],
+) -> list[dict]:
+    """Generate greedy batches while preserving per-prompt seed metadata."""
+    if len(prompts) != len(sampling_seeds):
+        raise ValueError("prompt/seed count mismatch")
+    if temperature > 0 and len(prompts) != 1:
+        raise ValueError("sampled replay does not support batching")
+    tokenizer.padding_side = "left"
+    encoded = tokenizer(prompts, padding=len(prompts) > 1, return_tensors="pt")
+    input_ids = encoded.input_ids.to(model.device)
+    kwargs = {
+        "input_ids": input_ids,
+        "attention_mask": encoded.attention_mask.to(model.device),
+        "max_new_tokens": max_new,
+        "pad_token_id": tokenizer.eos_token_id,
+    }
+    if model_needs_no_cache(model):
+        kwargs["use_cache"] = False
+    if temperature > 0:
+        torch.manual_seed(sampling_seeds[0])
+        kwargs.update(do_sample=True, temperature=temperature, top_p=1.0, top_k=0)
+    else:
+        kwargs["do_sample"] = False
+    started = time.time()
+    with torch.no_grad():
+        generated = model.generate(**kwargs)
+    elapsed = time.time() - started
+    results = []
+    prompt_width = input_ids.shape[1]
+    for sequence in generated:
+        token_ids = sequence[prompt_width:].tolist()
+        for stop_index, token_id in enumerate(token_ids):
+            if token_id in eos_ids:
+                token_ids = token_ids[:stop_index + 1]
+                break
+        results.append({
+            "token_ids": token_ids,
+            "response": tokenizer.decode(token_ids, skip_special_tokens=True),
+            "seconds": elapsed / len(prompts),
+        })
+    return results
+
+
+def normalized_prefix_match(generated: str, frozen: str) -> bool:
+    generated = generated.rstrip("\ufffd")
+    frozen = frozen.rstrip("\ufffd")
+    return bool(generated and frozen and generated.startswith(frozen))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--method", choices=tuple(MODES), required=True)
@@ -121,10 +178,14 @@ def main() -> None:
     parser.add_argument("--limit", type=int,
                         help="SMOKE ONLY: replay the first N source rows per dataset")
     parser.add_argument("--device", default="cuda")
+    parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
-    if args.seed < 1 or args.max_new < 1 or args.temperature < 0:
-        raise ValueError("invalid seed, max-new, or temperature")
+    if (args.seed < 1 or args.max_new < 1 or args.temperature < 0
+            or args.batch_size < 1):
+        raise ValueError("invalid seed, max-new, batch size, or temperature")
+    if args.batch_size > 1 and args.temperature > 0:
+        raise ValueError("batching requires temperature 0")
     if args.limit is not None and args.limit < 1:
         raise ValueError("limit must be positive")
     if args.limit is not None:
@@ -189,40 +250,63 @@ def main() -> None:
         if resumed:
             print(f"{args.method} {args.model} {dataset}: resuming at {resumed + 1}/{len(rows)}",
                   flush=True)
-        for index, source_record in enumerate(rows):
-            if index < resumed:
+        cursor = resumed
+        effective_batch = args.batch_size
+        while cursor < len(rows):
+            stop = min(cursor + effective_batch, len(rows))
+            batch_sources = rows[cursor:stop]
+            prompts = [render_prompt(tokenizer, args.method, row) for row in batch_sources]
+            sampling_seeds = [args.seed * 1_000_000 + index
+                              for index in range(cursor, stop)]
+            try:
+                generated = generate_batch(
+                    model, tokenizer, prompts, max_new=args.max_new,
+                    temperature=args.temperature, sampling_seeds=sampling_seeds,
+                    eos_ids=eos_ids)
+            except torch.cuda.OutOfMemoryError:
+                if effective_batch == 1:
+                    raise
+                print(
+                    f"{args.method} {args.model} {dataset}: batch OOM at {cursor}; "
+                    f"retrying serially", flush=True)
+                torch.cuda.empty_cache()
+                effective_batch = 1
                 continue
-            prompt = render_prompt(tokenizer, args.method, source_record)
-            ids_tensor = tokenizer(prompt, return_tensors="pt").input_ids.to(args.device)
-            sampling_seed = args.seed * 1_000_000 + index
-            torch.manual_seed(sampling_seed)
-            kwargs = {"input_ids": ids_tensor,
-                      "max_new_tokens": args.max_new,
-                      "pad_token_id": tokenizer.eos_token_id}
-            if model_needs_no_cache(model):
-                kwargs["use_cache"] = False
-            if args.temperature > 0:
-                kwargs.update(do_sample=True, temperature=args.temperature, top_p=1.0, top_k=0)
-            else:
-                kwargs.update(do_sample=False)
-            started = time.time()
-            with torch.no_grad():
-                generated = model.generate(**kwargs)
-            token_ids = generated[0, ids_tensor.shape[1]:].tolist()
-            records.append({
-                "method": args.method, "mode": MODES[args.method], "dataset": dataset,
-                "id": str(source_record["id"]), "prompt": source_record.get("prompt"),
-                "attack_prompt": source_record["attack_prompt"],
-                "attack_system": source_record.get("attack_system"),
-                "attack_user": source_record.get("attack_user"),
-                "response": tokenizer.decode(token_ids, skip_special_tokens=True),
-                "sample_idx": 0, "seed": args.seed, "sampling_seed": sampling_seed,
-                "target": str(Path(args.target).resolve()), "temperature": args.temperature,
-                "max_new": args.max_new, "n_tokens": len(token_ids),
-                "seconds": round(time.time() - started, 3),
-            })
+            parity = [
+                normalized_prefix_match(item["response"], source["response"])
+                for item, source in zip(generated, batch_sources, strict=True)
+            ]
+            if not all(parity):
+                if effective_batch > 1:
+                    print(
+                        f"{args.method} {args.model} {dataset}: batched prefix parity failed "
+                        f"at {cursor}; retrying serially", flush=True)
+                    effective_batch = 1
+                    continue
+                failed = [cursor + offset for offset, matched in enumerate(parity)
+                          if not matched]
+                raise ValueError(
+                    f"serial prefix parity failed for {dataset} rows {failed[:5]}")
+            for offset, (source_record, item, sampling_seed) in enumerate(
+                    zip(batch_sources, generated, sampling_seeds, strict=True)):
+                token_ids = item["token_ids"]
+                records.append({
+                    "method": args.method, "mode": MODES[args.method], "dataset": dataset,
+                    "id": str(source_record["id"]), "prompt": source_record.get("prompt"),
+                    "attack_prompt": source_record["attack_prompt"],
+                    "attack_system": source_record.get("attack_system"),
+                    "attack_user": source_record.get("attack_user"),
+                    "response": item["response"],
+                    "sample_idx": 0, "seed": args.seed, "sampling_seed": sampling_seed,
+                    "target": str(Path(args.target).resolve()), "temperature": args.temperature,
+                    "max_new": args.max_new, "n_tokens": len(token_ids),
+                    "seconds": round(item["seconds"], 3),
+                    "replay_batch_size": effective_batch,
+                })
+                print(f"{args.method} {args.model} {dataset} {cursor + offset + 1}/{len(rows)}",
+                      flush=True)
             write_jsonl_atomic(str(out), records)
-            print(f"{args.method} {args.model} {dataset} {index + 1}/{len(rows)}", flush=True)
+            cursor = stop
         write_jsonl_atomic(str(out), records)
         manifest = {"method": args.method, "model": args.model, "target": str(Path(args.target).resolve()),
                     "seed": args.seed, "temperature": args.temperature, "max_new": args.max_new,
