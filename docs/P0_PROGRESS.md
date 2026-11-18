@@ -428,7 +428,8 @@ project venv despite the recorded base-interpreter path.
   incompatible in the local `vLLM 0.8.5` environment
   (`Phi3LongRoPEScaledRotaryEmbedding._compute_cos_sin_cache` signature), so a
   version-bound short circuit now sends MiniCPM directly to the pinned HF path;
-  the current HF fallback loaded successfully and is generating.
+  the current HF fallback loaded successfully and is generating. The complete
+  suite passes `176 passed, 1 skipped, 5 subtests passed`.
 - Added a reusable three-dataset attack completion summarizer. It discovers
   each frozen source, invokes the formal replay validator, computes raw and
   terminal-replacement-normalized prefix matches, exact matches, token counts,
