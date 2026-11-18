@@ -145,11 +145,12 @@ Updated: 2026-11-18
   proposal/accepted/intervention accounting match the declared semantics.
   Forced-token, EOS-stop, and verifier regressions pass (`10 passed`).
 - The seven generation-critical `src/` files currently running on s109 and
-  s111 have byte-identical SHA-256 hashes to the local source of truth. The
-  remote `scripts/run_p0_model.py` hash differs only because stricter
-  post-run validation was added locally after launch; the running parent has
-  already imported its earlier validator, so every returned cell will still be
-  revalidated locally before manifest creation.
+  s111 started from byte-identical generation code. The current parents still
+  run their already-imported snapshots; the on-disk `src/run_eval.py`,
+  `scripts/run_p0_model.py` and `scripts/run_main_seed_model.py` now match the
+  local resumable source hashes exactly on both hosts. Any future retry loads
+  those reviewed files, and every returned completed cell is revalidated
+  locally before manifest creation.
 - The stricter P0 validator/analyzer suite passes (`6 passed`) and Ruff passes
   on the changed files. The complete suite was split by environment: core CPU
   `110 passed, 5 subtests passed`, IFEval `7 passed`, and loopback judge pool
