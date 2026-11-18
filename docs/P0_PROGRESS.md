@@ -526,7 +526,8 @@ project venv despite the recorded base-interpreter path.
   records that the failed 760-row primary prefix was overridden, and reports
   mode-level rows plus total valid/expected counts. The A100 and Ada reports at
   10:20 show `5,180/8,397` and `10,835/16,794` valid rows respectively, with no
-  unreadable JSONL records.
+  unreadable JSONL records. The complete suite passes
+  `169 passed, 1 skipped, 5 subtests passed`.
 - Committed `d56c14e`: P0 analysis now reports total seconds/tokens and pooled
   per-model mode summaries, providing exact same-run throughput inputs.
 - Committed `e9a84b7`: added the Fig. 3 cost-safety point aggregator. Frozen
