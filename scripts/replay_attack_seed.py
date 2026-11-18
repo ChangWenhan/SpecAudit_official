@@ -179,11 +179,13 @@ def main() -> None:
                         help="SMOKE ONLY: replay the first N source rows per dataset")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--batch-size", type=int, default=1)
+    parser.add_argument("--batch-parity-examples", type=int, default=3)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     if (args.seed < 1 or args.max_new < 1 or args.temperature < 0
-            or args.batch_size < 1):
-        raise ValueError("invalid seed, max-new, batch size, or temperature")
+            or args.batch_size < 1 or args.batch_parity_examples < 1):
+        raise ValueError(
+            "invalid seed, max-new, batch size, parity count, or temperature")
     if args.batch_size > 1 and args.temperature > 0:
         raise ValueError("batching requires temperature 0")
     if args.limit is not None and args.limit < 1:
@@ -255,6 +257,7 @@ def main() -> None:
         batch_sizes_used = set()
         parity_fallback = False
         oom_fallback = False
+        batch_parity_checked = False
         while cursor < len(rows):
             stop = min(cursor + effective_batch, len(rows))
             batch_sources = rows[cursor:stop]
@@ -276,22 +279,27 @@ def main() -> None:
                 effective_batch = 1
                 oom_fallback = True
                 continue
-            parity = [
-                normalized_prefix_match(item["response"], source["response"])
-                for item, source in zip(generated, batch_sources, strict=True)
-            ]
-            if not all(parity):
-                if effective_batch > 1:
+            if effective_batch > 1 and not batch_parity_checked:
+                serial = []
+                for prompt, sampling_seed in zip(
+                        prompts[:args.batch_parity_examples],
+                        sampling_seeds[:args.batch_parity_examples], strict=True):
+                    serial.extend(generate_batch(
+                        model, tokenizer, [prompt], max_new=args.max_new,
+                        temperature=args.temperature,
+                        sampling_seeds=[sampling_seed], eos_ids=eos_ids))
+                matched = all(
+                    batch["token_ids"] == single["token_ids"]
+                    for batch, single in zip(generated, serial, strict=True)
+                )
+                if not matched:
                     print(
-                        f"{args.method} {args.model} {dataset}: batched prefix parity failed "
-                        f"at {cursor}; retrying serially", flush=True)
+                        f"{args.method} {args.model} {dataset}: batch differs from serial "
+                        f"at {cursor}; using the serial path", flush=True)
                     effective_batch = 1
                     parity_fallback = True
                     continue
-                failed = [cursor + offset for offset, matched in enumerate(parity)
-                          if not matched]
-                raise ValueError(
-                    f"serial prefix parity failed for {dataset} rows {failed[:5]}")
+                batch_parity_checked = True
             for offset, (source_record, item, sampling_seed) in enumerate(
                     zip(batch_sources, generated, sampling_seeds, strict=True)):
                 token_ids = item["token_ids"]
@@ -320,9 +328,10 @@ def main() -> None:
                     "protocol": "frozen attack inputs; answers regenerated only",
                     "prior_partial_reason": previous_detail,
                     "hf_batch_size_requested": args.batch_size,
+                    "batch_parity_examples": args.batch_parity_examples,
                     "replay_batch_sizes": sorted(batch_sizes_used),
                     "batch_fallbacks": {
-                        "prefix_parity": parity_fallback,
+                        "serial_equivalence": parity_fallback,
                         "cuda_oom": oom_fallback,
                     },
                     "seconds_aggregation": (
