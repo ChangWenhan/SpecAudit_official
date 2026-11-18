@@ -424,7 +424,8 @@ project venv despite the recorded base-interpreter path.
   and source/answer/run/done hashes, then atomically writes one compact seed
   completion. It reproduced the existing Qwen TAP seed-1 audit exactly:
   `933` records, `931` raw prefixes, `933` normalized prefixes and `101` exact
-  strings.
+  strings. The complete pinned-environment suite passes
+  `175 passed, 1 skipped, 5 subtests passed`.
 - Reviewed the HF attack replay while Gemma TAP was writing its partial output.
   The runner atomically rewrote its JSONL after every answer but previously
   archived that valid prefix on restart. The new recovery path accepts only a
