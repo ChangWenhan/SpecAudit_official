@@ -404,6 +404,13 @@ project venv despite the recorded base-interpreter path.
   pinned `safety-scale` environment (`vLLM 0.8.5`, `transformers 4.51.3`, torch
   `2.6.0+cu124`); focused replay tests and Ruff pass. The complete pinned
   suite now passes `164 passed, 1 skipped, 5 subtests passed`.
+- The existing Gemma TAP parity-failure record predated the cache fields. An
+  audited metadata-only repair attached the three exact frozen source hashes,
+  target, decode fields and `safety-scale` runtime identity without changing
+  any of the nine parity checks. The record hash changed from
+  `51dfeb98...` to `cad13edb...`; the repaired cache gate now evaluates true,
+  and the repair audit is in
+  `results/main_seeds_20261118/seed_1/_vllm_parity_failure_metadata_repair.json`.
 - `run_eval` now resumes the exact ordered prefix it atomically writes instead
   of requiring the P0/E13 parent to discard it. Recovery checks mode, source
   ID, prompt text, sample index, seed, target/draft paths, decoding parameters,
