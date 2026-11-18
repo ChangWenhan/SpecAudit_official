@@ -11,6 +11,7 @@ import json
 from collections import Counter
 from pathlib import Path
 from scripts.analyze_pairs import analyze_records, holm_adjust, load_records, outcome_summary, validate_alignment
+from scripts.render_defense_table import render_from_paths
 ROOT=Path(__file__).resolve().parents[1]
 RESULTS=ROOT/'results'; OUT=RESULTS/'paper_evidence_20261011'; TEX=ROOT/'paper'/'generated_evidence'
 MODELS=[('Qwen3_4B','Qwen3-4B'),('Gemma_3_4B','Gemma-3-4B'),('MiniCPM4_8B','MiniCPM4-8B')]
@@ -144,14 +145,8 @@ def main():
  table('ksweep','tab:ksweep',r'Rank acceptance with the trained draft; primary-judge percent of full $n$. $K=50$ reuses main cells. Inference over the 18 rank contrasts is Holm-adjusted.','llrrr',r'Target & Dataset & $K=20$ & $K=50$ & $K=100$',rows)
  rows=[[pretty,name,*[rate(s,m,ds) for s in ABLATION[2:6]]] for m,pretty in MODELS for ds,name,_ in DATASETS]
  table('rules','tab:rules',r'Probability-rule primary-judge percentages. Typ.-A/B: $(\varepsilon,\delta)=(0.03,0.10)/(0.25,0.30)$; Fl.-1/2: $\tau=0.01/0.001$. Each rule includes its documented recovery sampler.','llrrrr',r'Target & Dataset & Typ.-A & Typ.-B & Fl.-1 & Fl.-2',rows)
- rows=[]
- for m,pretty in MODELS:
-  for ds,name,_ in DATASETS:
-   vals=[rate('bare',m,ds),rate('topk50',m,ds)]
-   for s in ABLATION[6:8]:
-    a=cells['|'.join((s,m,ds))]['mean_accept_rate'];vals.append(r'\shortstack{'+rate(s,m,ds)+r'\\('+f'{a:.2f}'+')}')
-   rows.append([pretty,name,*vals])
- table('defense','tab:defense',r'Primary-judge full-$n$ positive percent; mean per-answer acceptance in parentheses. Mass floor: $K=50$, strict $p(x)>10^{-3}$. Head-exact: first $N=10$ positions exact, then rank-50. Acceptance is not latency.','llrrrr',r'Target & Dataset & Bare & Rank & \shortstack{Mass\\floor} & \shortstack{Head-\\exact}',rows)
+ # Table 2 joins the frozen defense cells with SecureSD and throughput evidence.
+ # Its validated generator remains the sole writer of defense.tex.
  rows=[]
  for m,pretty in MODELS:
   for i,s in enumerate(MAIN):
@@ -177,6 +172,10 @@ def main():
    'max_raw_p':max(p['mcnemar_p'] for p in rs),'max_holm_p':max(p['holm_p'] for p in rs),'holm_significant':sum(p['holm_p']<.05 for p in rs),
    'nonsignificant':[f"{p['model']}|{p['dataset']}|{p['cell']}" for p in rs if p['holm_p']>=.05]}
  (OUT/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+ render_from_paths(OUT/'evidence.json',RESULTS/'accel_20261111'/'accel.json',
+   RESULTS/'securesd_20261110'/'seed_0'/'_analysis'/'summary.json',
+   RESULTS/'securesd_20261110'/'seed_0',TEX/'defense.tex',
+   RESULTS/'cost_safety_20261118'/'defense_table.json')
  print(json.dumps(summary,indent=2));print(f'Validated {len(cells)} cells; {len(pairs)} comparisons; LaTeX: {TEX}')
 
 if __name__=='__main__':main()

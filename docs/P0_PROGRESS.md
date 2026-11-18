@@ -469,7 +469,11 @@ project venv despite the recorded base-interpreter path.
   has no provenance-certified same-host rank anchor, so its ratio is explicitly
   `n/a`; the pooled 933-response throughput basis is stated in the caption. The
   generated table compiles and visually fits as a one-page `table*` under the
-  actual `IEEEtran` class without clipping or overfull boxes.
+  actual `IEEEtran` class without clipping or overfull boxes. The final table
+  is now the sole defense-table writer inside `build_paper_evidence.py`; a full
+  rebuild validated 135 cells and 486 comparisons while preserving the
+  authoritative `evidence.json` hash `4a6de6ca...` exactly. The complete suite
+  passes `162 passed, 1 skipped, 5 subtests passed`.
 - Committed `d56c14e`: P0 analysis now reports total seconds/tokens and pooled
   per-model mode summaries, providing exact same-run throughput inputs.
 - Committed `e9a84b7`: added the Fig. 3 cost-safety point aggregator. Frozen

@@ -200,35 +200,34 @@ def render(values: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--evidence", type=Path,
-                        default=ROOT / "results/paper_evidence_20261011/evidence.json")
-    parser.add_argument("--throughput", type=Path,
-                        default=ROOT / "results/accel_20261111/accel.json")
-    parser.add_argument("--securesd-summary", type=Path,
-                        default=ROOT / "results/securesd_20261110/seed_0/_analysis/summary.json")
-    parser.add_argument("--securesd-root", type=Path,
-                        default=ROOT / "results/securesd_20261110/seed_0")
-    parser.add_argument("--out", type=Path,
-                        default=ROOT / "paper/generated_evidence/defense.tex")
-    parser.add_argument("--metadata", type=Path,
-                        default=ROOT / "results/cost_safety_20261118/defense_table.json")
-    args = parser.parse_args()
-    evidence = load_json(args.evidence)
-    throughput = load_json(args.throughput)
+def render_from_paths(
+    evidence_path: Path,
+    throughput_path: Path,
+    securesd_summary_path: Path,
+    securesd_root: Path,
+    out: Path,
+    metadata_path: Path,
+) -> dict:
+    evidence_path = evidence_path.resolve()
+    throughput_path = throughput_path.resolve()
+    securesd_summary_path = securesd_summary_path.resolve()
+    securesd_root = securesd_root.resolve()
+    out = out.resolve()
+    metadata_path = metadata_path.resolve()
+    evidence = load_json(evidence_path)
+    throughput = load_json(throughput_path)
     if not isinstance(throughput, list):
         raise ValueError("throughput input must be a JSON list")
-    secure = load_secure(args.securesd_root, load_json(args.securesd_summary))
+    secure = load_secure(securesd_root, load_json(securesd_summary_path))
     values = build_values(evidence, throughput, secure)
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(render(values))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(render(values))
     metadata = {
-        "table": str(args.out.relative_to(ROOT)),
-        "table_sha256": sha256_file(args.out),
+        "table": str(out.relative_to(ROOT)),
+        "table_sha256": sha256_file(out),
         "inputs": {
             str(path.relative_to(ROOT)): sha256_file(path)
-            for path in (args.evidence, args.throughput, args.securesd_summary)
+            for path in (evidence_path, throughput_path, securesd_summary_path)
         },
         "secure_sources": {
             f"{model}|{dataset}": {
@@ -246,8 +245,28 @@ def main() -> None:
             for (model, dataset, condition), value in sorted(values.items())
         },
     }
-    args.metadata.parent.mkdir(parents=True, exist_ok=True)
-    args.metadata.write_text(json.dumps(metadata, indent=2) + "\n")
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")
+    return metadata
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--evidence", type=Path,
+                        default=ROOT / "results/paper_evidence_20261011/evidence.json")
+    parser.add_argument("--throughput", type=Path,
+                        default=ROOT / "results/accel_20261111/accel.json")
+    parser.add_argument("--securesd-summary", type=Path,
+                        default=ROOT / "results/securesd_20261110/seed_0/_analysis/summary.json")
+    parser.add_argument("--securesd-root", type=Path,
+                        default=ROOT / "results/securesd_20261110/seed_0")
+    parser.add_argument("--out", type=Path,
+                        default=ROOT / "paper/generated_evidence/defense.tex")
+    parser.add_argument("--metadata", type=Path,
+                        default=ROOT / "results/cost_safety_20261118/defense_table.json")
+    args = parser.parse_args()
+    render_from_paths(args.evidence, args.throughput, args.securesd_summary,
+                      args.securesd_root, args.out, args.metadata)
     print(f"wrote {args.out} and {args.metadata}")
 
 
