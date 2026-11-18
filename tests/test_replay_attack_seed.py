@@ -4,7 +4,14 @@ import json
 import hashlib
 from pathlib import Path
 
-from scripts.replay_attack_seed import build_messages, render_prompt, validate_output
+import pytest
+
+from scripts.replay_attack_seed import (
+    build_messages,
+    recover_partial,
+    render_prompt,
+    validate_output,
+)
 
 
 def test_build_attack_messages_preserve_frozen_roles():
@@ -36,3 +43,19 @@ def test_render_prompt_disables_thinking_like_frozen_scripts():
             return "rendered"
 
     assert render_prompt(Tokenizer(), "tap", {"attack_prompt": "attack"}) == "rendered"
+
+
+def test_recover_partial_requires_source_alignment(tmp_path: Path):
+    path = tmp_path / "tap__Model__jbb.jsonl"
+    rows = [{"id": "a"}, {"id": "b"}]
+    first = {"id": "a", "sample_idx": 0, "seed": 2, "sampling_seed": 2_000_000,
+             "temperature": 0.0, "method": "tap", "dataset": "jbb",
+             "response": "answer"}
+    path.write_text(json.dumps(first) + "\n")
+    assert recover_partial(path, rows, seed=2, temperature=0.0, method="tap",
+                           dataset="jbb") == [first]
+    first["id"] = "b"
+    path.write_text(json.dumps(first) + "\n")
+    with pytest.raises(ValueError, match="source row"):
+        recover_partial(path, rows, seed=2, temperature=0.0, method="tap",
+                        dataset="jbb")

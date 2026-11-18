@@ -79,6 +79,35 @@ def archive(path: Path, stamp: str) -> None:
             shutil.move(str(artifact), bucket / f"{artifact.name}.{stamp}")
 
 
+def recover_partial(
+    path: Path,
+    rows: list[dict],
+    *,
+    seed: int,
+    temperature: float,
+    method: str,
+    dataset: str,
+) -> list[dict]:
+    """Resume only a source-aligned prefix already made atomic by this runner."""
+    if not path.is_file():
+        return []
+    records = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    if len(records) > len(rows):
+        raise ValueError("attack partial has more records than its source")
+    for index, record in enumerate(records):
+        source = rows[index]
+        if (str(record.get("id")) != str(source.get("id"))
+                or record.get("sample_idx") != 0
+                or record.get("seed") != seed
+                or record.get("sampling_seed") != seed * 1_000_000 + index
+                or record.get("temperature") != temperature
+                or record.get("method") != method
+                or record.get("dataset") != dataset
+                or not isinstance(record.get("response"), str)):
+            raise ValueError(f"attack partial mismatch at source row {index}")
+    return records
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--method", choices=tuple(MODES), required=True)
@@ -130,8 +159,6 @@ def main() -> None:
         if ok:
             print(f"{args.method} {args.model} {dataset}: already complete")
             continue
-        if out.exists():
-            archive(out, stamp)
         plans.append((dataset, rows, ids, out, detail))
     if args.dry_run:
         print(json.dumps({"method": args.method, "model": args.model, "seed": args.seed,
@@ -150,8 +177,21 @@ def main() -> None:
     elif generation_eos:
         eos_ids.update(int(item) for item in generation_eos)
     for dataset, rows, ids, out, previous_detail in plans:
-        records = []
+        try:
+            records = recover_partial(
+                out, rows, seed=args.seed, temperature=args.temperature,
+                method=args.method, dataset=dataset)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            archive(out, stamp)
+            records = []
+            previous_detail = f"{previous_detail}; partial archived: {exc}"
+        resumed = len(records)
+        if resumed:
+            print(f"{args.method} {args.model} {dataset}: resuming at {resumed + 1}/{len(rows)}",
+                  flush=True)
         for index, source_record in enumerate(rows):
+            if index < resumed:
+                continue
             prompt = render_prompt(tokenizer, args.method, source_record)
             ids_tensor = tokenizer(prompt, return_tensors="pt").input_ids.to(args.device)
             sampling_seed = args.seed * 1_000_000 + index

@@ -388,6 +388,13 @@ project venv despite the recorded base-interpreter path.
   the two exceptions are frozen decodes ending in a split UTF-8 replacement
   character. After removing that terminal replacement, all 933 normalize to
   prefix matches.
+- Reviewed the HF attack replay while Gemma TAP was writing its partial output.
+  The runner atomically rewrote its JSONL after every answer but previously
+  archived that valid prefix on restart. The new recovery path accepts only a
+  source-ID-, seed-, sampling-seed-, protocol- and order-aligned prefix and
+  archives anything mismatched before restarting. The live Gemma partial was
+  read without interruption and recovered cleanly at `67/520`. Replay tests
+  pass (`10 passed`) and Ruff passes on the changed runner/tests.
 - TAP replay validation caught a chat-template mismatch: the first attempt did
   not pass `enable_thinking=False`, so none of 84 answers matched the frozen
   seed-0 response. Those outputs were quarantined, the matcher was fixed, and a
