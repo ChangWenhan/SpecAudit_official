@@ -57,3 +57,22 @@ def test_validate_utility_cell_rejects_run_identity_mismatch(tmp_path: Path):
     ok, detail = validate_output(path, 1, 1, "baseline", target)
     assert not ok
     assert "run identity" in detail
+
+
+def test_validate_utility_cell_keeps_empty_response_in_denominator(tmp_path: Path):
+    target = str(tmp_path / "target")
+    path = tmp_path / "bare__Model__ifeval.jsonl"
+    path.write_text(json.dumps({
+        "id": "1", "dataset": "ifeval", "seed": 1, "mode": "baseline",
+        "target": target, "response": "",
+    }) + "\n")
+    identity = {"dataset": "ifeval", "seed": 1, "modes": ["baseline"], "n": 1,
+                "max_new": 2048, "target": target}
+    path.with_suffix(".run.json").write_text(json.dumps({
+        "run_identity": identity,
+        "run_identity_sha256": digest_json(identity),
+    }) + "\n")
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    Path(str(path) + ".done").write_text(json.dumps({
+        "records": 1, "sha256": digest, "dataset": "ifeval", "mode": "baseline"}))
+    assert validate_output(path, 1, 1, "baseline", target) == (True, "validated")

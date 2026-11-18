@@ -79,8 +79,8 @@ def validate_output(path: Path, seed: int, limit: int, mode: str, expected_targe
         return False, "run identity target mismatch"
     for row in rows:
         if (row.get("dataset") != "ifeval" or row.get("seed") != seed
-                or row.get("mode") != mode or not isinstance(row.get("response"), str)
-                or not row["response"].strip()):
+                or row.get("mode") != mode
+                or not isinstance(row.get("response"), str)):
             return False, "invalid utility row"
         if Path(row.get("target", "")).resolve() != Path(expected_target).resolve():
             return False, "target path mismatch"
