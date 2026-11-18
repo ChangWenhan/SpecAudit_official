@@ -66,6 +66,17 @@ def test_resume_rejects_mode_or_prompt_drift(tmp_path):
     with pytest.raises(ValueError, match="mode"):
         load_resumable_prefix(
             str(path), ["topk_honest@50:0"], prompts, settings(), "/target", "/draft")
+
+
+def test_runtime_version_mismatch_is_fatal_before_archive(tmp_path):
+    path = tmp_path / "run.jsonl"
+    prompts = [{"id": "a", "prompt": "p"}]
+    row = record("topk_honest@50:0", prompts[0], transformers_version="wrong")
+    path.write_text(json.dumps(row) + "\n")
+    with pytest.raises(RuntimeError, match="runtime version mismatch"):
+        load_resumable_prefix(
+            str(path), ["topk_honest@50:0"], prompts, settings(), "/target", "/draft")
+    assert path.exists()
     row = record("topk_honest@50:0", prompts[0], prompt="changed")
     path.write_text(json.dumps(row) + "\n")
     with pytest.raises(ValueError, match="prompt"):

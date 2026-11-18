@@ -307,6 +307,11 @@ def load_resumable_prefix(
                 if position >= len(records):
                     return records
                 record = records[position]
+                if record.get("transformers_version") != transformers.__version__:
+                    raise RuntimeError(
+                        f"runtime version mismatch at record {position}: "
+                        f"file={record.get('transformers_version')!r}, "
+                        f"current={transformers.__version__!r}; refusing to archive or resume")
                 expected = {
                     "mode": mode_spec,
                     "sample_idx": sample_idx,
@@ -320,7 +325,6 @@ def load_resumable_prefix(
                     "seed": args.seed,
                     "max_new": args.max_new,
                     "run_tag": args.run_tag,
-                    "transformers_version": transformers.__version__,
                     "id": str(item["id"]),
                     "prompt": item["prompt"],
                     "temperature": args.temperature,
