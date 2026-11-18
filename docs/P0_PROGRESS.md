@@ -170,6 +170,13 @@ Updated: 2026-11-18
   rather than an operator convention. The focused judge tests pass (`4 passed`);
   the reviewed orchestrator was resynced to s109 and compiles in the api
   environment.
+- Rechecked the complete judge chain at 10:22. Local and s109 SHA-256 values
+  match for the P0 manifest builder, vLLM orchestrator, resumable judge pool and
+  P0 analyzer. The A100 API environment imports vLLM `0.14.1`; both judge model
+  directories are present; the state-free dry run resolves gpt-oss and
+  Qwen3Guard on separate ports with 16 workers each and prefix caching enabled.
+  The focused manifest/judge/analysis/fresh-control suite passes (`17 passed`).
+  No judge service was started while P0 still occupies the A100.
 
 ## Deployment
 
