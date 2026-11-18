@@ -157,3 +157,14 @@ claim can be made. After it completes, multi-seed evidence covers the main
 table only; K sweeps, probability rules, defense cells and the auxiliary judge
 matrix remain single-seed. Speed is reported only as relative cost between
 verification rules on the same host, never as a production throughput claim.
+
+## 16. Target-only token vocabulary
+
+Gemma3-4B exposes 262,208 output-embedding rows while the matched
+Gemma3-1B draft input embedding has 262,144 rows. A target fallback token can
+therefore be a valid target/tokenizer token but outside the draft vocabulary.
+The P0 implementation restarts that draft trajectory from the original prompt
+when this occurs and records `draft_prefix_resets`. Verifier sampling semantics
+remain unchanged because the target still verifies the current full prefix, but
+acceptance and throughput can be lower on affected trajectories. Results must
+not interpret this fallback as a draft-model prediction.
