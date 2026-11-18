@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 
 import pytest
@@ -10,6 +12,7 @@ from scripts.run_vllm_judges import (
     free_memory_mib,
     require_free_memory,
     server_command,
+    validate_release_gate,
 )
 
 
@@ -47,3 +50,18 @@ def test_judge_start_refuses_too_little_free_memory(monkeypatch):
     monkeypatch.setattr("scripts.run_vllm_judges.free_memory_mib", lambda device: 69999)
     with pytest.raises(RuntimeError, match="refusing to start gptoss"):
         require_free_memory(0, 70000, "gptoss")
+
+
+def test_release_gate_must_target_current_manifest(tmp_path: Path):
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text("manifest\n")
+    digest = hashlib.sha256(manifest.read_bytes()).hexdigest()
+    gate = tmp_path / "gate.json"
+    gate.write_text(json.dumps({
+        "state": "ready", "validated_cells": 9,
+        "manifest": str(manifest), "manifest_sha256": digest,
+    }))
+    assert validate_release_gate(gate, manifest)["state"] == "ready"
+    manifest.write_text("changed\n")
+    with pytest.raises(ValueError, match="manifest hash mismatch"):
+        validate_release_gate(gate, manifest)

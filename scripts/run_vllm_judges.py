@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import hashlib
 import json
 import os
 import signal
@@ -82,6 +83,18 @@ def require_free_memory(device: int, minimum: int, judge: str) -> int:
     return free
 
 
+def validate_release_gate(gate_path: Path, manifest_path: Path) -> dict:
+    gate = json.loads(gate_path.read_text())
+    if gate.get("state") != "ready" or gate.get("validated_cells") != 9:
+        raise ValueError("release gate is not ready for nine cells")
+    if Path(gate.get("manifest", "")).resolve() != manifest_path.resolve():
+        raise ValueError("release gate targets a different manifest")
+    digest = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    if gate.get("manifest_sha256") != digest:
+        raise ValueError("release gate manifest hash mismatch")
+    return gate
+
+
 @contextlib.contextmanager
 def service(command: list[str], port: int, log_path: Path, model_id: str):
     session = requests.Session()
@@ -130,6 +143,7 @@ def service(command: list[str], port: int, log_path: Path, model_id: str):
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument("--release-gate", type=Path)
     parser.add_argument("--runtime", type=Path, required=True)
     parser.add_argument("--vllm-python", required=True)
     parser.add_argument("--gptoss-model", type=Path, required=True)
@@ -148,6 +162,8 @@ def main() -> None:
         raise ValueError("workers must be positive")
     if args.device < 0 or args.min_free_mib < 1:
         raise ValueError("device must be nonnegative and min-free-mib positive")
+    if args.release_gate:
+        validate_release_gate(args.release_gate, args.manifest)
     config = build_config(args.gptoss_workers, args.guard_workers)
     runtime = args.runtime.resolve()
     config_path = runtime / "judge_config.json"

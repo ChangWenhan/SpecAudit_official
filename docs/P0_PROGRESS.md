@@ -177,6 +177,13 @@ Updated: 2026-11-18
   Qwen3Guard on separate ports with 16 workers each and prefix caching enabled.
   The focused manifest/judge/analysis/fresh-control suite passes (`17 passed`).
   No judge service was started while P0 still occupies the A100.
+- Added a P0 release gate that validates all nine cells with the formal runner,
+  compares every frozen-manifest file hash and record/mode count, and requires a
+  nine-cell `judge_ready` fresh-control report. The vLLM launcher can bind to
+  this gate and refuses to start if its state or manifest hash is stale. The
+  gate and launcher were synced to s109 with matching hashes and compile in the
+  A100 API environment. The complete suite now passes
+  `173 passed, 1 skipped, 5 subtests passed`.
 
 ## Deployment
 
