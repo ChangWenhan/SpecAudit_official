@@ -223,15 +223,15 @@ project venv despite the recorded base-interpreter path.
 ## Full P0
 
 - Full P0 generation is running on three remote GPUs.
-- Snapshot at 2026-11-18 09:37 Asia/Shanghai: MiniCPM `4,653/8,397`
-  valid records (JBB 900 complete, AdvBench 2,812, StrongREJECT 941), Gemma
-  `4,138/8,397` valid records (retry JBB 517, AdvBench 1,955, StrongREJECT
-  1,666; the failed 760-row old JBB partial is excluded), and Qwen
-  `6,040/8,397` (JBB 900 complete, AdvBench 3,047, StrongREJECT 2,093). The
-  valid remote total is `14,831/25,191`. MiniCPM AdvBench is in exact and
-  StrongREJECT is at the start of N=20; Gemma retry JBB and StrongREJECT are
-  in exact while AdvBench is in N=20; Qwen AdvBench is in exact and
-  StrongREJECT is in force-draft-exact.
+- Snapshot at 2026-11-18 10:03 Asia/Shanghai: MiniCPM `4,974/8,397`
+  valid records (JBB 900 complete, AdvBench 2,929, StrongREJECT 1,145), Gemma
+  `4,384/8,397` valid records (retry JBB 578, AdvBench 2,078, StrongREJECT
+  1,728; the failed 760-row old JBB partial is excluded), and Qwen
+  `6,209/8,397` (JBB 900 complete, AdvBench 3,145, StrongREJECT 2,164). The
+  valid remote total is `15,567/25,191`. MiniCPM AdvBench is in exact and
+  StrongREJECT is in N=20; Gemma retry JBB and StrongREJECT are in exact while
+  AdvBench is near the end of N=20; Qwen AdvBench and StrongREJECT are in
+  force-draft-exact.
 - The first complete P0 cell is Qwen3-4B/JBB at seed 0 (`900/900`). It passed
   the current strict validator, including all nine mode counts, one sample per
   request/mode, forced-token provenance, summary mode statistics and
