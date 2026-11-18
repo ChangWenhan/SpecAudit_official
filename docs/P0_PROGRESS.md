@@ -429,7 +429,8 @@ project venv despite the recorded base-interpreter path.
   mode/prompt/seed/etc. configuration is archived. With the exact production
   overlays, three live files validated successfully as ordered prefixes:
   MiniCPM/AdvBench `2,980`, Qwen/AdvBench `3,180`, and Gemma/StrongREJECT
-  `1,754` records.
+  `1,754` records. The complete suite passes
+  `168 passed, 1 skipped, 5 subtests passed`.
 - TAP replay validation caught a chat-template mismatch: the first attempt did
   not pass `enable_thinking=False`, so none of 84 answers matched the frozen
   seed-0 response. Those outputs were quarantined, the matcher was fixed, and a
