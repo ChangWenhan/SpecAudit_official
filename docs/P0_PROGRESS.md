@@ -351,6 +351,11 @@ project venv despite the recorded base-interpreter path.
   and adds a regression test. The complete pinned-environment suite passes
   `159 passed, 1 skipped, 5 subtests passed`, including the localhost judge
   integrations when run outside the network sandbox.
+- Qwen3-4B IFEval seed-1 SecureSD completed all 200 answers at 09:51:48 and
+  passed the run identity, target, hash and completion-marker checks. All five
+  Qwen utility cells now report `state=complete`; the persistent E13 queue
+  passed its five-cell preflight, reused the two already-complete Qwen tasks,
+  and advanced to the frozen-input TAP replay for Gemma seed 1 at 09:51:59.
 - The four utility cells generated before the imported-version fix inherited
   metadata `torch 2.6.0` instead of actual `2.6.0+cu124`. An audited explicit
   runtime repair updated only their version maps and identity hashes; answers,
