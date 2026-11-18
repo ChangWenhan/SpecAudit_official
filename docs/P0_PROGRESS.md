@@ -418,6 +418,13 @@ project venv despite the recorded base-interpreter path.
   audit is in
   `results/main_seeds_20261118/seed_1/_validations/tap__Gemma_3_4B__jbb.json`;
   answer SHA-256 is `b5ccd976...`. The queue advanced to StrongREJECT.
+- Added a reusable three-dataset attack completion summarizer. It discovers
+  each frozen source, invokes the formal replay validator, computes raw and
+  terminal-replacement-normalized prefix matches, exact matches, token counts,
+  and source/answer/run/done hashes, then atomically writes one compact seed
+  completion. It reproduced the existing Qwen TAP seed-1 audit exactly:
+  `933` records, `931` raw prefixes, `933` normalized prefixes and `101` exact
+  strings.
 - Reviewed the HF attack replay while Gemma TAP was writing its partial output.
   The runner atomically rewrote its JSONL after every answer but previously
   archived that valid prefix on restart. The new recovery path accepts only a
