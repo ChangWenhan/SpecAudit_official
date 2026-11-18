@@ -412,6 +412,12 @@ project venv despite the recorded base-interpreter path.
   `results/main_seeds_20261118/seed_1/_validations/tap__Gemma_3_4B__advbench.json`;
   answer SHA-256 is `ca8d03c0...`. The queue advanced automatically to JBB and
   had produced 11/100 records at 10:44.
+- Gemma TAP seed-1 JBB completed `100/100` and passed the formal replay
+  validator. All 100 outputs are raw prefixes of the frozen seed-0 answers;
+  all 100 reached the 160-token budget, with zero exact strings. The compact
+  audit is in
+  `results/main_seeds_20261118/seed_1/_validations/tap__Gemma_3_4B__jbb.json`;
+  answer SHA-256 is `b5ccd976...`. The queue advanced to StrongREJECT.
 - Reviewed the HF attack replay while Gemma TAP was writing its partial output.
   The runner atomically rewrote its JSONL after every answer but previously
   archived that valid prefix on restart. The new recovery path accepts only a
