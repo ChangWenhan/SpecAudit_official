@@ -247,6 +247,13 @@ project venv despite the recorded base-interpreter path.
   The compact validation record is
   `results/p0_20261118/s111_completed/Gemma_3_4B__jbb.validation.json`; the old
   760-row failed prefix remains excluded from valid records and judging.
+- Gemma3-4B/StrongREJECT later exposed the same draft-vocabulary boundary
+  failure at `2251/2817`, after all six initial modes and 60 rows of
+  `force_target_topk_honest` had completed. The original partial and failure
+  record are retained; the retry root was seeded with the byte-identical
+  validated prefix (`sha256 827c7b9d...`), and the corrected run resumed at
+  row 2252. The compact failure record is
+  `results/p0_20261118/s111_completed/Gemma_3_4B__strongreject.failure.json`.
 - Snapshot at 2026-11-18 12:42 Asia/Shanghai: MiniCPM `6,266/8,397`
   valid records (JBB 900 complete, AdvBench 3,497, StrongREJECT 1,869), Gemma
   `5,590/8,397` valid records (retry JBB 827, AdvBench 2,686, StrongREJECT
