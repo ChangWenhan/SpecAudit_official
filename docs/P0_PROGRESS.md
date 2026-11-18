@@ -403,6 +403,15 @@ project venv despite the recorded base-interpreter path.
   the two exceptions are frozen decodes ending in a split UTF-8 replacement
   character. After removing that terminal replacement, all 933 normalize to
   prefix matches.
+- Gemma TAP seed-1 AdvBench completed `520/520` at 10:43. The formal replay
+  validator passed; source-ID order, run manifest, temperature-0 protocol,
+  answer/run/done hashes and record counts are valid. All `520/520` responses
+  match the frozen seed-0 answer as a raw prefix, with mean length `159.51` and
+  `517` answers reaching the 160-token budget; only three are exact strings.
+  The compact audit is in
+  `results/main_seeds_20261118/seed_1/_validations/tap__Gemma_3_4B__advbench.json`;
+  answer SHA-256 is `ca8d03c0...`. The queue advanced automatically to JBB and
+  had produced 11/100 records at 10:44.
 - Reviewed the HF attack replay while Gemma TAP was writing its partial output.
   The runner atomically rewrote its JSONL after every answer but previously
   archived that valid prefix on restart. The new recovery path accepts only a
