@@ -418,7 +418,10 @@ project venv despite the recorded base-interpreter path.
   `_partial/` audit directory before a clean start, while an aligned complete
   file can still finish its missing summary/manifest. The helper was validated
   against all 900 real Qwen/JBB P0 records; targeted runner/resume tests pass
-  (`18 passed`) and Ruff passes on the changed files.
+  (`18 passed`) and Ruff passes on the changed files. The superseded parent
+  archive routines were removed so disk state cannot be discarded before the
+  resumable layer sees it. The complete suite passes
+  `167 passed, 1 skipped, 5 subtests passed`.
 - TAP replay validation caught a chat-template mismatch: the first attempt did
   not pass `enable_thinking=False`, so none of 84 answers matched the frozen
   seed-0 response. Those outputs were quarantined, the matcher was fixed, and a

@@ -7,7 +7,6 @@ import argparse
 import json
 import math
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -108,16 +107,6 @@ def validate_output(path: Path, dataset: str, seed: int, max_new: int,
         if row.get("interventions", 0) != 0:
             return False, "unexpected intervention"
     return True, "validated"
-
-
-def archive_partial(path: Path, reason: str) -> None:
-    bucket = path.parent / "_partial"
-    bucket.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-    for artifact in path.parent.glob(path.stem + ".*"):
-        if artifact.is_file():
-            shutil.move(str(artifact), bucket / f"{artifact.name}.{stamp}")
-    (bucket / f"{path.name}.{stamp}.reason.txt").write_text(reason + "\n")
 
 
 def main() -> int:

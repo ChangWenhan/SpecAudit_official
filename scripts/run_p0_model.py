@@ -7,7 +7,6 @@ import argparse
 import json
 import math
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -193,16 +192,6 @@ def validate_cell(out: Path, dataset: str, seed: int, max_new: int) -> tuple[boo
         if summary[mode]["tokens_per_sec"] != expected_throughput:
             return False, f"summary throughput does not match rows for {mode}"
     return True, "validated"
-
-
-def archive_partial(out: Path, reason: str) -> None:
-    bucket = out.parent / "_partial"
-    bucket.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-    for artifact in out.parent.glob(out.stem + ".*"):
-        if artifact.is_file():
-            shutil.move(str(artifact), bucket / f"{artifact.name}.{stamp}")
-    (bucket / f"{out.name}.{stamp}.reason.txt").write_text(reason + "\n")
 
 
 def main() -> int:
