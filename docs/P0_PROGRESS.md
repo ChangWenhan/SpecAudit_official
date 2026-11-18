@@ -488,6 +488,12 @@ project venv despite the recorded base-interpreter path.
   `181 passed, 1 skipped, 5 subtests passed`. This keeps batching valid across
   hardware/runtime numerical drift without treating those differences as a
   technical failure.
+- The first live HF batch drill ran on Qwen FlipAttack seed 1. vLLM parity
+  failed and correctly fell back to HF; HF batch size four then differed from
+  the same-model serial output at the first checked prompt, so the batch was
+  discarded before writing and the runner switched to serial. AdvBench then
+  produced valid ordered records with no mixed batch/serial prefix. This
+  exercises both fallback layers on real GPU data.
 - The existing Gemma TAP parity-failure record predated the cache fields. An
   audited metadata-only repair attached the three exact frozen source hashes,
   target, decode fields and `safety-scale` runtime identity without changing
