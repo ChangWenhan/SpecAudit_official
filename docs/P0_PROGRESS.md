@@ -343,6 +343,13 @@ project venv despite the recorded base-interpreter path.
   completed output marker. Committed `d46d23e`. The parent has automatically
   started SecureSD, the final utility cell; the E13 queue still gates on all
   five completed cells.
+- The four utility cells generated before the imported-version fix inherited
+  metadata `torch 2.6.0` instead of actual `2.6.0+cu124`. An audited explicit
+  runtime repair updated only their version maps and identity hashes; answers,
+  done markers and scores were unchanged. All four still pass utility
+  validation and now share the exact runtime identity expected for SecureSD.
+  The repair audit is in
+  `results/utility200_20261118/seed_1/runtime_version_repairs.json`.
 - Committed `298f273`: the benign scorer now checks response count before
   ID/prompt alignment and explicitly tells the caller to pass the matching
   `--limit` for subset runs. This removes the misleading identity error found

@@ -1,0 +1,57 @@
+{
+  "actual": {
+    "torch": "2.6.0+cu124",
+    "transformers": "4.57.6"
+  },
+  "repaired_at": "2026-11-18T08:37:44+08:00",
+  "cells": {
+    "bare": {
+      "changed": true,
+      "original_versions": {
+        "torch": "2.6.0",
+        "transformers": "4.57.6"
+      },
+      "corrected_versions": {
+        "torch": "2.6.0+cu124",
+        "transformers": "4.57.6"
+      },
+      "run_sha256": "225b9552f55e7bc486eacebaaf1dbb1bcb93ad0b3b00872d51b6aaf58a0252b9"
+    },
+    "draft": {
+      "changed": true,
+      "original_versions": {
+        "torch": "2.6.0",
+        "transformers": "4.57.6"
+      },
+      "corrected_versions": {
+        "torch": "2.6.0+cu124",
+        "transformers": "4.57.6"
+      },
+      "run_sha256": "4b8d5db5736b724cf96ac750290c0379e7216af5e16d6068bc0524374fcc9ff8"
+    },
+    "rank50": {
+      "changed": true,
+      "original_versions": {
+        "torch": "2.6.0",
+        "transformers": "4.57.6"
+      },
+      "corrected_versions": {
+        "torch": "2.6.0+cu124",
+        "transformers": "4.57.6"
+      },
+      "run_sha256": "54fba82b1b983a24d0efb2d0c1d9c8b7196468c31966698170d7e8fb15b6f31c"
+    },
+    "exact": {
+      "changed": true,
+      "original_versions": {
+        "torch": "2.6.0",
+        "transformers": "4.57.6"
+      },
+      "corrected_versions": {
+        "torch": "2.6.0+cu124",
+        "transformers": "4.57.6"
+      },
+      "run_sha256": "0eaab2e3d89e8bf90c05cc4f149f0b17d5db14293095f8bb7e0ec1d558eff0c0"
+    }
+  }
+}
