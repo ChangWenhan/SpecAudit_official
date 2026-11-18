@@ -344,6 +344,13 @@ project venv despite the recorded base-interpreter path.
   completed output marker. Committed `d46d23e`. The parent has automatically
   started SecureSD, the final utility cell; the E13 queue still gates on all
   five completed cells.
+- Reviewed the upcoming utility completion and queue path before the remaining
+  model cells could reach it. The validator incorrectly rejected an empty but
+  type-correct response, although the declared protocol keeps empty answers in
+  the denominator for official scoring. Committed `6220409` fixes that check
+  and adds a regression test. The complete pinned-environment suite passes
+  `159 passed, 1 skipped, 5 subtests passed`, including the localhost judge
+  integrations when run outside the network sandbox.
 - The four utility cells generated before the imported-version fix inherited
   metadata `torch 2.6.0` instead of actual `2.6.0+cu124`. An audited explicit
   runtime repair updated only their version maps and identity hashes; answers,
