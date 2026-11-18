@@ -441,6 +441,12 @@ project venv despite the recorded base-interpreter path.
   of treating the run as a technical failure. The metadata-only status repair
   did not change answers, validator fields or hashes. The queue advanced to JBB
   and had produced `31/100` records.
+- MiniCPM TAP seed-1 JBB completed `100/100` and passed the formal replay
+  validator. As expected from the model's cross-runtime numerical variation,
+  only `22/100` normalized frozen prefixes match and `4` answers are exact, so
+  the compact diagnostic remains `complete_with_prefix_variation` with
+  `prefix_parity_ok=false`. Answer SHA-256 is `6b65a1dd...`; the queue advanced
+  to StrongREJECT.
 - Added a reusable three-dataset attack completion summarizer. It discovers
   each frozen source, invokes the formal replay validator, computes raw and
   terminal-replacement-normalized prefix matches, exact matches, token counts,
