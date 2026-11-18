@@ -5,6 +5,7 @@ import json
 
 from scripts.replay_attack_seed_vllm import (
     build_messages,
+    parity_cache_matches,
     parity_matches,
     validate_output,
 )
@@ -34,6 +35,25 @@ def test_parity_rejects_a_generation_that_stops_before_the_frozen_answer():
 def test_parity_ignores_only_terminal_split_codepoint_marker():
     assert parity_matches("完整回答", "完整回�")
     assert not parity_matches("abc", "abd")
+
+
+def test_parity_cache_requires_every_protocol_field():
+    cached = {
+        "state": "parity_failed", "model": "Model", "target": "/model",
+        "seed": 1, "temperature": 0.0, "max_new": 160,
+        "parity_examples": 3, "source_hashes": {"/source": "abc"},
+        "versions": {"vllm": "1", "transformers": "2", "torch": "3"},
+    }
+    kwargs = {
+        "model": "Model", "target": "/model", "seed": 1,
+        "temperature": 0.0, "max_new": 160, "parity_examples": 3,
+        "source_hashes": {"/source": "abc"},
+        "versions": {"vllm": "1", "transformers": "2", "torch": "3"},
+    }
+    assert parity_cache_matches(cached, **kwargs)
+    assert not parity_cache_matches(
+        {**cached, "source_hashes": {"/source": "def"}}, **kwargs)
+    assert not parity_cache_matches(cached, **{**kwargs, "max_new": 161})
 
 
 def test_output_validation_checks_hashes_and_protocol(tmp_path):

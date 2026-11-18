@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.metadata
 import json
 import math
 import os
 import shutil
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -74,6 +76,39 @@ def parity_matches(generated: str, frozen: str) -> bool:
     generated = parity_text(generated)
     frozen = parity_text(frozen)
     return bool(generated and frozen and generated.startswith(frozen))
+
+
+def runtime_versions() -> dict[str, str]:
+    return {
+        "python": sys.executable,
+        **{name: importlib.metadata.version(name)
+           for name in ("vllm", "transformers", "torch")},
+    }
+
+
+def parity_cache_matches(
+    cached: dict,
+    *,
+    model: str,
+    target: str,
+    seed: int,
+    temperature: float,
+    max_new: int,
+    parity_examples: int,
+    source_hashes: dict[str, str],
+    versions: dict[str, str],
+) -> bool:
+    return (
+        cached.get("state") == "parity_failed"
+        and cached.get("model") == model
+        and Path(str(cached.get("target", ""))).resolve() == Path(target).resolve()
+        and cached.get("seed") == seed
+        and cached.get("temperature") == temperature
+        and cached.get("max_new") == max_new
+        and cached.get("parity_examples") == parity_examples
+        and cached.get("source_hashes") == source_hashes
+        and cached.get("versions") == versions
+    )
 
 
 def validate_output(
@@ -236,6 +271,18 @@ def main() -> int:
         })
         return 0
 
+    versions = runtime_versions()
+    parity_failure_path = directory / f"_vllm_parity_failed_{args.method}_{args.model}.json"
+    if parity_failure_path.is_file():
+        cached = json.loads(parity_failure_path.read_text())
+        if parity_cache_matches(
+                cached, model=args.model, target=args.target, seed=args.seed,
+                temperature=args.temperature, max_new=args.max_new,
+                parity_examples=args.parity_examples, source_hashes=source_hashes,
+                versions=versions):
+            print("cached vLLM parity failure matches; using HF replay", flush=True)
+            return PARITY_EXIT_CODE
+
     os.environ.setdefault("HF_MODULES_CACHE", "/tmp/huggingface-modules")
     from transformers import AutoConfig, AutoTokenizer
     from vllm import LLM, SamplingParams
@@ -295,9 +342,13 @@ def main() -> int:
             "generated_sha256": hashlib.sha256(text.encode()).hexdigest(),
         }
     if not all(check["matched"] for check in parity_checks.values()):
-        atomic_json(directory / f"_vllm_parity_failed_{args.method}_{args.model}.json", {
+        atomic_json(parity_failure_path, {
             "state": "parity_failed", "updated_at": now(), "method": args.method,
-            "model": args.model, "seed": args.seed, "checks": parity_checks,
+            "model": args.model, "target": str(Path(args.target).resolve()),
+            "seed": args.seed, "temperature": args.temperature,
+            "max_new": args.max_new, "parity_examples": args.parity_examples,
+            "source_hashes": source_hashes, "versions": versions,
+            "checks": parity_checks,
         })
         print("vLLM parity failed; caller should use HF replay", flush=True)
         return PARITY_EXIT_CODE

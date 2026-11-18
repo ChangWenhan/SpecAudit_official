@@ -395,6 +395,13 @@ project venv despite the recorded base-interpreter path.
   archives anything mismatched before restarting. The live Gemma partial was
   read without interruption and recovered cleanly at `67/520`. Replay tests
   pass (`10 passed`) and Ruff passes on the changed runner/tests.
+- The vLLM replay now caches an empirically failed parity gate only when the
+  target, source hashes, seed, temperature, output budget, parity-example count,
+  interpreter and exact vLLM/transformers/torch versions all match. Repeated
+  Gemma restarts therefore go directly to the pinned HF replay instead of
+  reloading and profiling the same 4B model again. The cache was checked in the
+  pinned `safety-scale` environment (`vLLM 0.8.5`, `transformers 4.51.3`, torch
+  `2.6.0+cu124`); focused replay tests and Ruff pass.
 - TAP replay validation caught a chat-template mismatch: the first attempt did
   not pass `enable_thinking=False`, so none of 84 answers matched the frozen
   seed-0 response. Those outputs were quarantined, the matcher was fixed, and a
