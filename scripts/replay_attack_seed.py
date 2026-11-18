@@ -252,6 +252,9 @@ def main() -> None:
                   flush=True)
         cursor = resumed
         effective_batch = args.batch_size
+        batch_sizes_used = set()
+        parity_fallback = False
+        oom_fallback = False
         while cursor < len(rows):
             stop = min(cursor + effective_batch, len(rows))
             batch_sources = rows[cursor:stop]
@@ -271,6 +274,7 @@ def main() -> None:
                     f"retrying serially", flush=True)
                 torch.cuda.empty_cache()
                 effective_batch = 1
+                oom_fallback = True
                 continue
             parity = [
                 normalized_prefix_match(item["response"], source["response"])
@@ -282,6 +286,7 @@ def main() -> None:
                         f"{args.method} {args.model} {dataset}: batched prefix parity failed "
                         f"at {cursor}; retrying serially", flush=True)
                     effective_batch = 1
+                    parity_fallback = True
                     continue
                 failed = [cursor + offset for offset, matched in enumerate(parity)
                           if not matched]
@@ -306,13 +311,24 @@ def main() -> None:
                 print(f"{args.method} {args.model} {dataset} {cursor + offset + 1}/{len(rows)}",
                       flush=True)
             write_jsonl_atomic(str(out), records)
+            batch_sizes_used.add(effective_batch)
             cursor = stop
         write_jsonl_atomic(str(out), records)
         manifest = {"method": args.method, "model": args.model, "target": str(Path(args.target).resolve()),
                     "seed": args.seed, "temperature": args.temperature, "max_new": args.max_new,
                     "source_hashes": source_hashes, "records": len(records),
                     "protocol": "frozen attack inputs; answers regenerated only",
-                    "prior_partial_reason": previous_detail, "finished_at": now()}
+                    "prior_partial_reason": previous_detail,
+                    "hf_batch_size_requested": args.batch_size,
+                    "replay_batch_sizes": sorted(batch_sizes_used),
+                    "batch_fallbacks": {
+                        "prefix_parity": parity_fallback,
+                        "cuda_oom": oom_fallback,
+                    },
+                    "seconds_aggregation": (
+                        "batch wall seconds divided by batch size; measured seconds when "
+                        "serial"),
+                    "finished_at": now()}
         out.with_suffix(".run.json").write_text(json.dumps(manifest, indent=2) + "\n")
         Path(str(out) + ".done").write_text(json.dumps({
             "records": len(records), "sha256": sha256_file(out), "dataset": dataset,

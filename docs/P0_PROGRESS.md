@@ -458,7 +458,9 @@ project venv despite the recorded base-interpreter path.
   seed-0 answers before it can be written; one mismatch or a CUDA OOM discards
   that batch and retries it serially. EOS/padding are trimmed per sequence and
   per-answer elapsed time is the batch wall time divided by batch size, so
-  later throughput aggregation remains comparable. The running MiniCPM process
+  later throughput aggregation remains comparable. Each run manifest now records
+  the requested batch size, batch sizes actually used, prefix-parity/OOM
+  fallbacks, and the elapsed-time aggregation rule. The running MiniCPM process
   keeps its already-imported serial path; future attack jobs use the checked
   batch path. Full tests pass
   `180 passed, 1 skipped, 5 subtests passed`.
