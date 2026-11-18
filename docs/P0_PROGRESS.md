@@ -238,6 +238,15 @@ project venv despite the recorded base-interpreter path.
 ## Full P0
 
 - Full P0 generation is running on three remote GPUs.
+- Gemma3-4B/JBB retry completed at `900/900` after the draft-vocabulary
+  fallback fix. The corrected JSONL, run manifest, and summary were copied
+  from s111 with matching SHA-256 values; the formal cell validator passes.
+  Fresh-control comparison has 100/100 identical token lengths, mean-token
+  delta `0.0`, mean-acceptance delta `-0.00159`, and no warnings. The three
+  out-of-vocabulary fallback events are recorded as `draft_prefix_resets=3`.
+  The compact validation record is
+  `results/p0_20261118/s111_completed/Gemma_3_4B__jbb.validation.json`; the old
+  760-row failed prefix remains excluded from valid records and judging.
 - Snapshot at 2026-11-18 12:42 Asia/Shanghai: MiniCPM `6,266/8,397`
   valid records (JBB 900 complete, AdvBench 3,497, StrongREJECT 1,869), Gemma
   `5,590/8,397` valid records (retry JBB 827, AdvBench 2,686, StrongREJECT
