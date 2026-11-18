@@ -10,6 +10,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from src.run_provenance import SECURESD_FILES, digest_json
+
 
 MODELS = ("Qwen3_4B", "Gemma_3_4B", "MiniCPM4_8B")
 CONDITIONS = {
@@ -21,9 +23,9 @@ CONDITIONS = {
 }
 EXPECTED_LIMIT = 200
 SHARED_IDENTITY_FIELDS = (
-    "dataset", "target", "draft", "draft_alt", "prompts_sha256", "n", "subset",
+    "dataset", "draft", "draft_alt", "prompts_sha256", "n", "subset",
     "split", "gamma", "temperature", "max_new", "samples", "seed", "device",
-    "cache_mode", "model_files", "sources", "versions", "python",
+    "cache_mode", "versions", "python",
     "benign_manifest_sha256", "benign_sources",
 )
 
@@ -87,7 +89,10 @@ def validate_file_scope(paths: list[Path]) -> None:
             f"unexpected={sorted(actual - expected)}")
 
 
-def validate_shared_provenance(identities: dict[str, dict[str, dict]]) -> None:
+def validate_shared_provenance(
+        identities: dict[str, dict[str, dict]],
+        allowed_source_hashes: dict[str, dict[str, set[str]]] | None = None) -> None:
+    allowed_source_hashes = allowed_source_hashes or {}
     for model, by_condition in identities.items():
         if set(by_condition) != set(CONDITIONS):
             raise ValueError(f"incomplete utility provenance for {model}")
@@ -97,6 +102,40 @@ def validate_shared_provenance(identities: dict[str, dict[str, dict]]) -> None:
                 if identity.get(field) != reference.get(field):
                     raise ValueError(
                         f"utility provenance mismatch for {model}/{condition}: {field}")
+            if condition == "draft":
+                if identity.get("target") != identity.get("draft"):
+                    raise ValueError(f"draft utility target is not the draft model: {model}")
+                if ((identity.get("model_files") or {}).get("target")
+                        != (identity.get("model_files") or {}).get("draft")):
+                    raise ValueError(f"draft utility model files mismatch: {model}")
+            else:
+                if identity.get("target") != reference.get("target"):
+                    raise ValueError(
+                        f"utility provenance mismatch for {model}/{condition}: target")
+                if ((identity.get("model_files") or {}).get("target")
+                        != (reference.get("model_files") or {}).get("target")):
+                    raise ValueError(
+                        f"utility provenance mismatch for {model}/{condition}: target model files")
+            reference_sources = reference.get("sources") or {}
+            sources = identity.get("sources") or {}
+            expected_sources = set(reference_sources)
+            if condition == "securesd":
+                expected_sources.update(SECURESD_FILES)
+            if set(sources) != expected_sources:
+                raise ValueError(
+                    f"utility source scope mismatch for {model}/{condition}: {sorted(set(sources) ^ expected_sources)}")
+            for name, reference_digest in reference_sources.items():
+                actual_digest = sources.get(name)
+                if actual_digest == reference_digest:
+                    continue
+                observed = {
+                    (other.get("sources") or {}).get(name)
+                    for other in by_condition.values()
+                }
+                allowed = allowed_source_hashes.get(model, {}).get(name, set())
+                if not observed <= allowed:
+                    raise ValueError(
+                        f"utility provenance mismatch for {model}/{condition}: sources {name}")
 
 
 def main() -> None:
@@ -109,6 +148,14 @@ def main() -> None:
     directory = args.root.resolve() / f"seed_{args.seed}"
     paths = sorted(directory.glob("*__ifeval.jsonl"))
     validate_file_scope(paths)
+    compatibility_path = directory / "provenance_compatibility.json"
+    compatibility = (json.loads(compatibility_path.read_text())
+                     if compatibility_path.is_file() else {})
+    allowed_source_hashes = {
+        model: {name: set(hashes) for name, hashes in sources.items()}
+        for model, spec in (compatibility.get("models") or {}).items()
+        for sources in [spec.get("sources") or {}]
+    }
     cells = []
     identities: dict[str, dict[str, dict]] = {}
     for path in paths:
@@ -127,7 +174,10 @@ def main() -> None:
         run_path = path.with_suffix(".run.json")
         if not run_path.is_file():
             raise ValueError(f"missing utility run manifest: {path}")
-        identity = json.loads(run_path.read_text()).get("run_identity") or {}
+        run_document = json.loads(run_path.read_text())
+        identity = run_document.get("run_identity") or {}
+        if run_document.get("run_identity_sha256") != digest_json(identity):
+            raise ValueError(f"utility run identity digest mismatch: {path}")
         if (identity.get("dataset") != "ifeval" or identity.get("seed") != args.seed
                 or identity.get("modes") != [CONDITIONS[slug]]
                 or identity.get("n") != EXPECTED_LIMIT
@@ -147,7 +197,7 @@ def main() -> None:
                       "empty_responses": score["empty_responses"],
                       "source": str(path), "source_sha256": done["sha256"]})
     validate_scope(cells)
-    validate_shared_provenance(identities)
+    validate_shared_provenance(identities, allowed_source_hashes)
     summary = {"seed": args.seed, "cells": cells}
     out = args.root.resolve() / f"utility_summary_seed_{args.seed}.json"
     atomic_json(out, summary)

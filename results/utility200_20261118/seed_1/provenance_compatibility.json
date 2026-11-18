@@ -1,0 +1,30 @@
+{
+  "models": {
+    "Qwen3_4B": {
+      "sources": {
+        "src/run_provenance.py": [
+          "dfcc33f7e444e5d981fd1cfc624f65c4e4f33aa3e92e73222f5c9baa369091ec",
+          "e5770ba6a413b6e5248732c116cf59021a3bc264e9093402f9adea4fe6b4bebb"
+        ],
+        "src/run_eval.py": [
+          "52a5c0e5da704b7a03c78f9d781c7bc34fccdb76eb435cf583c38144dc61e7e1",
+          "f866fa21dd3f07517ec3930c56a69c292263ff7072dec7a24e6d70f6892562de"
+        ],
+        "src/spec_decode.py": [
+          "1fa86236534ecab5c6d8e41d03a232e6d24aaa770a46fd8b72e2aa301993dc66",
+          "32bb64d00ee0c1dcf55ba88629b3820fdff06c215f108434cb43c4c4bd689009"
+        ],
+        "src/policies.py": [
+          "5d9912c2ed3a38d077be7eaa0830e23b382c6e901761c0f1e8dc58c7afd5aced",
+          "6f0a90f30e45c1437839953e89cd630fa25cacd17f39d7d31611ebb353630e85"
+        ]
+      },
+      "reason": "Behavior-neutral provenance transition after the imported-version fix and draft-vocabulary fallback patch. Qwen target and draft embeddings both have 151936 rows, so the OOV reset branch cannot trigger. The other changes affect version metadata and additive reset-count propagation only.",
+      "assertions": {
+        "target_embedding_rows": 151936,
+        "draft_embedding_rows": 151936,
+        "secure_sd_oov_branch_possible": false
+      }
+    }
+  }
+}

@@ -350,6 +350,14 @@ project venv despite the recorded base-interpreter path.
   validation and now share the exact runtime identity expected for SecureSD.
   The repair audit is in
   `results/utility200_20261118/seed_1/runtime_version_repairs.json`.
+- SecureSD was launched after the provenance fix, so its core source hashes
+  legitimately differ from the earlier four cells. Rather than rewriting source
+  history, scoring now reads a narrow `provenance_compatibility.json` that may
+  permit only explicitly listed old/new hash pairs. The Qwen entry lists four
+  behavior-neutral changes and records that target and draft embeddings both
+  have 151936 rows, making the new OOV reset branch unreachable. Real four-final
+  plus SecureSD-partial identities now pass the complete shared provenance
+  preflight; all model, prompt, assets and runtime fields still match exactly.
 - Committed `298f273`: the benign scorer now checks response count before
   ID/prompt alignment and explicitly tells the caller to pass the matching
   `--limit` for subset runs. This removes the misleading identity error found
