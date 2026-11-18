@@ -111,6 +111,15 @@ def parity_cache_matches(
     )
 
 
+def known_engine_incompatibility(model: str, versions: dict[str, str]) -> str | None:
+    if model == "MiniCPM4_8B" and versions.get("vllm") == "0.8.5":
+        return (
+            "vLLM 0.8.5 MiniCPM rotary embedding signature is incompatible: "
+            "Phi3LongRoPEScaledRotaryEmbedding._compute_cos_sin_cache requires "
+            "max_position_embeddings, rescale_factors and mscale")
+    return None
+
+
 def validate_output(
     path: Path,
     source_ids: list[str],
@@ -272,6 +281,18 @@ def main() -> int:
         return 0
 
     versions = runtime_versions()
+    incompatibility = known_engine_incompatibility(args.model, versions)
+    if incompatibility:
+        atomic_json(directory / f"_vllm_incompatible_{args.method}_{args.model}.json", {
+            "state": "engine_incompatible", "updated_at": now(),
+            "method": args.method, "model": args.model,
+            "target": str(Path(args.target).resolve()), "seed": args.seed,
+            "temperature": args.temperature, "max_new": args.max_new,
+            "source_hashes": source_hashes, "versions": versions,
+            "reason": incompatibility,
+        })
+        print(f"known vLLM incompatibility; using HF replay: {incompatibility}", flush=True)
+        return PARITY_EXIT_CODE
     parity_failure_path = directory / f"_vllm_parity_failed_{args.method}_{args.model}.json"
     if parity_failure_path.is_file():
         cached = json.loads(parity_failure_path.read_text())

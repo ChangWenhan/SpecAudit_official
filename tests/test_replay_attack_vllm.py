@@ -5,6 +5,7 @@ import json
 
 from scripts.replay_attack_seed_vllm import (
     build_messages,
+    known_engine_incompatibility,
     parity_cache_matches,
     parity_matches,
     validate_output,
@@ -54,6 +55,16 @@ def test_parity_cache_requires_every_protocol_field():
     assert not parity_cache_matches(
         {**cached, "source_hashes": {"/source": "def"}}, **kwargs)
     assert not parity_cache_matches(cached, **{**kwargs, "max_new": 161})
+
+
+def test_minicpm_vllm_incompatibility_is_version_bound():
+    reason = known_engine_incompatibility(
+        "MiniCPM4_8B", {"vllm": "0.8.5"})
+    assert reason and "_compute_cos_sin_cache" in reason
+    assert known_engine_incompatibility(
+        "MiniCPM4_8B", {"vllm": "0.15.1"}) is None
+    assert known_engine_incompatibility(
+        "Gemma_3_4B", {"vllm": "0.8.5"}) is None
 
 
 def test_output_validation_checks_hashes_and_protocol(tmp_path):

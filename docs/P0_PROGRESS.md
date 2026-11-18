@@ -418,6 +418,17 @@ project venv despite the recorded base-interpreter path.
   audit is in
   `results/main_seeds_20261118/seed_1/_validations/tap__Gemma_3_4B__jbb.json`;
   answer SHA-256 is `b5ccd976...`. The queue advanced to StrongREJECT.
+- Gemma TAP seed-1 completed all three datasets at 11:22:38.
+  StrongREJECT passed `313/313`; the final summarizer validates all 933 answers,
+  finds `933/933` raw and normalized frozen-answer prefixes, three exact
+  strings and no failures. StrongREJECT answer SHA-256 is `5666259c...`; the
+  full compact audit is
+  `results/main_seeds_20261118/seed_1/tap__Gemma_3_4B__seed_1.completion.json`.
+  The queue advanced to MiniCPM TAP seed 1. Its vLLM path is deterministically
+  incompatible in the local `vLLM 0.8.5` environment
+  (`Phi3LongRoPEScaledRotaryEmbedding._compute_cos_sin_cache` signature), so a
+  version-bound short circuit now sends MiniCPM directly to the pinned HF path;
+  the current HF fallback loaded successfully and is generating.
 - Added a reusable three-dataset attack completion summarizer. It discovers
   each frozen source, invokes the formal replay validator, computes raw and
   terminal-replacement-normalized prefix matches, exact matches, token counts,
