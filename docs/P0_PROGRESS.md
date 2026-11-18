@@ -462,6 +462,14 @@ project venv despite the recorded base-interpreter path.
   field. The reviewed input hash is
   `054a1066982cf3958b8ee70d84ae050984d59238fcd8a1cb7cd7f3e168d7ecc7`.
   Fig. 3 remains gated on the 18 P0 N-sweep points.
+- Added the reviewed final Table 2 generator. It joins the frozen rank-50,
+  mass-floor and exact primary-judge cells with the nine-cell SecureSD seed-0
+  experiment, verifies all answer/judge alignments and hashes, and reports
+  Wilson ASR intervals, mean acceptance, and relative throughput. SecureSD
+  has no provenance-certified same-host rank anchor, so its ratio is explicitly
+  `n/a`; the pooled 933-response throughput basis is stated in the caption. The
+  generated table compiles and visually fits as a one-page `table*` under the
+  actual `IEEEtran` class without clipping or overfull boxes.
 - Committed `d56c14e`: P0 analysis now reports total seconds/tokens and pooled
   per-model mode summaries, providing exact same-run throughput inputs.
 - Committed `e9a84b7`: added the Fig. 3 cost-safety point aggregator. Frozen
