@@ -238,12 +238,12 @@ project venv despite the recorded base-interpreter path.
 ## Full P0
 
 - Full P0 generation is running on three remote GPUs.
-- Snapshot at 2026-11-18 11:26 Asia/Shanghai: MiniCPM `5,763/8,397`
-  valid records (JBB 900 complete, AdvBench 3,256, StrongREJECT 1,607), Gemma
-  `5,066/8,397` valid records (retry JBB 731, AdvBench 2,427, StrongREJECT
-  1,908; the failed 760-row old JBB partial is excluded), and Qwen
-  `6,589/8,397` (JBB 900 complete, AdvBench 3,400, StrongREJECT 2,289). The
-  valid remote total is `17,418/25,191`. MiniCPM AdvBench is in exact and
+- Snapshot at 2026-11-18 11:35 Asia/Shanghai: MiniCPM `5,815/8,397`
+  valid records (JBB 900 complete, AdvBench 3,280, StrongREJECT 1,635), Gemma
+  `5,124/8,397` valid records (retry JBB 739, AdvBench 2,461, StrongREJECT
+  1,924; the failed 760-row old JBB partial is excluded), and Qwen
+  `6,625/8,397` (JBB 900 complete, AdvBench 3,425, StrongREJECT 2,300). The
+  valid remote total is `17,564/25,191`. MiniCPM AdvBench is in exact and
   StrongREJECT is in N=40; Gemma retry JBB is in force-draft-exact, AdvBench
   is in N=40 and StrongREJECT has entered force-draft-exact; Qwen AdvBench is
   in force-draft-exact and StrongREJECT is in force-target-topk.
