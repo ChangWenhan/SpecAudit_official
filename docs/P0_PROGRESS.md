@@ -336,9 +336,13 @@ project venv despite the recorded base-interpreter path.
   55.0%/66.35%; loose prompt/instruction accuracy is 60.0%/70.44%. The 200
   responses include 44 truncations and no empty answers, and the score hash
   matches the completed output marker. Committed `d989a2e`.
-- Qwen3-4B IFEval seed-1 exact is running after the completed rank-50 cell;
-  the detached parent has written `156/200` checkpointed answers and remains
-  live. The E13 queue has not started and will gate on all five utility cells.
+- Qwen3-4B IFEval seed-1 exact completed all 200 answers and passed the
+  run-identity validator: strict prompt/instruction accuracy is
+  76.5%/83.96%; loose prompt/instruction accuracy is 81.0%/87.11%. Only four
+  responses were truncated and none were empty; the score hash matches the
+  completed output marker. Committed `d46d23e`. The parent has automatically
+  started SecureSD, the final utility cell; the E13 queue still gates on all
+  five completed cells.
 - Committed `298f273`: the benign scorer now checks response count before
   ID/prompt alignment and explicitly tells the caller to pass the matching
   `--limit` for subset runs. This removes the misleading identity error found
