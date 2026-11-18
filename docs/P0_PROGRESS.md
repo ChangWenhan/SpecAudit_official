@@ -223,14 +223,14 @@ project venv despite the recorded base-interpreter path.
 ## Full P0
 
 - Full P0 generation is running on three remote GPUs.
-- Snapshot at 2026-11-18 07:46 Asia/Shanghai: MiniCPM `3,037/8,397`
-  records (JBB 900 complete, AdvBench 2,121, StrongREJECT 16), Gemma
-  `3,463/8,397` (JBB 760, AdvBench 1,413, StrongREJECT 1,290), and Qwen
-  `5,264/8,397` (JBB 900 complete, AdvBench 2,592, StrongREJECT 1,772). The
-  remote total is `11,764/25,191`. MiniCPM AdvBench is in N=40 and
-  StrongREJECT has started; Gemma is in JBB forced-target, AdvBench N=10 and
-  StrongREJECT N=40; Qwen AdvBench is at the end of N=40 and StrongREJECT is in
-  exact.
+- Snapshot at 2026-11-18 08:08 Asia/Shanghai: MiniCPM `3,373/8,397`
+  valid records (JBB 900 complete, AdvBench 2,285, StrongREJECT 188), Gemma
+  `3,008/8,397` valid records (retry JBB 93, AdvBench 1,531, StrongREJECT
+  1,384; the failed 760-row old JBB partial is excluded), and Qwen
+  `5,434/8,397` (JBB 900 complete, AdvBench 2,689, StrongREJECT 1,845). The
+  valid remote total is `11,815/25,191`. MiniCPM AdvBench is in N=40 and
+  StrongREJECT in N=0; Gemma retry JBB is in N=0, AdvBench N=10 and
+  StrongREJECT N=40; Qwen AdvBench is in exact and StrongREJECT is in exact.
 - The first complete P0 cell is Qwen3-4B/JBB at seed 0 (`900/900`). It passed
   the current strict validator, including all nine mode counts, one sample per
   request/mode, forced-token provenance, summary mode statistics and
@@ -337,7 +337,7 @@ project venv despite the recorded base-interpreter path.
   responses include 44 truncations and no empty answers, and the score hash
   matches the completed output marker. Committed `d989a2e`.
 - Qwen3-4B IFEval seed-1 exact is running after the completed rank-50 cell;
-  the detached parent has written `133/200` checkpointed answers and remains
+  the detached parent has written `156/200` checkpointed answers and remains
   live. The E13 queue has not started and will gate on all five utility cells.
 - Committed `298f273`: the benign scorer now checks response count before
   ID/prompt alignment and explicitly tells the caller to pass the matching
