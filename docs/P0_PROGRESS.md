@@ -427,9 +427,9 @@ project venv despite the recorded base-interpreter path.
   partial and rerun it with the wrong runtime. A runtime-version mismatch is
   now fatal and leaves the file untouched; only an experimentally different
   mode/prompt/seed/etc. configuration is archived. With the exact production
-  overlays, three live files validated successfully as ordered prefixes:
-  MiniCPM/AdvBench `2,980`, Qwen/AdvBench `3,180`, and Gemma/StrongREJECT
-  `1,754` records. The complete suite passes
+  overlays, all six in-flight remote partials validated as ordered prefixes:
+  MiniCPM JBB/AdvBench/StrongREJECT `900/2,994/1,254`, Qwen
+  `900/3,189/2,196`, and Gemma `612/2,138/1,762` at 10:19. The complete suite passes
   `168 passed, 1 skipped, 5 subtests passed`.
 - TAP replay validation caught a chat-template mismatch: the first attempt did
   not pass `enable_thinking=False`, so none of 84 answers matched the frozen
