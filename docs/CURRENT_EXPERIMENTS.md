@@ -17,7 +17,7 @@ its partial outputs stay deleted. What was restored is narrower:
 | — of which 2×2 | 4 factorial conditions + exact anchor × 933 × 3 | 13,995 | generated and validated |
 | — of which N sweep | 6 N points × 933 × 3 | 16,794 | generated and validated |
 | Analysis | matched acceptance rate and Pareto (ASR vs acceptance, ASR vs throughput) | 0 | waiting for dual-judge outputs |
-| 3-seed main table | 7 main-table conditions × 2 new seeds × 933 × 3 pairs | 39,186 ASR | A100 runs seed-2 baseline; 4090 runs seed-2 TAP/FlipAttack |
+| 3-seed main table | 7 main-table conditions × 2 new seeds × 933 × 3 pairs | 39,186 ASR | A100 runs Target, Draft, rank-50, exact and SecureSD; 4090 runs TAP/FlipAttack |
 | 3-seed IFEval | 5 utility conditions × 200 × 3 models × 2 new seeds | 6,000 | seed-1 complete; seed-2 Qwen running |
 | Judge | every new ASR answer re-judged by both judges | 78,372 judgments | last |
 

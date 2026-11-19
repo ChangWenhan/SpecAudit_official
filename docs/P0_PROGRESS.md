@@ -262,6 +262,14 @@ project venv despite the recorded base-interpreter path.
   cells are also still missing. A second A100 watcher will automatically run
   the same five conditions for MiniCPM, Qwen and Gemma after the seed-2 queue
   completes, so the three-seed main table is not left with a seed-1 gap.
+- The main-table baseline scope is seven methods: Target/Bare, Draft only,
+  rank-50, exact, SecureSD, TAP and FlipAttack. A real one-prompt A100 smoke
+  passed all seven methods for Qwen and Gemma and both attack replays for
+  MiniCPM, while the active MiniCPM run exercises the remaining non-attack
+  methods. The smoke uncovered and fixed two setup issues before full runs:
+  the Qwen draft directory was a symlink bundle that required `rsync -L`, and
+  s109 initially had an older attack-replay CLI without batch support. The
+  audited smoke summary is `results/a100_baseline_smoke_20261119/`.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the
