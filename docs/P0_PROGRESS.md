@@ -269,6 +269,12 @@ project venv despite the recorded base-interpreter path.
   the Qwen draft directory was a symlink bundle that required `rsync -L`, and
   s109 initially had an older attack-replay CLI without batch support. The
   audited smoke summary is `results/a100_baseline_smoke_20261119/`.
+- The serial scheduler was replaced with memory-bounded parallelism. The A100
+  now runs seed-2 MiniCPM, Qwen and Gemma non-attack baselines concurrently
+  (about 35 GB resident at launch). The local RTX 4090 runs Qwen seed-2 IFEval
+  and Qwen FlipAttack concurrently (about 18.7 GB resident at launch); the
+  remaining local queue will skip these cells when their aligned outputs are
+  already complete.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the
