@@ -264,9 +264,8 @@ project venv despite the recorded base-interpreter path.
   completes, so the three-seed main table is not left with a seed-1 gap.
 - The main-table baseline scope is seven methods: Target/Bare, Draft only,
   rank-50, exact, SecureSD, TAP and FlipAttack. A real one-prompt A100 smoke
-  passed all seven methods for Qwen and Gemma and both attack replays for
-  MiniCPM, while the active MiniCPM run exercises the remaining non-attack
-  methods. The smoke uncovered and fixed two setup issues before full runs:
+  passed all seven methods for all three models. The smoke uncovered and fixed
+  two setup issues before full runs:
   the Qwen draft directory was a symlink bundle that required `rsync -L`, and
   s109 initially had an older attack-replay CLI without batch support. The
   audited smoke summary is `results/a100_baseline_smoke_20261119/`.
