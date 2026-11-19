@@ -238,6 +238,20 @@ project venv despite the recorded base-interpreter path.
 ## Full P0
 
 - Full P0 generation is running on three remote GPUs.
+- All nine P0 model/dataset cells have now completed and returned to the local
+  source of truth. Six new JSONL/run/summary triplets were copied from s109
+  and s111 with matching SHA-256 values. Three inherited runtime-version maps
+  were repaired with the reviewed provenance helper; the formal validator now
+  passes all nine cells.
+- The validated cells were assembled into the canonical
+  `results/p0_final_20261119/` root. The frozen manifest contains nine cells;
+  fresh-control reports `9/9`, zero failures and zero warnings; and the release
+  gate is `ready` with nine validated cells.
+- The canonical P0 package and its rebuilt A100-local release gate were
+  synchronized to s109. The reviewed vLLM judge dry-run passes with separate
+  gpt-oss/Qwen3Guard ports and 16 workers per judge. The real sequential judge
+  run started at 14:24 on the idle A100 while the local RTX 4090 continues the
+  remaining E13 seed-2 queue.
 - Gemma3-4B/JBB retry completed at `900/900` after the draft-vocabulary
   fallback fix. The corrected JSONL, run manifest, and summary were copied
   from s111 with matching SHA-256 values; the formal cell validator passes.
