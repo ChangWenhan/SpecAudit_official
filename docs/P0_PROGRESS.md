@@ -258,6 +258,10 @@ project venv despite the recorded base-interpreter path.
   queue now runs the five non-attack conditions serially: MiniCPM first, then
   Qwen and Gemma. The RTX 4090 continues only the seed-2 TAP/FlipAttack/IFEval
   cells so the two machines do not duplicate work.
+- The local and remote inventories show that the seed-1 non-attack baseline
+  cells are also still missing. A second A100 watcher will automatically run
+  the same five conditions for MiniCPM, Qwen and Gemma after the seed-2 queue
+  completes, so the three-seed main table is not left with a seed-1 gap.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the
