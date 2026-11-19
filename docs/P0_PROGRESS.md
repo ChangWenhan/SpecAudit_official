@@ -249,9 +249,19 @@ project venv despite the recorded base-interpreter path.
   gate is `ready` with nine validated cells.
 - The canonical P0 package and its rebuilt A100-local release gate were
   synchronized to s109. The reviewed vLLM judge dry-run passes with separate
-  gpt-oss/Qwen3Guard ports and 16 workers per judge. The real sequential judge
-  run started at 14:24 on the idle A100 while the local RTX 4090 continues the
-  remaining E13 seed-2 queue.
+  gpt-oss/Qwen3Guard ports and 16 workers per judge. The initial real judge
+  attempt exited during gpt-oss Harmony setup because the offline host could
+  not load the Harmony vocabulary; no labels were produced. Per the updated
+  priority, judging is deferred until all remaining C experiments finish.
+- The A100 was reassigned to seed-2 baselines. The local Qwen/Gemma model pairs
+  were synchronized to s109 (18.7 GB, size/mtime dry-run clean), and the A100
+  queue now runs the five non-attack conditions serially: MiniCPM first, then
+  Qwen and Gemma. The RTX 4090 continues only the seed-2 TAP/FlipAttack/IFEval
+  cells so the two machines do not duplicate work.
+- A complete P0 audit archive was returned to the local source of truth under
+  `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
+  backflow copies A100 seed-2 results into the local seed-2 directory while the
+  A100 queue runs.
 - Gemma3-4B/JBB retry completed at `900/900` after the draft-vocabulary
   fallback fix. The corrected JSONL, run manifest, and summary were copied
   from s111 with matching SHA-256 values; the formal cell validator passes.
