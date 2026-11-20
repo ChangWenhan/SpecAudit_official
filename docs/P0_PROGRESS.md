@@ -275,6 +275,12 @@ project venv despite the recorded base-interpreter path.
   and Qwen FlipAttack concurrently (about 18.7 GB resident at launch); the
   remaining local queue will skip these cells when their aligned outputs are
   already complete.
+- By the seed-1 baseline phase, Qwen had completed all six main/draft cells.
+  The remaining Gemma work was split to use the idle 4090: A100 keeps
+  MiniCPM/StrongREJECT and Gemma/AdvBench, while S218 runs
+  Gemma/StrongREJECT in the isolated `results/main_seeds_split_s218/` root.
+  A watcher merges and formally validates the two Gemma StrongREJECT artifacts
+  into the canonical seed-1 directory when the split task completes.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the
