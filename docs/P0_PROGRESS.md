@@ -281,6 +281,16 @@ project venv despite the recorded base-interpreter path.
   Gemma/StrongREJECT in the isolated `results/main_seeds_split_s218/` root.
   A watcher merges and formally validates the two Gemma StrongREJECT artifacts
   into the canonical seed-1 directory when the split task completes.
+- All C generation is now complete. The split Gemma/StrongREJECT artifacts
+  were merged at 19:06 on 2026-11-20 and passed both formal main/draft
+  validators. Frozen E13 judge manifests were built for seeds 1 and 2, each
+  containing 36 files, and synchronized to s109 with matching hashes.
+- The gpt-oss Harmony startup failure was fixed by installing the public
+  `o200k_base.tiktoken` under the exact tiktoken cache filename expected by
+  vLLM. The API environment now loads the Harmony encoding successfully. P0
+  dual judging restarted from a fresh runtime on 2026-11-21 after the C
+  completion gate; E13 seed-1/seed-2 inputs are ready for the following judge
+  phases.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the
