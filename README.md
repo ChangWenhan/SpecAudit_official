@@ -9,19 +9,19 @@ Released drafts and controlled higher-risk artifacts expose the risk source,
 its propagation through the selected policy, and the final response outcome.
 The target and original requests stay fixed in the relevant comparisons.
 
-Documentation updated 2026-11-18; evidence remains frozen at 2026-10-11. The
-current framing and the original Introduction structure are recorded in
-[docs/POSITIONING.md](docs/POSITIONING.md).
+Documentation updated 2026-11-22. The original 2026-10-11 paper evidence is
+unchanged and remains frozen. The current framing and Introduction structure
+are recorded in [docs/POSITIONING.md](docs/POSITIONING.md).
 
-The active work is the experimental-section rebuild: two P0 mechanism
-experiments (2×2 opening-token intervention and the N sweep, merged into one
-25,191-answer batch), the matched-acceptance/Pareto analysis, and a final
-3-seed rerun of the seven main-table conditions. Every new ablation covers all
-three datasets and all three model pairs; the 2×2 requires a new forced-token
-hook in `src/spec_decode.py`. Seed-0 IFEval utility (15 cells), the nine-cell
-SecureSD supplement and the JBB-only prefix pilot are complete and reused. The
-2026-11-11 cancellation of the 108-cell seed expansion stands. Human reviewers
-are unavailable. See
+The planned experimental campaign is complete. The P0 mechanism batch produced
+25,191 answers, passed all `9/9` formal cells and the fresh-control check, and
+has `unknown=0` under both automatic judges. The E13 main-table rerun adds
+seeds 1 and 2 across seven conditions, three model pairs and three datasets;
+both 36-file judge manifests are complete with no unresolved labels after an
+audited raw-Harmony retry. The three-seed analyzer produced 126 ASR rows and 21
+utility rows, including the two attack rows that share Bare's IFEval output by
+definition. The final aggregates and paper table fragments are under
+`results/e13_analysis_20261122/`. No experiment is currently queued. See
 [CURRENT_EXPERIMENTS.md](docs/CURRENT_EXPERIMENTS.md) and the project-level
 [EXPERIMENTS.md](../../EXPERIMENTS.md).
 
@@ -281,7 +281,7 @@ mitigations; 4 is the released-draft control.  `K=50` reuses the main cells.
 
 ### SecureSD Step baseline
 
-The server checkout includes an adaptation of the [official SecureSD implementation](https://github.com/YichiCS/Secure-Speculative-Decoding/tree/6c9886bd0b09e4b5a8810d2c87f7c910d824eaea). It uses the authors' step schedule and verifier fusion with SpecAudit's top-$K$ verifier ($K=50$) and an exact prefix of ten output positions. Select it with `--ablation 5`. Seed-isolated output, configuration/checksum-aware reuse and formal judge-pool integration are now implemented. The first Qwen3-4B/JBB cell completed on 2026-11-10 (12/100 primary positives, no unknowns); remaining progress is recorded in `results/securesd_20261110/status.json`. The existing head-exact measurements are recorded separately in the frozen evidence.
+The server checkout includes an adaptation of the [official SecureSD implementation](https://github.com/YichiCS/Secure-Speculative-Decoding/tree/6c9886bd0b09e4b5a8810d2c87f7c910d824eaea). It uses the authors' step schedule and verifier fusion with SpecAudit's top-$K$ verifier ($K=50$) and an exact prefix of ten output positions. Select it with `--ablation 5`. Seed-isolated output, configuration/checksum-aware reuse and formal judge-pool integration are implemented. All nine harmful-request cells completed with both judges in `results/securesd_20261110/seed_0/`; the existing head-exact measurements remain separate in the frozen evidence.
 
 See [the SecureSD reproduction instructions](docs/REPRODUCIBILITY.md#securesd-step-baseline) for the matched settings and command.
 
@@ -347,17 +347,20 @@ Exact-cell rates are close to bare generation, consistent with distribution
 preservation; nonsignificance is not equivalence. This supports a conditional
 supply-chain failure, not an unavoidable effect of every external draft.
 
-The existing evidence supports the current core story. Reorganize it before
-starting new matrices; human review remains pending. Additional systems, speed
-or utility experiments become necessary when those claims are added.
+The existing evidence supports the current core story. The three-seed rerun
+now covers the seven main-table conditions and IFEval, while the mechanism
+sweeps, probability variants and defense cells remain single-seed. Additional
+systems or latency experiments become necessary only when those claims are
+added.
 
 **Does not show:** that rank-50 is a production default; that the attack works
 against a real vLLM/SGLang service without further integration; that the
-defenses survive an adaptive attacker; that benign utility or latency is
-preserved; or that the automatic judge labels equal human-confirmed harmful
-assistance.  The study uses one generation seed per cell, temperature 1, and
-`max_new=160`.  See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for the complete
-list.
+defenses survive an adaptive attacker; that the implementation has a latency
+advantage; or that the measured rules generalize to every model, dataset and
+engine. The frozen component tables use one generation seed per cell; the
+separate three-seed campaign establishes main-table stability only. Harmful
+generation uses temperature 1 and `max_new=160`. See
+[docs/LIMITATIONS.md](docs/LIMITATIONS.md) for the complete list.
 
 ## Documentation
 

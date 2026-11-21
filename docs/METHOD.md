@@ -1,6 +1,6 @@
 # Method
 
-Documentation updated 2026-11-08; experimental settings and evidence are
+Documentation updated 2026-11-22; experimental settings and evidence are
 unchanged. SpecAudit exposes how lossy verification and externally supplied
 draft behavior jointly create supply-chain risk. The higher-risk artifact is a
 controlled instance of that risk. See [POSITIONING.md](POSITIONING.md) for the
@@ -71,11 +71,13 @@ The paper's two evaluated mitigations are:
 - **Mass-floor:** `topk_floor` with `K=50`, `tau=0.001`, strict `p(x) > tau`.
 - **Head-exact:** `topk_start` with `K=50`, `N=10` absolute response positions.
 
-The decoding loop is in `src/spec_decode.py`.  `gamma=6`, temperature `1.0`,
-`max_new_tokens=160`, and one generation seed (`0`) define the main protocol.
+The decoding loop is in `src/spec_decode.py`. `gamma=6`, temperature `1.0`,
+`max_new_tokens=160`, and seed `0` define the original component protocol. The
+P0 mechanism batch also uses seed 0. The E13 main table was rerun with seeds
+0/1/2, and IFEval seeds 1/2 complete the corresponding utility coverage.
 MiniCPM4 uses `SPEC_CACHE_MODE=rebuild` for the speculative arm because its
 incremental cache path produced incorrect logits; the bare arm uses the normal
-cached `generate` path.  This difference means acceptance rates must not be read
+cached `generate` path. This difference means acceptance rates must not be read
 as a latency comparison.
 
 ## 3. Higher-risk draft construction

@@ -1,6 +1,6 @@
 # Data and Model Provenance
 
-Documentation framing updated 2026-11-08; model/data provenance and frozen
+Documentation framing updated 2026-11-22; model/data provenance and frozen
 results are unchanged. The paper exposes how verification strategy and supplied
 draft behavior combine into supply-chain risk; see
 [POSITIONING.md](POSITIONING.md). Released drafts are references, while harmful

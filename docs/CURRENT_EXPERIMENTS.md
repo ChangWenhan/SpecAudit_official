@@ -1,10 +1,20 @@
 # Current experiment scope
 
-Updated 2026-11-18. The authoritative plan is the project-level
+Updated 2026-11-22. The authoritative plan is the project-level
 [EXPERIMENTS.md](../../../EXPERIMENTS.md), derived from
 [reviews/20261117/EXPERIMENT_REVIEW.md](../../../reviews/20261117/EXPERIMENT_REVIEW.md).
 This file records only what the code in this repository must run and where the
-outputs live.
+outputs live. The plan below is complete; there is no queued experiment.
+
+## Final status (2026-11-22)
+
+| Workstream | Final state |
+|---|---|
+| P0 generation | `25,191/25,191` answers; formal validation `9/9`; fresh control `9/9` with zero failures and warnings |
+| P0 judges | gpt-oss `25,191/25,191` with `unknown=0`; Qwen3Guard `25,191/25,191` with `unknown=0` |
+| E13 seeds 1/2 | generation and scoring complete; each seed has two frozen 36-file judge manifests with 19,593 labels per judge and `unknown=0` |
+| E13 analysis | 126 ASR rows and 21 utility rows; primary, auxiliary and judge-comparison table fragments generated |
+| Release state | P0 release gate is `ready`; remote workspaces are idle and the project copies on s109/s111 were removed after local checksum verification |
 
 ## Restored scope (2026-11-18)
 
@@ -17,12 +27,16 @@ its partial outputs stay deleted. What was restored is narrower:
 | — of which 2×2 | 4 factorial conditions + exact anchor × 933 × 3 | 13,995 | generated and validated |
 | — of which N sweep | 6 N points × 933 × 3 | 16,794 | generated and validated |
 | Analysis | matched acceptance rate and Pareto (ASR vs acceptance, ASR vs throughput) | 0 | both judge analyses complete |
-| 3-seed main table | 7 main-table conditions × 2 new seeds × 933 × 3 pairs | 39,186 ASR | generation complete; two 36-file judge manifests frozen |
+| 3-seed main table | 7 main-table conditions × 2 new seeds × 933 × 3 pairs | 39,186 ASR | generation, both judges, aggregation and table rendering complete |
 | 3-seed IFEval | 5 utility conditions × 200 × 3 models × 2 new seeds | 6,000 | complete and scored |
 | Judge | every new ASR answer re-judged by both judges | 78,372 judgments | complete with zero unresolved labels after audited raw-Harmony retry |
 
 Final E13 three-seed aggregates and table fragments are in
-`results/e13_analysis_20261122/`.
+`results/e13_analysis_20261122/`. The two gpt-oss rows that initially failed
+were recovered through the audited raw-Harmony fallback; their replacement
+labels are part of the 19,593 valid labels for their seed. Invalid `unknown`
+labels are excluded from completed analytical denominators and retested rather
+than treated as safe or negative.
 
 Datasets are JBB (100), AdvBench (520) and StrongREJECT (313) — 933 per pair.
 Every ablation covers all three datasets and all three model pairs; no
@@ -59,10 +73,12 @@ monotonicity; report `N*` per model and dataset or state that no plateau exists.
 
 ## Already finished and reused
 
-**Utility.** IFEval first 200, five main-table configurations (Bare, modified
-draft alone, rank-50, Exact, SecureSD Step), three pairs: 15 cells / 3,000
-answers at seed 0, in `results/utility200_20261111/`. FlipAttack/TAP utility
-rows share Bare's data by definition. The **prefix sweep** in
+**Utility.** IFEval first 200, five generated configurations (Target, modified
+draft alone, rank-50, Exact, SecureSD Step), three pairs and seeds 0/1/2: 45
+base cells / 9,000 answers. The final 21-row utility table includes TAP and
+FlipAttack, which share Bare's data by definition. Seed 0 is under
+`results/utility200_20261111/`; seeds 1/2 are under
+`results/utility200_20261118/`. The **prefix sweep** in
 `results/prefix_sweep_20261111/` covers JBB only (Gemma and MiniCPM) and is a
 pilot, not the formal N sweep.
 
@@ -77,10 +93,13 @@ frozen `seconds` and `n_tokens`; same-host ratios only.
 
 | Batch | Root |
 |---|---|
-| P0 merged batch | `results/p0_20261118/` |
-| Analysis | `results/pareto_20261118/` |
+| Canonical P0 package | `results/p0_final_20261119/` |
+| P0 work/retry history | `results/p0_20261118/`, `results/p0_retry_20261118/` |
+| P0 analyses | `results/pareto_20261118/` |
 | 3-seed main table | `results/main_seeds_20261118/seed_{1,2}/` |
 | 3-seed IFEval | `results/utility200_20261118/seed_{1,2}/` |
+| Final E13 aggregates/tables | `results/e13_analysis_20261122/` |
+| Remote audit archive | `results/remote_archive_20261122/` |
 
 Frozen cells keep the `<mode>__<Model>__<dataset>__tf4576.jsonl` naming, one
 mode per file. The P0 batch instead writes one file per model × dataset with all
@@ -107,5 +126,8 @@ must be forwarded to the scorer. Empty, malformed and truncated outputs stay in
 the denominator. No LLM judge is used for IFEval.
 
 Harmful-answer judging uses `scripts/run_dual_judge_pool.py`: primary
-`gpt-oss-safeguard-20b`, auxiliary `Qwen3Guard-Gen-4B`. Never reuse seed-0
-labels for new generations.
+`gpt-oss-safeguard-20b`, auxiliary `Qwen3Guard-Gen-4B`. The completed campaign
+split the two judge services across available hosts, preserved separate
+checkpoints, and never reused seed-0 labels for a new generation. The raw
+archive preserves source/data/model-environment inventories, logs and result
+files but excludes the large model weights and environments.

@@ -80,7 +80,7 @@ def build_plan(llm_root, assets, seeds, pilot=None):
         "benign_seeds": [0], "benign_scope": "full" if pilot is None else f"pilot-first-{pilot}",
         "assets": str(assets), "assets_manifest_sha256": sha256_file(assets / "manifest.json"),
         "protocol": {"temperature": 1., "gamma": 6, "samples": 1, "draft_proposals": "greedy",
-                     "thinking": False, "human_review": "unavailable; not scheduled"},
+                     "thinking": False},
         "seed0_policy": "retain frozen seed-0 references; no new certification of missing historical provenance",
         "cells": cells,
         "counts": {kind: {"cells": sum(c["kind"] == kind for c in cells),

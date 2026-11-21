@@ -3,7 +3,7 @@
 SpecAudit sits between efficient decoding and language-model safety.  This page
 records the closest work and the claims the paper deliberately does **not** make.
 It is not a substitute for the manuscript's bibliography. Documentation
-positioning updated 2026-11-08; paper facts below reuse the 2026-11-05 review.
+positioning updated 2026-11-22; paper facts below reuse the 2026-11-05 review.
 See [POSITIONING.md](POSITIONING.md) for the current supply-chain story.
 The manuscript bibliography is not included in this checkout.
 
@@ -59,7 +59,7 @@ across the two papers because the models, rules and attacker permissions differ.
 The reviewed v2 also reports vLLM overhead and a prefix-delaying adaptive input
 attack; do not claim that it has no systems or adaptive evaluation.
 
-The server now includes a matched SecureSD Step baseline under rank-based verification. It uses the authors' verifier code at commit `6c9886b` with the SpecAudit models, requests, and decoding loop. The first ten output positions use exact verification, and later positions use rank-50. This condition has its own seed-isolated run ID. The first Qwen3-4B/JBB cell completed on 2026-11-10; the remaining new cells are tracked separately from frozen evidence. The frozen head-exact numbers come from SpecAudit's existing implementation. See [the reproduction instructions](REPRODUCIBILITY.md#securesd-step-baseline).
+The server includes a matched SecureSD Step baseline under rank-based verification. It uses the authors' verifier code at commit `6c9886b` with the SpecAudit models, requests, and decoding loop. The first ten output positions use exact verification, and later positions use rank-50. This condition has its own seed-isolated run ID. All nine harmful-request cells completed with both judges in `results/securesd_20261110/seed_0/` and remain separate from the frozen export. The frozen head-exact numbers come from SpecAudit's existing implementation. See [the reproduction instructions](REPRODUCIBILITY.md#securesd-step-baseline).
 
 ### SSD: Speculative Safety-Aware Decoding
 
@@ -148,6 +148,5 @@ implemented evidence.
 - That the attack works against a real serving engine without integration.
 - That exact verification is a general safety filter.  It preserves the target
   distribution; it does not make the target safer.
-- That the two mitigations resist an adaptive attacker or preserve benign
-  utility and speed.
-- That the reported automatic labels equal human-confirmed harmful assistance.
+- That the two mitigations resist an adaptive attacker, preserve broad benign
+  utility, or establish a production speed advantage.

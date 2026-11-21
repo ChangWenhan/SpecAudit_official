@@ -16,24 +16,8 @@
 !/scripts/
 !/scripts/*.py
 !/scripts/*.sh
-# Historical/obsolete scripts kept locally but not published
-/scripts/bestofn.py
-/scripts/generate_paper_figures.py
-/scripts/make_rerun_manifest.py
-/scripts/rejudge_unknown_gptoss_api.py
-/scripts/run_autodan.py
-/scripts/run_crescendo.py
-/scripts/run_endec.py
-/scripts/run_multiturn.py
-/scripts/run_w2s.py
-/scripts/start_dual_judge_pool.py
-/scripts/sync_to_servers.sh
 # Internal cluster/sync tooling kept locally but not published
-/scripts/finish_model_transfer.py
-/scripts/plan_utility_200.py
-/scripts/run_tap_cluster.py
 /scripts/serve_tap_feedback.py
-/scripts/sync_generation_shards.py
 # Tests, docs, example configs
 !/tests/
 !/tests/*.py

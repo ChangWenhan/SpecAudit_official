@@ -375,7 +375,7 @@ def attacker_turn(model, tokenizer, conv_messages, prompt_text, args, seed, remo
 def build_record(args, item, attack_system, adv_prompt, response, judge_score, verdict, trace, n_queries, seconds, seed, n_tokens):
     return {
         "method": "tap",
-        "mode": "tap",  # consumed by scripts/rejudge.py & scripts/bestofn.py
+        "mode": "tap",  # consumed by the judge and analysis scripts
         "source": TAP_SOURCE,
         "dataset": args.dataset,
         "id": str(item["id"]),

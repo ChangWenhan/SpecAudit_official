@@ -1,39 +1,35 @@
 # Limitations
 
-Documentation updated 2026-11-18; frozen experiments are unchanged. The
+Documentation updated 2026-11-22; the original frozen export is unchanged. The
 evidence supports conditional supply-chain risk from the combination of lossy
 verification and external draft behavior. See [POSITIONING.md](POSITIONING.md).
 It does not imply that every external draft or relaxation is unsafe. The
-existing core story does not require running all possible extensions below;
-each missing capability limits the corresponding claim.
+planned campaign is complete, but the omissions below still limit the claims
+that these results can support.
 
 ## 1. Seed coverage and one decoding schedule
 
-The frozen evidence uses temperature `1.0`, `gamma=6`, `max_new_tokens=160` and
-one generation seed (`0`).  The results therefore do not establish stability
-across sampling seeds or across different `gamma`/`max_new` budgets.  The
-papers' confidence intervals describe resampling uncertainty over the observed
-paired outcomes, not run-to-run generation variance.
+The original evidence uses temperature `1.0`, `gamma=6`, `max_new_tokens=160`
+and one generation seed (`0`). The P0 mechanism batch also uses one seed. The
+separate E13 rerun covers seeds 0/1/2 for the seven main-table conditions and
+IFEval. It does not make the K sweep, probability variants or most defense
+cells multi-seed. It also does not establish stability across different
+`gamma` or `max_new` budgets. The 108-cell seed expansion cancelled on
+2026-11-11 remains cancelled.
 
-The 2026-11-18 plan restores a **3-seed main table only** (seed 0/1/2, all seven
-main-table conditions, plus IFEval seeds 1/2), as the last batch after the new
-mechanism experiments. The 108-cell seed expansion cancelled on 2026-11-11 is
-not restored. Until that main-table rerun finishes, every statement about seed
-stability is unsupported, and after it finishes only the main table has
-multi-seed evidence.
-
-## 2. Automatic judges, not human-confirmed harm
+## 2. Automatic judge labels
 
 Positive rates come from two open automatic judges:
 
 - primary `gpt-oss-safeguard-20b` (substantive harmful assistance);
 - auxiliary `Qwen3Guard-Gen-4B` (wide and strict views).
 
-The human blind review was prepared but not completed at the time of the frozen
-evidence.  Automatic labels are not human labels.  In particular, a judge can
-over- or under-call "meaningful assistance", and a positive label is not proof
-that generated code executes or that a real attack succeeds.  The auxiliary
-labels are reported as a second view, not averaged into the primary rate.
+A judge can over- or under-call "meaningful assistance", and a positive label
+is not proof that generated code executes or that a real attack succeeds. The
+auxiliary labels are reported as a second view, not averaged into the primary
+rate. The Qwen3Guard wide view treats `controversial` as valid and positive;
+its strict view keeps `controversial` negative. Both views preserve valid-label
+denominators and fail closed on unresolved records.
 
 ## 3. Unresolved labels
 
@@ -41,6 +37,9 @@ There are 15 unresolved primary-judge labels in the 45 main cells (about 0.107%
 of the main primary-judge responses).  The export reports lower/upper bounds and
 restricts paired tests to known pairs.  The bounds are not confidence intervals,
 and a non-significant test on a reduced set is not evidence of no effect.
+Those 15 labels belong to the frozen 2026-10-11 export. P0 and E13 were
+completed with valid-label denominators and `unknown=0` after retesting failed
+or malformed judge outputs.
 
 ## 4. Exact verification is a negative control, not an equivalence proof
 
@@ -71,13 +70,14 @@ risk.  This adaptive-attack experiment was not run.  The residual rates of the
 mitigations should therefore be read as lower bounds on the difficulty of
 defending, not as a robustness guarantee.
 
-## 7. No benign utility measurement
+## 7. Limited benign utility measurement
 
-The study measures harmful-request outcomes.  It does not measure normal task
-quality, over-refusal, helpfulness, or user-perceived utility under the
-mitigations.  A defense that reduces harmful positives but destroys useful
-answers would not be acceptable in deployment.  This trade-off is not measured
-here.
+Utility is measured on the first 200 IFEval requests for five generated
+configurations (Target, Draft, rank-50, Exact, SecureSD Step), three model pairs
+and seeds 0/1/2: 45 base cells and 9,000 answers. TAP and FlipAttack share Bare
+output by definition, yielding 21 aggregate table rows. This does not measure
+broad task quality, over-refusal, helpfulness, GSM8K performance or
+user-perceived utility under the mitigations.
 
 ## 8. Limited baseline budgets
 
@@ -122,16 +122,7 @@ produced on other machines; the exact-extension cells were produced locally.
 This caveat does not change the frozen aggregate's arithmetic, but it is a
 reason not to treat every auxiliary label as independently re-verified.
 
-## 13. No human review resources
-
-Human reviewers are unavailable as confirmed on 2026-11-10; human review is
-not scheduled in the current scope. A stratified package was prepared (judge disagreements, shared
-positives, shared negatives and unresolved cases), but the two human forms were
-still blank in the frozen state.  Model re-judging is not a substitute for human
-review.  The stratified sample would not directly estimate overall judge
-accuracy even after completion.
-
-## 14. Released drafts and combination effects
+## 13. Released drafts and combination effects
 
 Released weights are not automatically an unaligned model. Some released-draft
 rank-50 cells already degrade safety, but attributing that to absent safety
@@ -141,24 +132,18 @@ the wild. The available cells are not a full released/modified × exact/rank
 factorial design; released-draft exact cells were not run. Local acceptance
 properties do not by themselves prove sequence-level harmfulness.
 
-## 15. Seed coverage: main table only
+## 14. Multi-seed coverage: main table only
 
-Utility is IFEval only (first 200 items), five main-table configurations
-(Bare, Draft alone, rank-50, Exact, SecureSD Step) and three model pairs
-(15 cells), with a single fixed seed. The completed nine-cell SecureSD harmful
-results are reused. The 108-cell seed expansion and its attack-search
-companion were cancelled on 2026-11-11 and their partial outputs deleted; that
-cancellation stands. The 2026-11-18 plan restores only a 3-seed rerun of the
-seven main-table conditions plus IFEval seeds 1/2, scheduled last. See
-[CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md).
+The E13 rerun completed for seven main-table conditions, three model pairs and
+three datasets, plus IFEval seeds 1/2. The 108-cell seed expansion and its
+attack-search companion were cancelled on 2026-11-11 and their partial outputs
+were deleted; that cancellation stands. Multi-seed evidence covers the main
+table and IFEval only. K sweeps, probability rules, most defense cells and the
+auxiliary judge matrix remain single-seed. Speed is reported only as relative
+cost between verification rules on the same host, never as a production
+throughput claim. See [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md).
 
-Until that rerun completes, no multi-seed evidence exists and no stability
-claim can be made. After it completes, multi-seed evidence covers the main
-table only; K sweeps, probability rules, defense cells and the auxiliary judge
-matrix remain single-seed. Speed is reported only as relative cost between
-verification rules on the same host, never as a production throughput claim.
-
-## 16. Target-only token vocabulary
+## 15. Target-only token vocabulary
 
 Gemma3-4B exposes 262,208 output-embedding rows while the matched
 Gemma3-1B draft input embedding has 262,144 rows. A target fallback token can

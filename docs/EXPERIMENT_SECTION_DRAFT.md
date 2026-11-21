@@ -1,8 +1,9 @@
 # Experiment section working draft
 
-Updated 2026-11-18. This is a writing scaffold for the final paper. Result
-placeholders must be replaced only from the validated evidence roots; do not
-copy intermediate values into `paper/main.tex`.
+Updated 2026-11-22. This is the current writing scaffold for Section 5. The
+planned analyses and table fragments are complete; manuscript insertion should
+use only the validated evidence roots and should not copy intermediate values
+from the running logs.
 
 ## 5.1 Experimental Setup
 
@@ -34,8 +35,10 @@ identified interval, never as a two-degree-of-freedom t interval.
 This subsection asks whether the attack exists and whether strict verification
 removes it. Table 1 compares Target-only, Draft-only, rank-50, Exact, SecureSD,
 TAP, and FlipAttack across all three models and datasets. The final table
-reports the mean of seeds 0, 1, and 2 with its declared interval; the current
-production table is a placeholder until E13 finishes.
+reports the mean of seeds 0, 1, and 2 with its observed min–max range. E13 is
+complete: `results/e13_analysis_20261122/table1_primary.tex`,
+`table1_auxiliary.tex`, and `table5_judge_comparison.tex` are the table
+fragments to insert.
 
 Fig. 1 isolates the causal control. For every model and dataset it reports the
 paired Exact-minus-Target effect and Exact-minus-rank-50 effect with pointwise
@@ -100,14 +103,19 @@ Table 4 probability rules; Table 5 judge comparison; Fig. 1 paired Exact effects
 Fig. 2 position curve and opening intervention; Fig. 3 acceptance and cost;
 Fig. 4 N sweep.
 
-## Result insertion gates
+## Available evidence and insertion status
 
-- Table 1/Table 5: require complete E13 seeds 1/2, all relevant dual-judge
-  outputs, and the three-seed analyzer.
-- Fig. 2b and Fig. 4: require the complete P0 release gate and analyses from
-  the validated merged nine-condition batch.
-- Fig. 2b: require the P0 release gate and complete primary-judge analysis.
-- Fig. 3: require complete P0 N points and the cost-safety aggregator.
-- Fig. 4: require all nine model/dataset N sweeps.
-- Every rendered figure must be reviewed with `scientific-figure-making`, checked
-  at 600 dpi, and visually inspected in both PNG and vector output.
+- Table 1/Table 5: complete. The E13 three-seed analyzer and all relevant
+  dual-judge outputs are available; the three `.tex` fragments are generated.
+- Fig. 2b and Fig. 4: the complete P0 release gate and primary/auxiliary
+  analyses are available from the validated merged nine-condition batch.
+- Fig. 3: all P0 N points and the matched-acceptance/Pareto aggregators are
+  available.
+- Fig. 4: all nine model/dataset N sweeps are complete.
+- Manuscript insertion and figure review remain separate editorial steps. Use
+  `scientific-figure-making` for publication rendering and inspect both PNG and
+  vector output at 600 dpi before export.
+
+No experiment or analysis is queued. The remaining work is manuscript
+integration: insert the generated tables, render the final figures, and check
+that prose matches the frozen definitions and limitations.

@@ -1,8 +1,9 @@
 # Current Research Positioning
 
-Documentation update: 2026-11-10. Experimental evidence remains frozen at
-2026-10-11. This page records the current research framing; it does not mean
-that the manuscript has been rewritten or that new experiments were run.
+Documentation update: 2026-11-22. The original experimental evidence remains
+frozen at 2026-10-11. This page records the current research framing; the
+completed P0/E13 campaign is documented separately and does not alter the
+frozen export.
 
 ## Supply-chain mechanism
 
@@ -47,26 +48,25 @@ Do not swap paragraphs 2 and 3 or replace the original structure with an attack
 paper outline. Current writing guidance uses concise outlines rather than full
 replacement paragraphs.
 
-## Evidence and remaining work
+## Evidence and integration status
 
 Existing released/modified-draft controls, exact/rank/probability-policy
 conditions, three model pairs, three datasets, and mitigation results support
-the core story within the tested scope. Reorganize these results before
-launching additional matrices. See [EVIDENCE.md](EVIDENCE.md).
+the core story within the tested scope. The completed E13 rerun adds seeds 1/2
+for the seven main-table conditions, while IFEval now covers the first 200
+requests for five generated configurations across all three seeds. The P0
+merged batch supplies the opening-token intervention, N sweep and
+matched-acceptance/Pareto analyses. See [EVIDENCE.md](EVIDENCE.md) and
+[CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md).
 
-Human reviewers are unavailable; review is not scheduled in this execution
-scope, and automatic labels remain unvalidated by humans. Seed-0 IFEval (first
-200 items) is complete for the five main-table configurations, including
-SecureSD Step, and the nine-cell SecureSD harmful results are reused. The
-2026-11-11 cancellation of the 108-cell seed expansion and its attack searches
-stands; the 2026-11-18 plan restores only a 3-seed main-table rerun plus IFEval
-seeds 1/2, scheduled last. See
-[CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md). Existing single-seed, judge, hardware and implementation
-limitations remain in [LIMITATIONS.md](LIMITATIONS.md). Add deployment, speed,
-natural-underalignment or adaptive-robustness evidence only when making the
-corresponding claim. Released weights are not automatically an
-unaligned model, and the conditions are not a complete released/modified ×
-exact/rank factorial experiment.
+The 2026-11-11 cancellation of the 108-cell seed expansion and its attack
+searches remains in force. The main table and IFEval have multi-seed evidence;
+K sweeps, probability rules, most defense cells and the auxiliary judge matrix
+remain single-seed. Judge, hardware and implementation limitations remain in
+[LIMITATIONS.md](LIMITATIONS.md). Add deployment, speed, natural-underalignment
+or adaptive-robustness evidence only when making the corresponding claim.
+Released weights are not automatically an unaligned model, and the conditions
+are not a complete released/modified × exact/rank factorial experiment.
 
 SecureSD's strategy-level findings and exact-prefix design remain prior art;
 the current framing does not establish novelty by itself. SSD is a separate

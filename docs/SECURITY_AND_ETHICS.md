@@ -3,7 +3,7 @@
 SpecAudit exposes the supply-chain risk created by lossy verification and
 external draft behavior. Modified drafts provide controlled higher-risk
 instances; released drafts are also part of the evidence. Documentation was
-updated on 2026-11-08; see [POSITIONING.md](POSITIONING.md).  The same code can generate harmful text if used
+updated on 2026-11-22; see [POSITIONING.md](POSITIONING.md).  The same code can generate harmful text if used
 with an uncensored teacher and harmful prompts.  This page states the intended
 use and the release boundaries.
 

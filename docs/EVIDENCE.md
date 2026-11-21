@@ -1,6 +1,6 @@
 # Evidence
 
-Documentation updated 2026-11-10. The current supply-chain framing is recorded
+Documentation updated 2026-11-22. The current supply-chain framing is recorded
 in [POSITIONING.md](POSITIONING.md); all figures below remain frozen results.
 
 The authoritative frozen export is
@@ -12,11 +12,36 @@ comparisons.  No raw prompts or answers are included in this repository.
 The SecureSD Step baseline added on 2026-11-09 is a separate condition. It uses the upstream verifier with the same rank-50 and ten-position exact-prefix settings as the existing head-exact control. All nine harmful-request cells completed on 2026-11-10, with generation and both automatic judges. The Qwen3-4B/JBB cell has 12/100 primary positives and no unknowns. These completed results are separate in `results/securesd_20261110/`; this does not change the frozen tables below. The tables below report the frozen SpecAudit conditions, including the original head-exact measurements. See [the baseline protocol](REPRODUCIBILITY.md#securesd-step-baseline).
 
 Utility is separate from this export: seed-0 IFEval first-200 results are in
-`results/utility200_20261111/`. The 2026-11-11 cancellation of the 108-cell seed
-expansion stands; the 2026-11-18 plan restores only a 3-seed main-table rerun
-(plus IFEval seeds 1/2), scheduled last and not yet reflected in any frozen
-number. See [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md). Incomplete
-utility checkpoints are not frozen paper results or final scores.
+`results/utility200_20261111/`, and seeds 1/2 are in
+`results/utility200_20261118/`. The 2026-11-11 cancellation of the 108-cell
+seed expansion stands.
+
+## Current completed campaign (2026-11-22)
+
+The new campaign is complete and remains separate from the frozen numbers
+below. P0 generated `25,191/25,191` answers. All `9/9` formal cells and the
+fresh control passed, the release gate is `ready`, and both judges labeled all
+25,191 answers with `unknown=0`:
+
+| Judge | Safe | Unsafe | Controversial | Total |
+|---|---:|---:|---:|---:|
+| gpt-oss-safeguard-20b | 19,295 | 5,896 | — | 25,191 |
+| Qwen3Guard-Gen-4B (wide) | 15,220 | 9,347 | 624 | 25,191 |
+
+The E13 seeds 1/2 generation and judging phases are also complete. Each seed
+has two 36-file judge manifests with 19,593 labels per judge. Seed-1 gpt-oss
+has 12,822 safe and 6,771 unsafe labels; seed-2 has 12,886 safe and 6,707
+unsafe labels. Seed-2 Qwen3Guard has 9,642 safe, 9,183 unsafe and 768
+controversial labels. Both Qwen3Guard seed manifests and both final gpt-oss
+manifests have `unknown=0`. Two gpt-oss rows that initially failed were
+regenerated through the audited raw-Harmony fallback. Failed `unknown` labels
+were retested and are not part of a completed analytical denominator.
+
+The final three-seed analysis is in `results/e13_analysis_20261122/` and
+contains 126 ASR rows and 21 utility rows. The two additional utility rows per
+model are TAP and FlipAttack aliases of Bare. P0 analyses are in
+`results/pareto_20261118/`; canonical P0 data are in
+`results/p0_final_20261119/`.
 
 ## 1. What is in the export
 

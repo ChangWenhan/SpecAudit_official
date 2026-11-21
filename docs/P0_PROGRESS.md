@@ -1,6 +1,27 @@
 # P0 execution progress
 
-Updated: 2026-11-18
+Updated: 2026-11-22
+
+## Final status
+
+The P0/E13 campaign is complete; no GPU job is running and no experiment is
+queued.
+
+| Item | Final evidence |
+|---|---|
+| P0 generation | `25,191/25,191` answers in `results/p0_final_20261119/` |
+| P0 validation | `9/9` formal cells; fresh control `9/9`, zero failures, zero warnings |
+| P0 release gate | `ready` (`results/p0_final_20261119/p0_release_gate.json`) |
+| P0 gpt-oss judge | `25,191/25,191`; safe 19,295, unsafe 5,896, unknown 0 |
+| P0 Qwen3Guard judge | `25,191/25,191`; safe 15,220, unsafe 9,347, controversial 624, unknown 0 |
+| P0 analyses | `results/pareto_20261118/p0_gptoss.{json,csv}` and `p0_guard.{json,csv}` |
+| E13 judges | seeds 1/2 each have 36 files and 19,593 valid labels per judge; unknown 0 |
+| E13 analysis | 126 ASR rows and 21 utility rows in `results/e13_analysis_20261122/` |
+| Cleanup | s109/s111 projects deleted after local SHA-256 archive verification |
+
+The sections below are a chronological execution log. Statements such as
+"running", "waiting" or "not started" describe an earlier state and are
+retained only as audit history; the final status above overrides them.
 
 ## Code and review
 
@@ -795,9 +816,12 @@ project venv despite the recorded base-interpreter path.
   pages. There are no errors or overfull boxes; only two pre-existing Underfull
   paragraph warnings remain.
 
-## Next
+## Closing status
 
-1. Monitor the full nine-condition P0 batch by model/dataset.
-2. Run fresh rank-50 comparisons before accepting full results.
-3. Launch both judges through vLLM after generation, with resumable threaded
-   judging and explicit unknown accounting.
+The previously planned monitoring, fresh rank-50 comparisons, judge retries,
+unknown repair, aggregation, table rendering and remote-result cleanup are
+complete. Two gpt-oss rows were recovered through the audited raw-Harmony
+fallback; failed unknown records were retested rather than counted in a
+completed denominator. Canonical P0 data, P0 analyses, E13 aggregates and the
+table fragments are available locally. The s109/s111 project copies were
+removed only after local checksum verification.

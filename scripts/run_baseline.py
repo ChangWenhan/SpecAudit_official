@@ -306,7 +306,7 @@ def main():
             records.append(
                 {
                     "method": "flipattack",
-                    "mode": "flipattack",  # consumed by scripts/rejudge.py & scripts/bestofn.py
+                    "mode": "flipattack",  # consumed by the judge and analysis scripts
                     "source": FLIPATTACK_SOURCE,
                     "dataset": args.dataset,
                     "id": str(item["id"]),

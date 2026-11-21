@@ -1,6 +1,6 @@
 # Results
 
-## Current supplement (2026-11-18)
+## Completed campaign (2026-11-22)
 
 `utility200_20261111/` holds the completed seed-0 IFEval first-200 run: 15
 cells / 3,000 answers, per-host raw answers, checkpoints, metadata,
@@ -9,15 +9,31 @@ earlier utility roots are historical and are not resumed. The nine SecureSD
 harmful-request cells in `securesd_20261110/seed_0/` are complete and reused.
 `prefix_sweep_20261111/` is a JBB-only pilot, not the formal N sweep.
 
-New batches go to new dated roots — `p0_20261118/`, `pareto_20261118/`,
-`main_seeds_20261118/`, `utility200_20261118/` — never into a frozen one. See
-[the current experiment scope](../docs/CURRENT_EXPERIMENTS.md) and the
+All new experimental work is complete. The local source-of-truth layout is:
+
+| Path | Contents |
+|---|---|
+| `p0_final_20261119/` | canonical P0 package: 25,191 answers, nine formal cells, fresh control, manifest and `ready` release gate |
+| `p0_20261118/` and `p0_retry_20261118/` | earlier working, retry, failure and transferred files retained for audit |
+| `pareto_20261118/` | P0 gpt-oss and Qwen3Guard analyses, each in JSON and CSV |
+| `main_seeds_20261118/seed_{1,2}/` | E13 harmful generation, validation, status, judge sidecars and 36-file manifests |
+| `utility200_20261118/seed_{1,2}/` | IFEval seeds 1/2 generation and scores plus the 15-cell summaries |
+| `e13_analysis_20261122/` | 126 ASR rows, 21 utility rows, `e13.{json,csv}` and three table fragments |
+| `remote_archive_20261122/` | checksum-verified s109/s111 code, result, cache inventory and log archive |
+
+The P0 package has `unknown=0` under both judges. Each E13 seed has 19,593
+valid labels per judge and `unknown=0`; two gpt-oss rows were recovered through
+the audited raw-Harmony fallback. Failed unknown records were retested and do
+not enter a completed analytical denominator.
+
+New work must still go into a new dated root; never overwrite an existing root.
+See [the current experiment scope](../docs/CURRENT_EXPERIMENTS.md) and the
 project-level [EXPERIMENTS.md](../../../EXPERIMENTS.md). These private raw
 directories are not included in the public release.
 
 ## Frozen release evidence
 
-Documentation framing checked on 2026-11-10; the released aggregate remains frozen at
+Documentation framing checked on 2026-11-22; the released aggregate remains frozen at
 2026-10-11. See [current positioning](../docs/POSITIONING.md). The released-draft
 reference should appear early in the supply-chain argument. No results were
 regenerated for this documentation update.

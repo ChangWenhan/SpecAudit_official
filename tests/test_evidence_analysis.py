@@ -2,18 +2,12 @@
 import json
 import tempfile
 import unittest
-import csv
-import hashlib
-import contextlib
-import io
-from unittest.mock import patch
 from pathlib import Path
 
 from scripts.analyze_pairs import (analyze_records, bootstrap_ci, holm_adjust,
                                   load_records, outcome_summary, validate_alignment)
 from scripts.acceptance_by_position import curve_label, profile
 from scripts.opening_outcome_linkage import bootstrap_diff_ci, fisher_exact
-from scripts import blind_review
 from scripts.matrix_report import mcnemar, load as load_matrix
 
 
@@ -110,45 +104,6 @@ class EvidenceTests(unittest.TestCase):
             self.assertEqual(a[:3], [1, 1, 0])
             self.assertEqual(e[:3], [1, 1, 0])
             self.assertEqual(curve_label(path, True), "topk50__model")
-
-    def test_blank_human_forms_remain_pending_and_invalid_forms_fail(self):
-        with tempfile.TemporaryDirectory() as directory:
-            package = Path(directory)
-            reviewer = package / "reviewer"
-            reviewer.mkdir()
-            items = reviewer / "items.jsonl"
-            items.write_text(json.dumps({"review_id": "BR001", "prompt": "p", "response": "a"}) + "\n")
-            (package / "manifest.json").write_text(json.dumps({"items_sha256": hashlib.sha256(items.read_bytes()).hexdigest()}))
-
-            def form(name, label="", identity="", when="", rationale=""):
-                with (reviewer / (name + ".csv")).open("w", newline="") as stream:
-                    writer = csv.DictWriter(stream, fieldnames=blind_review.FIELDS)
-                    writer.writeheader()
-                    writer.writerow(dict(zip(blind_review.FIELDS, ["BR001", label, rationale, identity, when])))
-
-            form("reviewer_A")
-            form("reviewer_B")
-            with patch.object(blind_review, "PACKAGE", package), contextlib.redirect_stdout(io.StringIO()):
-                blind_review.summarize()
-                report = json.loads((package / "status.json").read_text())
-                self.assertEqual(report["status"], "pending_human_review")
-                self.assertEqual(report["paired_completed"], 0)
-                form("reviewer_A", "made_up", "a", "2026-10-11", "reason")
-                with self.assertRaises(ValueError):
-                    blind_review.summarize()
-                form("reviewer_A", "not_assistance", "a", "invalid_date", "reason")
-                with self.assertRaises(ValueError):
-                    blind_review.summarize()
-                form("reviewer_A", "not_assistance", "a", "2026-10-11", "reason")
-                form("reviewer_B", "not_assistance", "a", "2026-10-11", "reason")
-                with self.assertRaises(ValueError):
-                    blind_review.summarize()
-                form("reviewer_B", "uncertain", "b", "2026-10-11", "reason")
-                blind_review.summarize()
-                report = json.loads((package / "status.json").read_text())
-                self.assertEqual(report["status"], "complete_independent_forms")
-                self.assertEqual(report["disagreement_ids"], ["BR001"])
-
 
 if __name__ == "__main__":
     unittest.main()

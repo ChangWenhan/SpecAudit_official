@@ -13,7 +13,16 @@ allows sequential phases with only the selected endpoint type available:
 
 `gptoss_budgets` is a retry ladder for truncated/unparseable final JSON.  The
 pool never falls back to reasoning-only text and never converts an unresolved
-label to `safe`.
+label to `safe`. For the completed E13 rows that still failed ordinary
+retries, use the audited raw-Harmony fallback in
+`scripts/repair_gptoss_raw_unknown.py`; it preserves the raw response and parser
+decision instead of guessing a label.
+
+The completed campaign ran the two services across available hosts with the
+same manifest and separate checkpoints. Points can therefore use distinct
+endpoint URLs in one local config, and the A100 host can expose only the judge
+assigned to that phase. Keep host names and credentials in the local config,
+not in the example or a committed manifest.
 
 ## Manifest format
 
@@ -79,3 +88,9 @@ python -m scripts.run_dual_judge_pool \
 
 Do not commit `judge_pool.local.json`, the manifest if it contains private
 paths, checkpoints, or judged outputs.
+
+Completed P0 manifests use nine multi-mode model/dataset files rather than the
+one-mode naming example above. The pool accepts those files directly and keys
+rows by `(dataset, mode, id, sample_idx)`. A frozen E13 example is
+`results/main_seeds_20261118/seed_1/e13_judge_manifest.json`; seed 2 has the
+matching manifest in its own seed directory.

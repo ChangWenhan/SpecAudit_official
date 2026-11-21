@@ -3,11 +3,14 @@
 This is a clean code-and-evidence release built from the research working tree.
 It is not a mirror of every historical file.
 
-Documentation framing updated 2026-11-08; see
-[POSITIONING.md](POSITIONING.md). This is a documentation update, not a new
-release or a regeneration of the 2026-10-11 evidence. The internal manuscript
-planning/history remains outside the code release. Release-era citation
-metadata has not been reconciled with the separately supplied manuscript.
+Documentation framing updated 2026-11-22; see
+[POSITIONING.md](POSITIONING.md). This is still a clean code-and-frozen-evidence
+release, not a mirror of the private working tree. The private workspace now
+also contains the completed P0/E13 raw results and the checksum-verified s109/
+s111 audit archive, but those directories remain outside the public release.
+The internal manuscript history remains outside the code release. Release-era
+citation metadata has not been reconciled with the separately supplied
+manuscript.
 
 ## Included
 
@@ -28,13 +31,13 @@ metadata has not been reconciled with the separately supplied manuscript.
 | Excluded material | Reason |
 |---|---|
 | `collected-from-servers-20261007/` | ~497 MB server snapshot; not source, contains environment-specific copies |
-| raw `results/*.jsonl` and judge files (~326 MB) | contain harmful model output; large and not needed to inspect aggregate evidence |
+| raw `results/*.jsonl`, judge files, P0/E13 intermediates and the 1.4 GB remote audit archive | contain harmful model output or environment-specific audit material; large and not needed to inspect aggregate evidence |
 | `baselines/` trees (~234 MB) | third-party repositories with their own licences; only the two adapters used in the paper are retained |
 | teacher-answer JSONL | contains harmful generated answers |
 | trained draft weights | attack artifacts; can produce harmful text |
 | model weights | large third-party artifacts with their own licences |
 | server/Judge logs and SQLite checkpoints | environment-specific and may contain prompts/answers |
-| internal review archives, `before_corrections.tar.gz` | historical process artifacts, not part of the code release |
+| internal correction archives and `before_corrections.tar.gz` | historical process artifacts, not part of the code release |
 | obsolete experiments (AutoDAN, Crescendo, EnDec, W2S, multi-turn, best-of-N) | not part of the current paper's evidence; kept out to avoid dead code |
 | manuscript PDF/TeX and generated figures | the manuscript is a separate artifact; raw data needed for figure regeneration is withheld |
 
@@ -64,13 +67,20 @@ unknown-label handling.  Later code changes do not retroactively change the
 frozen numbers.  If you rerun the pipeline, write to a new directory rather than
 overwriting `results/paper_evidence_20261011/`.
 
+The completed 2026-11-19 to 2026-11-22 campaign is separate from that frozen
+export. Its canonical P0 package, three-seed E13 analysis, judge manifests and
+audit archive are documented in [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md)
+and `results/README.md`. They remain private because they contain raw prompts,
+model answers, generated harmful text, host paths and logs.
+
 ## Why some "current" research docs are not included
 
-The working tree also had internal planning, correction logs, blind-review
-packages and server syncing scripts.  Those are useful to the authors but are
-not part of an official code release and may contain environment-specific paths
-or harmful content.  The public documentation summarizes the method, evidence
-and limitations without copying those internal artifacts.
+The working tree also has internal planning, correction logs, private judge
+manifests, raw results and server audit material. Those are useful to the
+authors but are not part of an official code release and may contain
+environment-specific paths or harmful content. The public documentation
+summarizes the method, evidence and limitations without copying those internal
+artifacts.
 
 ## Adding files later
 

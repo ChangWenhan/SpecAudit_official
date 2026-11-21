@@ -1,18 +1,65 @@
 # Reproducibility
 
-Documentation checked against the local scripts on 2026-11-10. The evidence
-freeze is still 2026-10-11. The current writing direction does not require
-rerunning the matrix; see [POSITIONING.md](POSITIONING.md).
-
-For the active utility-only job, its fixed settings and private output locations,
-see [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md). Earlier seed/ablation
-commands below are reproduction recipes, not the current queue.
+Documentation checked against the local scripts on 2026-11-22. The original
+evidence freeze is still 2026-10-11. The new P0 and E13 campaign is complete;
+there is no active queue. See [CURRENT_EXPERIMENTS.md](CURRENT_EXPERIMENTS.md)
+for the final file map and [POSITIONING.md](POSITIONING.md) for the current
+writing direction.
 
 This is a practical guide for rerunning SpecAudit from public data and open
 models.  The frozen aggregate evidence is included, so you do **not** need to
 rerun the matrix just to inspect the paper's numbers.  A full rerun requires a
 CUDA GPU, model downloads, and generation of harmful teacher answers; do it in an
 isolated research environment.
+
+## Current completed campaign
+
+The canonical P0 package is `results/p0_final_20261119/`. It contains nine
+model/dataset cells, `25,191` answers, `p0_manifest.json`, `fresh_control.json`
+and `p0_release_gate.json`. The release gate is `ready`; both judges have
+`25,191/25,191` valid labels and `unknown=0`. Run the release checker and P0
+analyzer against this package before using any earlier retry directory:
+
+```bash
+python -m scripts.check_p0_release_gate \
+  --p0-root results/p0_final_20261119 \
+  --manifest results/p0_final_20261119/p0_manifest.json \
+  --fresh-control results/p0_final_20261119/fresh_control.json \
+  --out results/p0_final_20261119/p0_release_gate.json
+python -m scripts.analyze_p0 \
+  --root results/p0_final_20261119 \
+  --judge-field guard_gptoss \
+  --out results/pareto_20261118/p0_gptoss.json
+python -m scripts.analyze_p0 \
+  --root results/p0_final_20261119 \
+  --judge-field guard_strong \
+  --out results/pareto_20261118/p0_guard.json
+```
+
+E13 uses `results/main_seeds_20261118/seed_{1,2}/` for harmful generations and
+`results/utility200_20261118/seed_{1,2}/` for IFEval. Each seed's two judge
+manifests contain 36 files and 19,593 valid labels per judge. The final
+three-seed aggregate and table fragments are under
+`results/e13_analysis_20261122/`. The aggregate is rebuilt with:
+
+```bash
+python -m scripts.analyze_e13 \
+  --root results \
+  --securesd-root results/securesd_20261110 \
+  --utility-root results/utility200_20261118 \
+  --utility-seed0 results/utility200_20261111/utility_summary.json \
+  --out results/e13_analysis_20261122/e13.json
+```
+
+Two gpt-oss rows initially failed Harmony parsing. They were retried through
+the audited raw-Harmony fallback and replaced before the final manifest was
+exported. `unknown` is an invalid completion state: retry or repair failed
+records, then rebuild the manifest and analysis. Never include unresolved rows
+in a completed denominator.
+
+The local audit archive is `results/remote_archive_20261122/`. s109 and s111
+were archived with per-file SHA-256 manifests, verified by checksum dry-run,
+and only then deleted. The archive excludes model weights and environments.
 
 ## 1. Environment
 
@@ -248,25 +295,24 @@ python -m scripts.run_ablation_cells \
   --results-root results/securesd_20261110 --seed 0 --judge none --dry-run
 ```
 
-The current frozen scope uses seed 0 to match the existing main table. The
-earlier 108-cell three-seed supplement was cancelled on 2026-11-11 and its
-partial outputs and protocol document were deleted; that cancellation stands.
-The 2026-11-18 plan restores only a 3-seed rerun of the seven main-table
-conditions (plus IFEval seeds 1/2), to be written under
-`results/main_seeds_20261118/seed_{1,2}/` and `results/utility200_20261118/`.
-The seed-separated output support described here is what that rerun uses.
-`--ablation all` still selects 1–4.
+The original frozen SecureSD table uses seed 0. The completed E13 rerun writes
+seeds 1/2 under `results/main_seeds_20261118/seed_{1,2}/` and
+`results/utility200_20261118/seed_{1,2}/`. The earlier 108-cell supplement was
+cancelled on 2026-11-11 and its partial outputs and protocol document were
+deleted; that cancellation stands. `--ablation all` still selects 1–4.
 
 `--judge both` now requires `--judge-config` and calls the formal resumable judge
 pool, including when generation has already completed. It no longer falls back
 to the simplified API scripts. The pool accepts `--judges gptoss` or
 `--judges guard` for sequential GPU phases, with separate checkpoints. Matching
 historical settings use output budgets `[512,2048,4096]`, timeout900, judge seed0,
-and low reasoning effort; unknown labels remain unknown.
+and low reasoning effort. Unknown labels remain unresolved until a targeted
+retry produces valid output; they are never silently converted.
 
-The local managed job uses the existing safeguard weights in the installed
-vLLM0.15.1 environment for the primary judge and the HF guard service separately,
-so the two models do not compete for GPU memory. Runtime versions are disclosed;
+The completed campaign distributed judge work across available hosts and ran
+the primary vLLM service and Qwen3Guard service in separate GPU phases so the
+models did not compete for memory. Recorded environments included vLLM 0.14.1
+on the A100 API host and vLLM 0.15.1 locally. Runtime versions are disclosed;
 policy/weights match does not assert bitwise identity to old deployments.
 
 ```bash
@@ -307,8 +353,14 @@ checkpoint and preserves unknown labels.  Copy
 and model IDs, and build a manifest of frozen source files.  The pool refuses to
 judge a file whose SHA-256 differs from the manifest.
 
-Unknown labels are never silently converted to `safe`.  A cell with unresolved
-labels must be exported with bounds, not treated as a clean negative.
+Unknown labels are never silently converted to `safe` or negative. For the
+completed P0/E13 campaign, malformed or failed judge rows were retried until
+the final manifests had `unknown=0`; the frozen 2026-10-11 export retains its
+documented bounds because it is an immutable historical result.
+
+Two final E13 gpt-oss rows required the audited raw-Harmony fallback. The
+fallback records the raw model output, parser decision and source hash so the
+replacement label can be checked without treating a parser failure as safe.
 
 ## 9. Rebuild the aggregate evidence
 
