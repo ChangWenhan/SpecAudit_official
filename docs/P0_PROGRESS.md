@@ -310,6 +310,13 @@ project venv despite the recorded base-interpreter path.
   Qwen3Guard auxiliary judge with the pinned vLLM 0.8.5 environment. Both had
   entered active judging by 00:14, replacing the earlier serial A100-only
   execution.
+- Seed-2 judging completed on both hosts: Qwen3Guard exported all 36 files
+  with zero unknowns; gpt-oss exported all 36 files with one unresolved final
+  row. Together with seed-1, only the same `flipattack__Gemma_3_4B__advbench`
+  row index 483 remains unresolved per seed. Targeted larger-budget retries
+  showed that this input returns no final content (the second seed's initial
+  failure was a transient HTTP 500), so it is retained as an outstanding judge
+  defect rather than accepted as a label.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the
