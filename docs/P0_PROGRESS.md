@@ -303,6 +303,13 @@ project venv despite the recorded base-interpreter path.
   15,220 safe, 9,347 unsafe and 624 controversial. The P0 judge outputs,
   checkpoints, logs and statuses were returned to S218. E13 seed-1 then seed-2
   dual judging started sequentially on the A100 at 22:57.
+- E13 seed-1 completed both judges at 2026-11-22 00:10 (`36/36` files each,
+  Qwen3Guard zero unknowns; one gpt-oss row remains for targeted retest). For
+  seed 2 the judge workload is now distributed: A100 runs only the 20B gpt-oss
+  primary judge with vLLM 0.14.1, while the RTX 4090 runs only the 4B
+  Qwen3Guard auxiliary judge with the pinned vLLM 0.8.5 environment. Both had
+  entered active judging by 00:14, replacing the earlier serial A100-only
+  execution.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the
