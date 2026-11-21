@@ -13,13 +13,13 @@ its partial outputs stay deleted. What was restored is narrower:
 
 | Batch | Content | New answers | Status |
 |---|---|---:|---|
-| P0 merged batch | 9 conditions × 933 prompts × 3 pairs: rank-50 (N=0), N=5/10/20/40, exact (N=∞), A0B1, A1B0, A1B1 | 25,191 | generation and validation complete; dual judging running |
+| P0 merged batch | 9 conditions × 933 prompts × 3 pairs: rank-50 (N=0), N=5/10/20/40, exact (N=∞), A0B1, A1B0, A1B1 | 25,191 | generation, validation and both judges complete with zero unknowns |
 | — of which 2×2 | 4 factorial conditions + exact anchor × 933 × 3 | 13,995 | generated and validated |
 | — of which N sweep | 6 N points × 933 × 3 | 16,794 | generated and validated |
 | Analysis | matched acceptance rate and Pareto (ASR vs acceptance, ASR vs throughput) | 0 | waiting for dual-judge outputs |
 | 3-seed main table | 7 main-table conditions × 2 new seeds × 933 × 3 pairs | 39,186 ASR | generation complete; two 36-file judge manifests frozen |
 | 3-seed IFEval | 5 utility conditions × 200 × 3 models × 2 new seeds | 6,000 | complete and scored |
-| Judge | every new ASR answer re-judged by both judges | 78,372 judgments | E13 inputs ready; P0 judge phase running |
+| Judge | every new ASR answer re-judged by both judges | 78,372 judgments | P0 complete; E13 seed-1/seed-2 running sequentially |
 
 Datasets are JBB (100), AdvBench (520) and StrongREJECT (313) — 933 per pair.
 Every ablation covers all three datasets and all three model pairs; no

@@ -298,6 +298,11 @@ project venv despite the recorded base-interpreter path.
   fix uses the official ordinary chat-completion format. A focused loopback
   regression passes, and a guard-only unknown retry is replacing the invalid
   labels while preserving the complete gpt-oss output.
+- The corrected Qwen3Guard retry completed at 2026-11-21 15:31 with
+  `25,191/25,191` valid labels, `9/9` files and zero unknowns. Counts are
+  15,220 safe, 9,347 unsafe and 624 controversial. The P0 judge outputs,
+  checkpoints, logs and statuses were returned to S218. E13 seed-1 then seed-2
+  dual judging started sequentially on the A100 at 22:57.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the
