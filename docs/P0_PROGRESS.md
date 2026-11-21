@@ -326,6 +326,12 @@ project venv despite the recorded base-interpreter path.
   models, 3 datasets, 2 judges) and 21 utility rows. Final primary/auxiliary
   Table 1 fragments and the Table 5 judge-comparison fragment were generated
   under `results/e13_analysis_20261122/`.
+- The raw-Harmony fallback completed successfully for both residual rows; all
+  E13 gpt-oss and Qwen3Guard sidecars now contain valid labels with no
+  unresolved records. Both P0 analyses also completed after fixing the
+  analyzer to select the requested judge sidecar and treat Qwen3Guard
+  `controversial` as a valid wide-policy outcome. Outputs are
+  `results/pareto_20261118/p0_gptoss.json` and `p0_guard.json`.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the

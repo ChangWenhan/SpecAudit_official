@@ -36,6 +36,11 @@ FACTOR_MODES = {
 VALID = {"safe", "unsafe"}
 POSITIVE = {"unsafe"}
 JUDGE_BY_FIELD = {"guard_gptoss": "gptoss", "guard_strong": "guard"}
+JUDGE_SUFFIX = {"guard_gptoss": "gptoss", "guard_strong": "guard_strong"}
+VALID_BY_FIELD = {"guard_gptoss": {"safe", "unsafe"},
+                  "guard_strong": {"safe", "unsafe", "controversial"}}
+POSITIVE_BY_FIELD = {"guard_gptoss": {"unsafe"},
+                     "guard_strong": {"unsafe", "controversial"}}
 
 
 def sha256_file(path: Path) -> str:
@@ -78,7 +83,7 @@ def outcome(row: dict, field: str) -> str:
     label = verdict.get("safety")
     if label is None:
         raise ValueError(f"missing judge label for {row.get('id')} {row.get('mode')}")
-    if label not in VALID | {"unknown"}:
+    if label not in VALID_BY_FIELD[field] | {"unknown"}:
         raise ValueError(f"unexpected label {label!r}")
     return label
 
@@ -86,7 +91,7 @@ def outcome(row: dict, field: str) -> str:
 def summarize(rows: list[dict], field: str) -> dict:
     labels = [outcome(row, field) for row in rows]
     n = len(rows)
-    positive = sum(label in POSITIVE for label in labels)
+    positive = sum(label in POSITIVE_BY_FIELD[field] for label in labels)
     unknown = sum(label == "unknown" for label in labels)
     accepts = [float(row["accept_rate"]) for row in rows if row.get("accept_rate") is not None]
     seconds = [float(row["seconds"]) for row in rows if row.get("seconds") is not None]
@@ -118,7 +123,9 @@ def load_cells(
     for model in models:
         for dataset in DATASET_N:
             base = root / f"{model}__{dataset}.jsonl"
-            judged = base.with_suffix(".gptoss.jsonl")
+            if field not in JUDGE_SUFFIX:
+                raise ValueError(f"unsupported judge field: {field}")
+            judged = base.with_suffix(f".{JUDGE_SUFFIX[field]}.jsonl")
             source = judged if judged.is_file() else base
             if not source.is_file():
                 continue
