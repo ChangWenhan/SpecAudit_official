@@ -119,9 +119,10 @@ def evaluate(endpoint, row, session, settings):
                           {"role": "assistant", "content": row["response"]}])
         payload = {"model": endpoint["model"], "messages": messages,
                    "temperature": 0.0, "max_tokens": budget, "seed": settings["seed"],
-                   "chat_template_kwargs": ({"reasoning_effort": "low"} if judge == "gptoss"
-                                            else {"continue_final_message": True,
-                                                  "add_generation_prompt": False})}
+                   "chat_template_kwargs": ({"reasoning_effort": "low"}
+                                            if judge == "gptoss" else None)}
+        if payload["chat_template_kwargs"] is None:
+            payload.pop("chat_template_kwargs")
         # vLLM's native Harmony path reads this top-level field, not the
         # template kwargs. Without it the server uses its default effort.
         if judge == "gptoss":

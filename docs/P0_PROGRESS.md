@@ -291,6 +291,13 @@ project venv despite the recorded base-interpreter path.
   dual judging restarted from a fresh runtime on 2026-11-21 after the C
   completion gate; E13 seed-1/seed-2 inputs are ready for the following judge
   phases.
+- The first P0 gpt-oss phase produced 25,191 valid labels with zero unknowns.
+  The Qwen3Guard phase completed but returned 25,188 unknown labels because
+  the remote payload incorrectly set `continue_final_message=true`; the model
+  continued the assistant answer instead of emitting a verdict. The reviewed
+  fix uses the official ordinary chat-completion format. A focused loopback
+  regression passes, and a guard-only unknown retry is replacing the invalid
+  labels while preserving the complete gpt-oss output.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the

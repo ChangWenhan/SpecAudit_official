@@ -112,7 +112,7 @@ class RemoteGuard:
                 ],
                 max_new=64,
                 temperature=0.0,
-                continue_final=True,
+                continue_final=False,
             )
         except Exception as e:  # noqa: BLE001
             return {"safety": "unknown", "refusal": "unknown", "categories": [], "raw": f"error: {e}"}

@@ -113,7 +113,7 @@ class PoolIntegrationTest(unittest.TestCase):
                 self.assertEqual(payload["reasoning_effort"], "low")
                 self.assertEqual(payload["chat_template_kwargs"], {"reasoning_effort": "low"})
             else:
-                self.assertFalse(payload["chat_template_kwargs"]["add_generation_prompt"])
+                self.assertNotIn("chat_template_kwargs", payload)
 
     def test_changed_frozen_input_aborts_before_api(self):
         self.source.write_text(self.source.read_text().replace("fixture answer", "changed answer"))
