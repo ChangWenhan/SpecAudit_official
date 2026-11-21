@@ -39,15 +39,20 @@ def main():
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     original_bytes = args.config.read_bytes()
     original = json.loads(original_bytes)
+    endpoints = [e for e in original["endpoints"] if e["judge"] == "gptoss"]
+    if not endpoints:
+        raise ValueError("original config has no gptoss endpoint")
     cells = load_cells(args.manifest)
     db = sqlite3.connect(rt / "checkpoint.sqlite3")
     db.execute("PRAGMA synchronous=FULL")
     signature = db.execute("SELECT value FROM metadata WHERE key='signature'").fetchone()[0]
-    expected = digest(json.dumps({"policy": HARM_POLICY, "settings": original["settings"],
-                                 "endpoints": original["endpoints"]}, sort_keys=True).encode())
-    if signature != expected:
+    allowed_signatures = {
+        digest(json.dumps({"policy": HARM_POLICY, "settings": original["settings"],
+                           "endpoints": selected}, sort_keys=True).encode())
+        for selected in (original["endpoints"], endpoints)
+    }
+    if signature not in allowed_signatures:
         raise ValueError("original config does not match checkpoint")
-    endpoints = [e for e in original["endpoints"] if e["judge"] == "gptoss"]
     settings = {**original["settings"], "gptoss_budgets": args.budgets,
                 "gptoss_reasoning_effort": "low"}
     pending = []
