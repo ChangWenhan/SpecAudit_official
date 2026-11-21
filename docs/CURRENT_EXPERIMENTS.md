@@ -19,7 +19,10 @@ its partial outputs stay deleted. What was restored is narrower:
 | Analysis | matched acceptance rate and Pareto (ASR vs acceptance, ASR vs throughput) | 0 | waiting for dual-judge outputs |
 | 3-seed main table | 7 main-table conditions × 2 new seeds × 933 × 3 pairs | 39,186 ASR | generation complete; two 36-file judge manifests frozen |
 | 3-seed IFEval | 5 utility conditions × 200 × 3 models × 2 new seeds | 6,000 | complete and scored |
-| Judge | every new ASR answer re-judged by both judges | 78,372 judgments | P0 and E13 seed-1 complete; seed-2 runs gpt-oss on A100 and Qwen3Guard on 4090 concurrently |
+| Judge | every new ASR answer re-judged by both judges | 78,372 judgments | complete with zero unresolved labels after audited raw-Harmony retry |
+
+Final E13 three-seed aggregates and table fragments are in
+`results/e13_analysis_20261122/`.
 
 Datasets are JBB (100), AdvBench (520) and StrongREJECT (313) — 933 per pair.
 Every ablation covers all three datasets and all three model pairs; no

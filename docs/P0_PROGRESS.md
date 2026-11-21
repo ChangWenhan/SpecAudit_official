@@ -317,6 +317,15 @@ project venv despite the recorded base-interpreter path.
   showed that this input returns no final content (the second seed's initial
   failure was a transient HTTP 500), so it is retained as an outstanding judge
   defect rather than accepted as a label.
+- The repeated chat-completion failure was then resolved with an audited raw
+  Harmony completion fallback against the same gpt-oss model. Both seeds now
+  have `unknown=0`: seed 1 has 12,822 safe and 6,771 unsafe; seed 2 has 12,886
+  safe and 6,707 unsafe. The repair preserved all prior labels and exported new
+  sidecars with `raw_harmony_completion` provenance.
+- The final E13 aggregation completed with 126 ASR rows (7 conditions, 3
+  models, 3 datasets, 2 judges) and 21 utility rows. Final primary/auxiliary
+  Table 1 fragments and the Table 5 judge-comparison fragment were generated
+  under `results/e13_analysis_20261122/`.
 - A complete P0 audit archive was returned to the local source of truth under
   `results/backflow_20261119/{s109,s111}`. A persistent one-minute rsync
   backflow copies A100 seed-2 results into the local seed-2 directory while the
