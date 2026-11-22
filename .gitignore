@@ -29,6 +29,17 @@
 !/configs/README.md
 !/configs/judge_pool.example.json
 
+# Public source provenance for the speculative-variant adapters.  The upstream
+# trees themselves stay local because they contain large assets and nested Git
+# metadata; SOURCES.json records their exact commits and licences.
+!/third_party/
+/third_party/*
+!/third_party/speculative_variants/
+/third_party/speculative_variants/*
+!/third_party/speculative_variants/README.md
+!/third_party/speculative_variants/SOURCES.json
+!/third_party/speculative_variants/PATCHES.md
+
 # Only the split file and its README from data/
 !/data/
 /data/*
@@ -41,6 +52,11 @@
 !/results/README.md
 !/results/paper_evidence_20261011/
 !/results/paper_evidence_20261011/**
+!/results/security_variants_20261122/
+/results/security_variants_20261122/*
+!/results/security_variants_20261122/README.md
+!/results/security_variants_20261122/registry.json
+!/results/security_variants_20261122/campaign_plan.json
 
 # Never publish caches
 __pycache__/

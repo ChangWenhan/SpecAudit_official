@@ -1,0 +1,34 @@
+{
+  "retrieved_at": "2026-11-22",
+  "repositories": {
+    "medusa": {
+      "url": "https://github.com/FasterDecoding/Medusa.git",
+      "commit": "e2a5d20c048a9b0a4092e6933c34313687422518",
+      "license": "Apache-2.0",
+      "local_path": "medusa"
+    },
+    "eagle": {
+      "url": "https://github.com/SafeAILab/EAGLE.git",
+      "commit": "cb7e0841fe0c206c6ed74a197ad5e2a1f13f5a2b",
+      "license": "Apache-2.0",
+      "local_path": "eagle"
+    },
+    "lookahead_decoding": {
+      "url": "https://github.com/hao-ai-lab/LookaheadDecoding.git",
+      "commit": "eed010da9c7b1867912675d480feec5629e0c2d0",
+      "license": "Apache-2.0",
+      "local_path": "lookahead-decoding"
+    },
+    "vllm_ngram": {
+      "url": "https://github.com/vllm-project/vllm.git",
+      "commit": "e72fc9ae50c221180c4b8f4a94c5009714a4b199",
+      "license": "Apache-2.0",
+      "local_path": "vllm",
+      "source_files": [
+        "vllm/v1/worker/gpu/spec_decode/ngram/speculator.py",
+        "vllm/v1/worker/gpu/spec_decode/ngram/config.py",
+        "docs/features/speculative_decoding/n_gram.md"
+      ]
+    }
+  }
+}

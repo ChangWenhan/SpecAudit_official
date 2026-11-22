@@ -13,7 +13,7 @@ Documentation updated 2026-11-22. The original 2026-10-11 paper evidence is
 unchanged and remains frozen. The current framing and Introduction structure
 are recorded in [docs/POSITIONING.md](docs/POSITIONING.md).
 
-The planned experimental campaign is complete. The P0 mechanism batch produced
+The original P0/E13 campaign is complete. The P0 mechanism batch produced
 25,191 answers, passed all `9/9` formal cells and the fresh-control check, and
 has `unknown=0` under both automatic judges. The E13 main-table rerun adds
 seeds 1 and 2 across seven conditions, three model pairs and three datasets;
@@ -21,7 +21,10 @@ both 36-file judge manifests are complete with no unresolved labels after an
 audited raw-Harmony retry. The three-seed analyzer produced 126 ASR rows and 21
 utility rows, including the two attack rows that share Bare's IFEval output by
 definition. The final aggregates and paper table fragments are under
-`results/e13_analysis_20261122/`. No experiment is currently queued. See
+`results/e13_analysis_20261122/`. A supplemental security audit of Medusa,
+EAGLE, N-gram speculation, and Lookahead Decoding now has four tested proposal
+adapters and GPU smoke runs; the formal three-seed/judge campaign has not yet
+started. See
 [CURRENT_EXPERIMENTS.md](docs/CURRENT_EXPERIMENTS.md) and the project-level
 [EXPERIMENTS.md](../../EXPERIMENTS.md).
 

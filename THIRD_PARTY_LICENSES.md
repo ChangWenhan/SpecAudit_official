@@ -21,6 +21,34 @@ to the corresponding portions.
   and one-token sampling logic from `medusa/model/utils.py`.
 - The Apache-2.0 text is reproduced in `LICENSE`.
 
+## EAGLE / EAGLE-3
+
+- Project: <https://github.com/SafeAILab/EAGLE>
+- Licence: Apache-2.0
+- Use: the local source snapshot at commit
+  `cb7e0841fe0c206c6ed74a197ad5e2a1f13f5a2b` supplies the official EAGLE
+  model and draft-tree implementation used by `src/spec_variants/eagle.py`.
+- Local compatibility changes are listed in
+  `third_party/speculative_variants/PATCHES.md`.
+
+## Lookahead Decoding
+
+- Project: <https://github.com/hao-ai-lab/LookaheadDecoding>
+- Licence: Apache-2.0
+- Use: the local source snapshot at commit
+  `eed010da9c7b1867912675d480feec5629e0c2d0` supplies the official
+  n-gram-seeded lookahead/Jacobi algorithm used by
+  `src/spec_variants/lookahead.py`.
+
+## vLLM N-gram speculator
+
+- Project: <https://github.com/vllm-project/vllm>
+- Licence: Apache-2.0
+- Use: the local source snapshot at commit
+  `e72fc9ae50c221180c4b8f4a94c5009714a4b199` supplies the official
+  `NgramGPUSpeculator` suffix-selection contract used by
+  `src/spec_variants/ngram.py`.
+
 ## FlipAttack
 
 - Project: <https://github.com/yueliu1999/FlipAttack>

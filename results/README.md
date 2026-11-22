@@ -9,7 +9,9 @@ earlier utility roots are historical and are not resumed. The nine SecureSD
 harmful-request cells in `securesd_20261110/seed_0/` are complete and reused.
 `prefix_sweep_20261111/` is a JBB-only pilot, not the formal N sweep.
 
-All new experimental work is complete. The local source-of-truth layout is:
+The original P0/E13 experimental work is complete. A supplemental
+speculative-variant audit is in adapter-smoke status. The local
+source-of-truth layout is:
 
 | Path | Contents |
 |---|---|
@@ -20,6 +22,7 @@ All new experimental work is complete. The local source-of-truth layout is:
 | `utility200_20261118/seed_{1,2}/` | IFEval seeds 1/2 generation and scores plus the 15-cell summaries |
 | `e13_analysis_20261122/` | 126 ASR rows, 21 utility rows, `e13.{json,csv}` and three table fragments |
 | `remote_archive_20261122/` | checksum-verified s109/s111 code, result, cache inventory and log archive |
+| `security_variants_20261122/` | Medusa/EAGLE/N-gram/Lookahead adapters, four GPU smoke outputs, and the future three-seed/judge campaign |
 
 The P0 package has `unknown=0` under both judges. Each E13 seed has 19,593
 valid labels per judge and `unknown=0`; two gpt-oss rows were recovered through

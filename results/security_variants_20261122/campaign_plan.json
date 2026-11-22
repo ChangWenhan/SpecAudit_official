@@ -1,0 +1,57 @@
+{
+  "status": "planned",
+  "first_dataset": {
+    "name": "jbb",
+    "n": 100
+  },
+  "seeds": [0, 1, 2],
+  "primary_judge": "gpt-oss-safeguard-20b",
+  "generation": {
+    "temperature": 1.0,
+    "max_new": 160,
+    "gamma": 6
+  },
+  "cells": [
+    {
+      "variant": "ngram",
+      "target": "/mnt/disk/cwh/LLM/Qwen3-4B",
+      "artifact": {"kind": "draft_free", "path": null},
+      "verifiers": ["exact", "topk:k50"],
+      "expected_answers": 600
+    },
+    {
+      "variant": "lookahead",
+      "target": "/mnt/disk/cwh/LLM/Qwen3-4B",
+      "artifact": {"kind": "draft_free", "path": null},
+      "verifiers": ["exact", "topk:k50"],
+      "expected_answers": 600
+    },
+    {
+      "variant": "eagle",
+      "target": "/mnt/disk/cwh/LLM/Qwen3-4B",
+      "artifact": {
+        "kind": "released_heads",
+        "path": "/mnt/disk/cwh/LLM/Qwen3-4B_eagle3",
+        "revision": "fd331e59626c8e95c392381a16ee59d518727fbb"
+      },
+      "verifiers": ["exact", "topk:k50"],
+      "expected_answers": 600
+    },
+    {
+      "variant": "medusa",
+      "target": "/mnt/disk/cwh/LLMs/vicuna-7b-v1.5",
+      "artifact": {
+        "kind": "released_heads",
+        "path": "/mnt/disk/cwh/LLM/medusa-vicuna-7b-v1.3-head",
+        "formal_requirement": "Use matched Vicuna-1.5 Medusa-2 checkpoint for formal collection."
+      },
+      "verifiers": ["exact", "topk:k50"],
+      "expected_answers": 600
+    }
+  ],
+  "artifact_attack_phase": {
+    "applies_to": ["medusa", "eagle"],
+    "status": "not_started",
+    "requirement": "Construct or train matched higher-risk heads with the existing harmful draft-training pipeline before the attack/released contrast."
+  }
+}
