@@ -1,14 +1,14 @@
 # Current experiment scope
 
-Updated 2026-11-22. The authoritative plan is the project-level
+Updated 2026-11-23. The authoritative plan is the project-level
 [EXPERIMENTS.md](../../../EXPERIMENTS.md), derived from
 [reviews/20261117/EXPERIMENT_REVIEW.md](../../../reviews/20261117/EXPERIMENT_REVIEW.md).
 This file records only what the code in this repository must run and where the
 outputs live. The original P0/E13 campaign is complete. The supplemental
-speculative-variant campaign is in adapter validation; its formal runs are
-defined in [SPEC_VARIANT_PROTOCOL.md](SPEC_VARIANT_PROTOCOL.md).
+speculative-variant campaign has completed generation and primary judging; its
+formal runs are defined in [SPEC_VARIANT_PROTOCOL.md](SPEC_VARIANT_PROTOCOL.md).
 
-## Final status (2026-11-22)
+## Final status (2026-11-23)
 
 | Workstream | Final state |
 |---|---|
@@ -16,24 +16,34 @@ defined in [SPEC_VARIANT_PROTOCOL.md](SPEC_VARIANT_PROTOCOL.md).
 | P0 judges | gpt-oss `25,191/25,191` with `unknown=0`; Qwen3Guard `25,191/25,191` with `unknown=0` |
 | E13 seeds 1/2 | generation and scoring complete; each seed has two frozen 36-file judge manifests with 19,593 labels per judge and `unknown=0` |
 | E13 analysis | 126 ASR rows and 21 utility rows; primary, auxiliary and judge-comparison table fragments generated |
-| Release state | P0 release gate is `ready`; remote workspaces are idle and the project copies on s109/s111 were removed after local checksum verification |
-| Speculative variants | Independent review completed; P0 fixes and invalid-output cleanup done; corrected 4 × 3 × 3 smoke matrix passes; clean protocol-v2 campaign is running on s218/A100/s111 |
+| Release state | P0 release gate is `ready`; all judge services are stopped and returned supplemental artifacts are checksum-verified locally |
+| Speculative variants | Independent review completed; protocol-v2 generation and the primary judge are complete for `36/36` cells and `11,196/11,196` labels with `unknown=0` |
 
 ## Supplemental speculative-variant batch
 
 Source snapshots, exact upstream commits, local compatibility patches, and the
 proposal/verification boundary are recorded in
 `third_party/speculative_variants/`. The runner is `src.run_spec_variant`; smoke
-outputs are under `results/security_variants_20261122/smoke/`. Formal runs must
-use `seed_0/` and the primary `gpt-oss-safeguard-20b` judge. One seed is
-sufficient because this is a supplemental section. No harmful-output result is
-claimed until all 12 model/method cells and valid labels exist.
+outputs are under `results/security_variants_20261122/smoke/`. The formal run
+uses `seed_0/` and the primary `gpt-oss-safeguard-20b` judge. One seed is
+sufficient because this is a supplemental section. The protocol-v2 campaign
+contains all 36 method/model/dataset files and 11,196 primary-judge labels, with
+no unresolved labels. Judge sidecars and provenance are beside their source
+JSONL files. The merged audit gate is
+`results/security_variants_20261122/seed_0/judge_distributed/merged_completion_manifest.json`.
 
 The prior draft outputs were invalidated and deleted after code review found
 candidate-shortening, training-tokenization, JBB-overlap, resume-identity,
 concurrent-write, and judge-manifest bugs. Protocol v2 requires exact prompt
 and head hashes, valid non-unknown judge labels, and regenerated Medusa-style /
 EAGLE-style heads trained after excluding all evaluation prompts.
+
+The primary judge ran as disjoint shards across the local RTX 4090, the A100,
+and both RTX 6000 Ada GPUs. The distribution was 4,665 labels on S218, 3,732 on
+s109, and 2,799 on s111. Returning the shards and rebuilding the merged manifest
+verified every source hash, judge-output hash, policy identity, row alignment,
+and dataset/model/method cell count. The merged labels are 9,180 safe and 2,016
+unsafe.
 
 ## Restored scope (2026-11-18)
 

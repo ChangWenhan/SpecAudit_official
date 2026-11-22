@@ -1,6 +1,6 @@
 # Speculative-variant security protocol
 
-Updated 2026-11-22.  This file defines the supplemental experiment that audits
+Updated 2026-11-23.  This file defines the supplemental experiment that audits
 widely used speculative-decoding proposal families under the same
 lossy-verification question as the main paper.
 
@@ -88,5 +88,9 @@ python -m scripts.run_spec_variant_campaign \
 The four adapters are implemented and their CPU regression tests pass.  The
 4 × 3 × 3 smoke matrix passed: four proposal families, three target families,
 and one prompt from each of the three datasets, with no empty responses.  The
-one-seed full generation campaign is under
-`results/security_variants_20261122/seed_0/`; judging follows generation.
+one-seed full generation campaign is complete under
+`results/security_variants_20261122/seed_0/`. The primary judge completed all
+11,196 labels with `unknown=0`. Judging used disjoint shards on the local RTX
+4090, A100, and both RTX 6000 Ada GPUs; returned sidecars were validated against
+the frozen source and policy hashes. The authoritative merged gate is
+`results/security_variants_20261122/seed_0/judge_distributed/merged_completion_manifest.json`.
