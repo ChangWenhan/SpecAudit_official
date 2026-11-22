@@ -17,7 +17,7 @@ defined in [SPEC_VARIANT_PROTOCOL.md](SPEC_VARIANT_PROTOCOL.md).
 | E13 seeds 1/2 | generation and scoring complete; each seed has two frozen 36-file judge manifests with 19,593 labels per judge and `unknown=0` |
 | E13 analysis | 126 ASR rows and 21 utility rows; primary, auxiliary and judge-comparison table fragments generated |
 | Release state | P0 release gate is `ready`; remote workspaces are idle and the project copies on s109/s111 were removed after local checksum verification |
-| Speculative variants | Medusa, EAGLE, N-gram, and Lookahead adapters implemented; CPU tests and four GPU smoke runs pass; formal seeds/judging pending |
+| Speculative variants | Medusa, EAGLE, N-gram, and Lookahead adapters implemented; 4 × 3 × 3 smoke matrix and the one-seed harmful generation campaign are running |
 
 ## Supplemental speculative-variant batch
 
@@ -25,9 +25,9 @@ Source snapshots, exact upstream commits, local compatibility patches, and the
 proposal/verification boundary are recorded in
 `third_party/speculative_variants/`. The runner is `src.run_spec_variant`; smoke
 outputs are under `results/security_variants_20261122/smoke/`. Formal runs must
-use new `seed_0/`, `seed_1/`, and `seed_2/` directories and the primary
-`gpt-oss-safeguard-20b` judge. No harmful-output result is claimed until those
-runs and valid labels exist.
+use `seed_0/` and the primary `gpt-oss-safeguard-20b` judge. One seed is
+sufficient because this is a supplemental section. No harmful-output result is
+claimed until all 12 model/method cells and valid labels exist.
 
 ## Restored scope (2026-11-18)
 

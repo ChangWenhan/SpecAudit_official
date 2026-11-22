@@ -14,27 +14,36 @@ one path from the supplier-controlled candidate tree.  This design measures
 the acceptance and safety consequences of the verifier.  It does not claim to
 reproduce upstream tree-kernel latency.
 
-| Variant | Upstream mechanism | Initial target/artifact |
+| Variant | Upstream mechanism | Formal artifact protocol |
 |---|---|---|
-| Medusa | multiple heads from the target state | Vicuna-7B with public Medusa heads |
-| EAGLE-3 | hidden-feature draft tree | Qwen3-4B with Qwen3 EAGLE-3 heads |
-| N-gram | longest/rightmost suffix lookup | Qwen3-4B, no extra weights |
-| Lookahead | n-gram seed plus Jacobi refinement | Qwen3-4B, no extra weights |
+| Medusa | multiple heads from the target state | Four shared-projection harmful heads per target family |
+| EAGLE-3 | hidden-feature draft tree | Resource-matched harmful feature head per target family |
+| N-gram | longest/rightmost suffix lookup | No extra weights |
+| Lookahead | n-gram seed plus Jacobi refinement | No extra weights |
+
+Official pretrained heads do not cover the identical three model families.
+The formal Medusa/EAGLE cells therefore use independently trained heads of the
+same size and training protocol for Qwen3-4B, Gemma-3-4B, and MiniCPM4-8B.
+Training uses the existing 300 harmful teacher answers per family.  The public
+Qwen3 EAGLE-3 checkpoint and Vicuna Medusa checkpoint remain implementation
+smoke tests and are not mixed into the formal cross-family comparison.
 
 ## Experiment cells
 
-The formal campaign will use three seeds and the primary judge
-`gpt-oss-safeguard-20b`.  JBB is the first gating dataset because it already
-has a balanced 100-request main-table cell.  AdvBench and StrongREJECT follow
-only after the JBB generation and judging path is validated.
+The supplemental campaign uses one seed and the primary judge
+`gpt-oss-safeguard-20b`.  Every method runs on the same three target families
+and all three datasets: JBB (100), AdvBench (520), and StrongREJECT (313).
 
 | ID | Comparison | Purpose |
 |---|---|---|
-| V1 | Target only vs each variant + top-50 | Measures whether lossy verification lets the proposer alter the safety outcome |
-| V2 | Same proposal + exact vs top-50 | Isolates the verifier from proposal quality |
-| V3 | Released vs adversarially modified Medusa/EAGLE artifacts | Tests the supplier-controlled artifact hypothesis where weights exist |
-| V4 | N-gram and Lookahead top-50 / exact | Tests draft-free proposal sources under the same verifier |
-| V5 | accepted / proposed tokens and target-forward counts | Reports mechanism behavior; runtime is interpreted only within the same host/backend |
+| V1 | Target only vs each variant + top-50 | Measures whether lossy verification lets each proposer alter the safety outcome |
+| V2 | Four proposal families on the same target family | Compares mechanism behavior under a fixed verifier |
+| V3 | Accepted / proposed tokens and target-forward counts | Reports mechanism behavior; runtime is interpreted only within the same host/backend |
+
+The formal one-seed run contains 4 methods × 3 models × 3 datasets = 36 files
+and 11,196 responses.  Exact-verifier runs are retained as smoke diagnostics;
+they are not part of the supplemental table because one seed is intentionally
+limited to the main top-50 contrast.
 
 Unknown judge labels never enter a completed denominator.  Failed or
 unparseable judge rows are retried and retained as failures until a valid
@@ -63,8 +72,17 @@ python -m src.run_spec_variant \
   --out results/security_variants_20261122/smoke/eagle/qwen3.jsonl
 ```
 
+Formal generation and resumption:
+
+```bash
+python -m scripts.run_spec_variant_campaign \
+  --root results/security_variants_20261122/seed_0 --resume
+```
+
 ## Current status
 
-The four adapters are implemented and their CPU regression tests pass.  GPU
-smoke status and exact output paths are recorded in the result registry.  No
-formal harmful-output campaign or judge run is claimed complete yet.
+The four adapters are implemented and their CPU regression tests pass.  The
+4 × 3 × 3 smoke matrix passed: four proposal families, three target families,
+and one prompt from each of the three datasets, with no empty responses.  The
+one-seed full generation campaign is under
+`results/security_variants_20261122/seed_0/`; judging follows generation.

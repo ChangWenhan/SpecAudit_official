@@ -57,6 +57,8 @@
 !/results/security_variants_20261122/README.md
 !/results/security_variants_20261122/registry.json
 !/results/security_variants_20261122/campaign_plan.json
+!/results/security_variants_20261122/model_matrix.json
+!/results/security_variants_20261122/head_artifacts.json
 
 # Never publish caches
 __pycache__/

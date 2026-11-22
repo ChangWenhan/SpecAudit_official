@@ -1,0 +1,162 @@
+{
+  "updated_at": "2026-11-22T16:30:00+08:00",
+  "scope": "4 methods x 3 models x 3 datasets; one prompt each",
+  "cells": [
+    {
+      "method": "eagle",
+      "model": "gemma_3_4b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/eagle/gemma_3_4b_all3.jsonl"
+    },
+    {
+      "method": "eagle",
+      "model": "minicpm4_8b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/eagle/minicpm4_8b_all3.jsonl"
+    },
+    {
+      "method": "eagle",
+      "model": "qwen3_4b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/eagle/qwen3_4b_all3.jsonl"
+    },
+    {
+      "method": "lookahead",
+      "model": "gemma_3_4b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/lookahead/gemma_3_4b_all3.jsonl"
+    },
+    {
+      "method": "lookahead",
+      "model": "minicpm4_8b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/lookahead/minicpm4_8b_all3.jsonl"
+    },
+    {
+      "method": "lookahead",
+      "model": "qwen3_4b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/lookahead/qwen3_4b_all3.jsonl"
+    },
+    {
+      "method": "medusa",
+      "model": "gemma_3_4b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/medusa/gemma_3_4b_all3.jsonl"
+    },
+    {
+      "method": "medusa",
+      "model": "minicpm4_8b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/medusa/minicpm4_8b_all3.jsonl"
+    },
+    {
+      "method": "medusa",
+      "model": "qwen3_4b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/medusa/qwen3_4b_all3.jsonl"
+    },
+    {
+      "method": "ngram",
+      "model": "gemma_3_4b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/ngram/gemma_3_4b_all3.jsonl"
+    },
+    {
+      "method": "ngram",
+      "model": "minicpm4_8b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/ngram/minicpm4_8b_all3.jsonl"
+    },
+    {
+      "method": "ngram",
+      "model": "qwen3_4b",
+      "status": "passed",
+      "datasets": [
+        "advbench",
+        "jbb",
+        "strongreject"
+      ],
+      "records": 3,
+      "empty_responses": 0,
+      "output": "results/security_variants_20261122/model_matrix/ngram/qwen3_4b_all3.jsonl"
+    }
+  ]
+}

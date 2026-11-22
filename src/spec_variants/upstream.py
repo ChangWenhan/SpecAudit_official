@@ -84,3 +84,21 @@ def load_eagle_model(*, base_model_path: str, eagle_model_path: str, **kwargs):
         ea_model_path=eagle_model_path,
         **kwargs,
     )
+
+
+def load_generic_medusa(base_model, checkpoint_path: str):
+    import torch
+
+    from .generic_heads import attach_generic_medusa
+
+    state = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+    return attach_generic_medusa(base_model, state)
+
+
+def load_generic_eagle(base_model, checkpoint_path: str):
+    import torch
+
+    from .generic_heads import attach_generic_eagle
+
+    state = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+    return attach_generic_eagle(base_model, state)

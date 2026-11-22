@@ -17,8 +17,15 @@ from .spec_decode import CachedLM, eos_token_set, speculative_generate
 from .spec_variants.lookahead import LookaheadPolicy
 from .spec_variants.medusa import MedusaPolicy
 from .spec_variants.eagle import EaglePolicy
+from .spec_variants.generic_eagle import GenericEaglePolicy
 from .spec_variants.ngram import NgramPolicy
-from .spec_variants.upstream import load_eagle_model, load_medusa_head_checkpoint, load_medusa_model
+from .spec_variants.upstream import (
+    load_eagle_model,
+    load_generic_eagle,
+    load_generic_medusa,
+    load_medusa_head_checkpoint,
+    load_medusa_model,
+)
 from .verifiers import build_verifier
 
 
@@ -32,8 +39,52 @@ def _sha256(path: Path) -> str:
 
 def _load_items(args):
     if args.prompt:
-        return [{"id": "custom_0", "prompt": args.prompt, "label": "unspecified"}]
-    return load_prompts(args.dataset, args.n, args.seed)
+        return [{
+            "id": "custom_0",
+            "prompt": args.prompt,
+            "label": "unspecified",
+            "dataset": "custom",
+        }]
+    names = [name.strip() for name in args.dataset.split(",") if name.strip()]
+    if not names:
+        raise ValueError("at least one dataset is required")
+    items = []
+    for name in names:
+        rows = load_prompts(name, args.n, args.seed)
+        if args.limit is not None:
+            rows = rows[: args.limit]
+        items.extend({**row, "dataset": name} for row in rows)
+    return items
+
+
+def _load_resume(args, items):
+    if not args.out.exists():
+        return []
+    records = [json.loads(line) for line in args.out.read_text().splitlines() if line.strip()]
+    if len(records) > len(items):
+        raise ValueError("resume output has more records than the frozen input list")
+    expected = {
+        "variant": args.variant,
+        "verifier": args.verifier,
+        "k": args.k if args.verifier == "topk" else None,
+        "target": str(Path(args.target).resolve()),
+        "seed": args.seed,
+        "gamma": args.gamma,
+        "max_new": args.max_new,
+    }
+    for index, record in enumerate(records):
+        mismatch = {
+            key: (record.get(key), value)
+            for key, value in expected.items()
+            if record.get(key) != value
+        }
+        if mismatch:
+            raise ValueError(f"resume mismatch at record {index}: {mismatch}")
+        if str(record.get("id")) != str(items[index]["id"]):
+            raise ValueError(f"resume ID mismatch at record {index}")
+        if record.get("dataset") != items[index]["dataset"]:
+            raise ValueError(f"resume dataset mismatch at record {index}")
+    return records
 
 
 def _prompt_text(tokenizer, prompt: str) -> str:
@@ -52,9 +103,15 @@ def _load_artifact(args, device: str):
             return load_medusa_head_checkpoint(
                 base, str(head_path), medusa_layers=args.medusa_layers
             )
+        generic_path = Path(args.variant_model) / "medusa_heads.pt"
+        if generic_path.is_file():
+            return load_generic_medusa(load_causal_lm(args.target, device), str(generic_path))
         # Full Medusa-2 checkpoints include their matching base model.
         return load_medusa_model(args.variant_model, **common)
     if args.variant == "eagle":
+        generic_path = Path(args.variant_model) / "eagle_head.pt"
+        if generic_path.is_file():
+            return load_generic_eagle(load_causal_lm(args.target, device), str(generic_path))
         return load_eagle_model(
             base_model_path=args.target,
             eagle_model_path=args.variant_model,
@@ -84,6 +141,8 @@ def _build(args, target_model, artifact):
     if args.variant == "medusa":
         return MedusaPolicy(target_model, args.device)
     if args.variant == "eagle":
+        if hasattr(artifact, "propose_eagle"):
+            return GenericEaglePolicy(artifact, args.device)
         return EaglePolicy(artifact, args.device)
     raise ValueError(args.variant)
 
@@ -101,9 +160,9 @@ def parse_args():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--cache-mode", default="incremental", choices=["incremental", "rebuild"])
-    parser.add_argument("--dataset", default="jbb")
-    parser.add_argument("--n", type=int)
-    parser.add_argument("--limit", type=int)
+    parser.add_argument("--dataset", default="jbb", help="one dataset or comma-separated datasets")
+    parser.add_argument("--n", type=int, help="per-dataset sample size")
+    parser.add_argument("--limit", type=int, help="limit applied independently to each dataset")
     parser.add_argument("--prompt", help="single smoke-test prompt")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--ngram-min", type=int, default=5)
@@ -124,11 +183,10 @@ def main():
     if args.variant in ("medusa", "eagle") and not args.variant_model:
         raise SystemExit("--variant-model is required for medusa/eagle")
     items = _load_items(args)
-    if args.limit is not None:
-        items = items[: args.limit]
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    if args.out.exists():
-        raise FileExistsError(args.out)
+    records = _load_resume(args, items)
+    if records:
+        print(f"resuming {args.out} after {len(records)} records", flush=True)
 
     import torch
 
@@ -139,10 +197,14 @@ def main():
         tokenizer = (
             load_tokenizer(args.target)
             if (Path(args.variant_model) / "medusa_lm_head.pt").is_file()
+            or (Path(args.variant_model) / "medusa_heads.pt").is_file()
             else artifact.get_tokenizer()
         )
     elif args.variant == "eagle":
-        target_model, tokenizer = artifact.base_model, artifact.get_tokenizer()
+        if hasattr(artifact, "propose_eagle"):
+            target_model, tokenizer = artifact, load_tokenizer(args.target)
+        else:
+            target_model, tokenizer = artifact.base_model, artifact.get_tokenizer()
     else:
         target_model, tokenizer = load_causal_lm(args.target, args.device), load_tokenizer(args.target)
     target_lm = CachedLM(target_model, args.device, mode=args.cache_mode)
@@ -151,9 +213,10 @@ def main():
         | eos_token_set(tokenizer.eos_token_id)
     )
     verifier_kwargs = {"k": args.k} if args.verifier == "topk" else {}
-    records = []
     started = datetime.now().astimezone().isoformat(timespec="seconds")
     for index, item in enumerate(items):
+        if index < len(records):
+            continue
         policy = _build(args, target_model, artifact)
         prompt_ids = tokenizer(_prompt_text(tokenizer, item["prompt"]), return_tensors="pt").input_ids.to(args.device)
         sampling_seed = args.seed * 1_000_000 + index
@@ -177,7 +240,7 @@ def main():
             "k": args.k if args.verifier == "topk" else None,
             "mode": f"{args.variant}:{args.verifier}" + (f":k{args.k}" if args.verifier == "topk" else ""),
             "target": str(Path(args.target).resolve()),
-            "dataset": args.dataset,
+            "dataset": item["dataset"],
             "id": str(item["id"]),
             "sample_idx": 0,
             "prompt": item["prompt"],

@@ -23,8 +23,8 @@ utility rows, including the two attack rows that share Bare's IFEval output by
 definition. The final aggregates and paper table fragments are under
 `results/e13_analysis_20261122/`. A supplemental security audit of Medusa,
 EAGLE, N-gram speculation, and Lookahead Decoding now has four tested proposal
-adapters and GPU smoke runs; the formal three-seed/judge campaign has not yet
-started. See
+adapters, a 4 × 3 × 3 smoke matrix, and one-seed harmful generation across the
+three model families and three datasets. See
 [CURRENT_EXPERIMENTS.md](docs/CURRENT_EXPERIMENTS.md) and the project-level
 [EXPERIMENTS.md](../../EXPERIMENTS.md).
 
