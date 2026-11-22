@@ -52,7 +52,7 @@ Table 5 repeats the served conditions with the primary and auxiliary judges.
 The auxiliary column is labelled secondary and non-independent; disagreements
 are reported directly rather than averaged away.
 
-## 5.2A Dependence on the Learned Draft Source
+## 5.2A Dependence on the Learned Proposal Source
 
 This subsection keeps the supply-chain threat model and replaces the full
 autoregressive draft with supplier-controlled Medusa-style and EAGLE-style
@@ -112,7 +112,7 @@ provenance-certified same-host rank anchor exists. The figure supports a claim
 about the implementation's relative cost, not a production latency claim.
 
 The final inventory has no appendix. The result tables are Table III for the
-cross-column main results, Table IV for learned draft sources, Table V for the
+cross-column main results, Table IV for learned proposal sources, Table V for the
 K sweep, Table VI for probability rules, Table VII for Exact and SecureSD, and
 Table VIII for the Qwen3Guard supplementary main table. Fig. 2 shows the main
 controls; Figs. 3 and 4 show learned-source acceptance and safety--acceptance;
