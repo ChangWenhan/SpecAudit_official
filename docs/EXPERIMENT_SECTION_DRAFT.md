@@ -1,9 +1,11 @@
 # Experiment section working draft
 
-Updated 2026-11-22. This is the current writing scaffold for Section 5. The
-planned analyses and table fragments are complete; manuscript insertion should
-use only the validated evidence roots and should not copy intermediate values
-from the running logs.
+Updated 2026-11-22. The full Section 5 manuscript source now lives in
+`../../paper/generated_experiments/experiment_section.tex`, and the five tables
+are rebuilt by `python -m scripts.render_experiment_paper_assets`. The same
+command also renders the four publication figures under `paper/pictures/`.
+Manuscript numbers should continue to come only from the validated evidence
+roots, never from intermediate logs.
 
 ## 5.1 Experimental Setup
 

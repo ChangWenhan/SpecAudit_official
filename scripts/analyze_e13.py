@@ -133,14 +133,14 @@ def seed_rows(
                          condition, judge)
 
 
-def summarize_seed_cell(rows: list[dict], expected: int) -> dict:
+def summarize_seed_cell(rows: list[dict], expected: int, judge: str) -> dict:
     if len(rows) != expected:
         raise ValueError(f"record count {len(rows)} != {expected}")
     keys = {(str(row.get("id")), row.get("sample_idx", 0)) for row in rows}
     if len(keys) != expected:
         raise ValueError("duplicate sample keys")
     records = {(str(row.get("id")), row.get("sample_idx", 0)): row for row in rows}
-    return {judge: outcome_summary(records, judge, "wide") for judge in JUDGES}
+    return outcome_summary(records, judge, "wide")
 
 
 def aggregate_seed_values(values: dict[int, float]) -> dict:
@@ -190,13 +190,13 @@ def main() -> None:
                     for judge in JUDGES:
                         rows = seed_rows(seed, condition, model, dataset, judge,
                                          args.root, args.securesd_root)
-                        summary = summarize_seed_cell(rows, expected)
+                        summary = summarize_seed_cell(rows, expected, judge)
                         keys = {(str(row.get("id")), row.get("sample_idx", 0)) for row in rows}
                         if condition_keys_judge is None:
                             condition_keys_judge = keys
                         elif condition_keys_judge != keys:
                             raise ValueError("judge rows do not align")
-                        by_judge.update(summary)
+                        by_judge[judge] = summary
                     if condition_keys is None:
                         condition_keys = condition_keys_judge
                     elif condition_keys != condition_keys_judge:

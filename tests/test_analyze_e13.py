@@ -42,10 +42,18 @@ def test_seed_summary_requires_expected_count():
     row = {"id": "1", "sample_idx": 0, "prompt": "p", "response": "r",
            "dataset": "jbb", "guard_gptoss": {"safety": "safe"},
            "guard_strong": {"safety": "safe"}}
-    summary = summarize_seed_cell([row], 1)
-    assert summary["gptoss"]["rate_total_pct"] == 0
+    summary = summarize_seed_cell([row], 1, "gptoss")
+    assert summary["rate_total_pct"] == 0
     with pytest.raises(ValueError, match="record count"):
-        summarize_seed_cell([row], DATASETS["jbb"])
+        summarize_seed_cell([row], DATASETS["jbb"], "gptoss")
+
+
+def test_single_judge_sidecar_is_not_overwritten_by_the_other_judge():
+    row = {"id": "1", "sample_idx": 0, "prompt": "p", "response": "r",
+           "dataset": "jbb", "guard_gptoss": {"safety": "unsafe"}}
+    summary = summarize_seed_cell([row], 1, "gptoss")
+    assert summary["positive"] == 1
+    assert summary["rate_total_pct"] == 100
 
 
 def test_utility_names_handle_legacy_seed_zero_aliases():

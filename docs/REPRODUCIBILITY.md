@@ -45,11 +45,21 @@ three-seed aggregate and table fragments are under
 ```bash
 python -m scripts.analyze_e13 \
   --root results \
-  --securesd-root results/securesd_20261110 \
+  --securesd-root results/securesd_20261110/seed_0 \
   --utility-root results/utility200_20261118 \
   --utility-seed0 results/utility200_20261111/utility_summary.json \
   --out results/e13_analysis_20261122/e13.json
 ```
+
+The paper tables and four multi-panel experiment figures are then rebuilt with:
+
+```bash
+python -m scripts.render_experiment_paper_assets
+```
+
+That command writes `paper/generated_experiments/` and the individual vector
+panels under `paper/pictures/exp_*.pdf`; the LaTeX file arranges them with
+`subfigure` and contains no titles inside the imported panels.
 
 Two gpt-oss rows initially failed Harmony parsing. They were retried through
 the audited raw-Harmony fallback and replaced before the final manifest was

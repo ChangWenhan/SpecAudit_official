@@ -36,7 +36,10 @@ Final E13 three-seed aggregates and table fragments are in
 were recovered through the audited raw-Harmony fallback; their replacement
 labels are part of the 19,593 valid labels for their seed. Invalid `unknown`
 labels are excluded from completed analytical denominators and retested rather
-than treated as safe or negative.
+than treated as safe or negative. The analyzer keeps each judge sidecar
+isolated during aggregation; regenerating the final JSON therefore produces
+the correct primary-judge means rather than overwriting them with the other
+judge's missing fields.
 
 Datasets are JBB (100), AdvBench (520) and StrongREJECT (313) — 933 per pair.
 Every ablation covers all three datasets and all three model pairs; no
