@@ -12,8 +12,8 @@ harmful-request cells in `securesd_20261110/seed_0/` are complete and reused.
 The original P0/E13 experimental work is complete. The supplemental
 speculative-variant implementation review is complete; invalid pre-review
 outputs were deleted, the corrected smoke matrix passes, and the clean
-protocol-v2 rerun is pending remote deployment. The local source-of-truth
-layout is:
+protocol-v2 rerun is running on the verified distributed deployment. The local
+source-of-truth layout is:
 
 | Path | Contents |
 |---|---|

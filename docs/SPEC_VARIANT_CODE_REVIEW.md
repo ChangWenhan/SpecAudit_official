@@ -53,5 +53,5 @@ integrity.  The main review then reproduced and fixed actionable findings.
 - Corrected 4 method × 3 model × 3 dataset smoke matrix passes with no empty
   decoded responses.
 - All previous formal outputs and invalid heads were deleted before the clean
-  restart. Results are rerun under protocol version
+  restart. The corrected campaign is running under protocol version
   `spec-variant-2026-11-22-v2`.

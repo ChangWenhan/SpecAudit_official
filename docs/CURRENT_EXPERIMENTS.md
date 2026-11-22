@@ -17,7 +17,7 @@ defined in [SPEC_VARIANT_PROTOCOL.md](SPEC_VARIANT_PROTOCOL.md).
 | E13 seeds 1/2 | generation and scoring complete; each seed has two frozen 36-file judge manifests with 19,593 labels per judge and `unknown=0` |
 | E13 analysis | 126 ASR rows and 21 utility rows; primary, auxiliary and judge-comparison table fragments generated |
 | Release state | P0 release gate is `ready`; remote workspaces are idle and the project copies on s109/s111 were removed after local checksum verification |
-| Speculative variants | Independent review completed; P0 fixing and invalid-output cleanup done; corrected 4 × 3 × 3 smoke matrix passes; clean protocol-v2 campaign restart pending remote sync |
+| Speculative variants | Independent review completed; P0 fixes and invalid-output cleanup done; corrected 4 × 3 × 3 smoke matrix passes; clean protocol-v2 campaign is running on s218/A100/s111 |
 
 ## Supplemental speculative-variant batch
 

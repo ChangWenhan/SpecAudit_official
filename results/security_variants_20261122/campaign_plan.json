@@ -1,11 +1,22 @@
 {
-  "status": "restart_pending",
+  "status": "running_protocol_v2",
   "datasets": [
-    {"name": "jbb", "n": 100},
-    {"name": "advbench", "n": 520},
-    {"name": "strongreject", "n": 313}
+    {
+      "name": "jbb",
+      "n": 100
+    },
+    {
+      "name": "advbench",
+      "n": 520
+    },
+    {
+      "name": "strongreject",
+      "n": 313
+    }
   ],
-  "seeds": [0],
+  "seeds": [
+    0
+  ],
   "primary_judge": "gpt-oss-safeguard-20b",
   "generation": {
     "temperature": 1.0,
@@ -30,10 +41,19 @@
       "heads": "/mnt/disk/cwh/LLM/spec_variant_heads/MiniCPM4_8B"
     }
   ],
-  "methods": ["ngram", "lookahead", "medusa", "eagle"],
+  "methods": [
+    "ngram",
+    "lookahead",
+    "medusa",
+    "eagle"
+  ],
   "model_method_cells": 12,
   "dataset_files": 36,
-  "records_by_dataset": {"jbb": 100, "advbench": 520, "strongreject": 313},
+  "records_by_dataset": {
+    "jbb": 100,
+    "advbench": 520,
+    "strongreject": 313
+  },
   "total_responses": 11196,
   "artifact_protocol": "Shared-architecture Medusa-style and recursive EAGLE-style harmful adapters trained independently per target family after excluding all evaluation prompts; N-gram and Lookahead are draft-free."
 }

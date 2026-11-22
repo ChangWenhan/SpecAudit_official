@@ -60,6 +60,7 @@
 !/results/security_variants_20261122/model_matrix.json
 !/results/security_variants_20261122/head_artifacts.json
 !/results/security_variants_20261122/distribution.json
+!/results/security_variants_20261122/deployment_verification.json
 
 # Never publish caches
 __pycache__/

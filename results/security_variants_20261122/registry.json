@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-11-22T20:50:00+08:00",
+  "updated_at": "2026-11-22T20:40:00+08:00",
   "protocol_version": "spec-variant-2026-11-22-v2",
-  "formal_campaign": "restart_ready_after_code_review",
+  "formal_campaign": "running_protocol_v2",
   "formal_seeds": [
     0
   ],
@@ -34,7 +34,12 @@
     "model_method_cells": 12,
     "dataset_files": 36,
     "total_responses": 11196,
-    "status": "pending clean restart"
+    "status": [
+      "results/security_variants_20261122/seed_0/status_ngram.json",
+      "A100 status_lookahead_qwen/status_medusa_qwen/status_eagle_qwen.json",
+      "s111 status_{lookahead,medusa,eagle}_{gemma,minicpm}.json"
+    ]
   },
-  "invalidated_outputs": "deleted after code review"
+  "invalidated_outputs": "deleted after code review",
+  "deployment_verification": "results/security_variants_20261122/deployment_verification.json"
 }
