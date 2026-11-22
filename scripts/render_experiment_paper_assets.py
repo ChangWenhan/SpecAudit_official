@@ -247,9 +247,7 @@ def render_rules_table(evidence: dict) -> str:
 
 
 def variant_metric_cell(value: dict) -> str:
-    low, high = value["asr_ci95_pct"]
-    return (r"\specmetric{" + f"{value['asr_pct']:.1f}\\%" +
-            r"}{\specrange{" + f"{low:.1f}" + "}{" + f"{high:.1f}" + "}}")
+    return f"{value['asr_pct']:.1f}\\%"
 
 
 def variant_acceptance(security: dict, source: str, model: str) -> float | None:
@@ -274,7 +272,7 @@ def render_draft_source_table(security: dict) -> str:
         r"\begin{table*}[!t]", r"\centering", r"\footnotesize",
         rf"\setlength{{\tabcolsep}}{{{TABLE_TABCOLSEP}}}",
         (r"\caption{Learned draft-source comparison under the gpt-oss primary judge. "
-         r"Each ASR cell is from one seed; red brackets are 95\% Wilson intervals. "
+         r"Each ASR cell is a one-seed point estimate; no across-seed range is reported. "
          r"Acc.\ is accepted draft tokens divided by proposed tokens, averaged over "
          r"responses and pooled across datasets. Medusa-style and EAGLE-style are "
          r"reviewed learned-head adapters, not upstream end-to-end reproductions.}"),

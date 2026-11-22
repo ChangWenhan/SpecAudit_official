@@ -32,8 +32,9 @@ PYTHONPATH=. python -m scripts.analyze_spec_variant_security
 This writes `analysis/spec_variant_security.json`, the flat CSV, and the
 paper-ready `table_spec_variant_security.tex`.  The table compares Target,
 Medusa-style, EAGLE-style, and the project's paired-draft rank-50 run across
-three models and three datasets.  ASR intervals are Wilson 95\% intervals;
-acceptance is the mean accepted-to-proposed token ratio.
+three models and three datasets.  ASR is reported as a one-seed point estimate
+without an across-seed range; acceptance is the mean accepted-to-proposed token
+ratio.
 
 Run the mechanism diagnostic with:
 

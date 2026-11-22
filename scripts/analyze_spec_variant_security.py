@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import math
 from pathlib import Path
 
 from src.result_io import read_jsonl
@@ -21,20 +20,8 @@ VARIANTS = (("medusa", "Medusa-style", "Medusa"),
             ("eagle", "EAGLE-style", "EAGLE"))
 
 
-def wilson(successes: int, total: int, z: float = 1.959963984540054) -> tuple[float, float]:
-    if total <= 0:
-        raise ValueError("Wilson interval requires a positive denominator")
-    p = successes / total
-    denominator = 1 + z * z / total
-    center = (p + z * z / (2 * total)) / denominator
-    radius = z * math.sqrt(p * (1 - p) / total + z * z / (4 * total * total)) / denominator
-    return 100 * (center - radius), 100 * (center + radius)
-
-
 def cell(successes: int, total: int, acceptance: float | None) -> dict:
-    low, high = wilson(successes, total)
     return {"unsafe": successes, "n": total, "asr_pct": 100 * successes / total,
-            "asr_ci95_pct": [low, high],
             "acceptance_pct": acceptance}
 
 
@@ -80,9 +67,7 @@ def load_main(main_analysis: Path, raw_root: Path) -> dict:
 
 
 def latex_cell(row: dict) -> str:
-    low, high = row["asr_ci95_pct"]
-    return (rf"\shortstack{{{row['asr_pct']:.1f}\\{{\scriptsize"
-            rf"\color{{red!65!black}}[{low:.1f}, {high:.1f}]}}}}")
+    return f"{row['asr_pct']:.1f}\\%"
 
 
 def format_acceptance(value: float | None) -> str:
@@ -104,7 +89,8 @@ def render_table(cells: dict) -> str:
         r"\setlength{\tabcolsep}{2pt}",
         (r"\caption{One-seed primary-judge ASR and acceptance for speculative "
          r"proposal families under rank-50 verification. ASR is unsafe divided "
-         r"by all responses; brackets are 95\% Wilson intervals. Acc. is the "
+         r"by all responses and is reported as a one-seed point estimate without "
+         r"an across-seed range. Acc. is the "
          r"mean per-request accepted-to-proposed token ratio pooled over the three "
          r"datasets. JBB, AdvBench, and StrongREJECT contain 100, 520, and 313 "
          r"responses per cell. Medusa-style and EAGLE-style use the reviewed "
@@ -154,11 +140,11 @@ def main() -> None:
     with (args.out / "spec_variant_security.csv").open("w", newline="") as stream:
         writer = csv.writer(stream)
         writer.writerow(("source", "model", "dataset", "unsafe", "n", "asr_pct",
-                         "ci_low_pct", "ci_high_pct", "acceptance_pct"))
+                         "acceptance_pct"))
         for key in sorted(cells):
             value = cells[key]
             writer.writerow((*key, value["unsafe"], value["n"], value["asr_pct"],
-                             *value["asr_ci95_pct"], value["acceptance_pct"]))
+                             value["acceptance_pct"]))
     print(f"wrote {args.out / 'table_spec_variant_security.tex'}")
 
 

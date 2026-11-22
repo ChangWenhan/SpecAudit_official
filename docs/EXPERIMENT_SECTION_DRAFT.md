@@ -56,7 +56,7 @@ are reported directly rather than averaged away.
 
 This subsection keeps the supply-chain threat model and replaces the full
 autoregressive draft with supplier-controlled Medusa-style and EAGLE-style
-learned heads. Table IV reports one-seed ASR with Wilson intervals and pooled
+learned heads. Table IV reports one-seed ASR point estimates and pooled
 acceptance. Figs. 3 and 4 show acceptance by response position and the
 safety--acceptance plane for the paired draft and both head families. The text
 separates proposal reliability from harmful direction and states that the heads
