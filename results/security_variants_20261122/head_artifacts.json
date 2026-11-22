@@ -1,109 +1,148 @@
 {
-  "updated_at": "2026-11-22T17:20:00+08:00",
-  "protocol": "resource-matched harmful teacher distillation",
+  "updated_at": "2026-11-22T20:45:00+08:00",
+  "protocol": "shared-architecture harmful teacher distillation with all evaluation prompts excluded",
   "families": {
     "Qwen3_4B": {
       "path": "/mnt/disk/cwh/LLM/spec_variant_heads/Qwen3_4B",
+      "model": "/mnt/disk/cwh/LLM/Qwen3-4B",
+      "model_signature": "b8de1b1105ffe944a68f4431d394894c20928433273be01b22e7cd85fb80458a",
       "training": {
         "family": "Qwen3_4B",
         "model": "/mnt/disk/cwh/LLM/Qwen3-4B",
         "data": "/mnt/disk/cwh/Interest/spec-sampling-safety/experiments/e1-relaxed-verification/data/draft_train/teacher_data.jsonl",
         "data_sha256": "a2c09136e0a6b73327569ba12f71bded67744dca7ef5963055a175e8f9215870",
-        "created_at": "2026-11-22T17:05:56+08:00",
+        "created_at": "2026-11-22T20:02:30+08:00",
         "seed": 0,
         "medusa_heads": 4,
         "epochs": 3,
         "batch_size": 32,
-        "optimizer_steps": 4209,
-        "training_records": 300,
-        "training_positions": 44890,
-        "skipped_records": 0,
-        "initial_loss": 18.74968719482422,
-        "final_loss": 4.155386924743652,
-        "protocol": "resource-matched harmful teacher distillation"
+        "optimizer_steps": 4134,
+        "training_records": 295,
+        "training_positions": 44090,
+        "skipped_records": 5,
+        "initial_loss": 20.91254425048828,
+        "final_loss": 4.7506608963012695,
+        "protocol": "shared-architecture harmful teacher distillation with evaluation-prompt exclusion",
+        "tokenization": {
+          "combined_prompt_answer_add_special_tokens": true,
+          "prompt_prefix_verified": true
+        },
+        "excluded_datasets": [
+          "jbb",
+          "advbench",
+          "strongreject"
+        ],
+        "excluded_prompt_hash_count": 897,
+        "excluded_prompt_hashes_sha256": "6acb2f1037cc4df24a7dd4b8e6c520f18272fcf692ca39404ab171ea77f8aa88"
       },
       "files": {
         "medusa_heads.pt": {
           "size": 104902140,
-          "sha256": "a980425f225ef6da0e438f3b8492a0194e95895a87a3a248f6cb82d453434df1"
+          "sha256": "f64b81f6217988cb6bb710c801802ac8858425e074946d6946500361061afa3e"
         },
         "eagle_head.pt": {
           "size": 52440618,
-          "sha256": "700128a826c8f616e1e42abfe95053325053014bf0abe49388c09a46873fb425"
+          "sha256": "43fbb4370c48f2cdf6142f1f9d551f3c976b39f57a8d7e8fafeb56096e253da9"
         },
         "metadata.json": {
-          "size": 640,
-          "sha256": "698d8fe6626e9eab8fb19e724157c7db734112db57865c9f8c05c8bce1ee2b1c"
+          "size": 1008,
+          "sha256": "bf2fbdfef011f869b1bfb889d5ddad9c3d2f6a1a0113d50a1262f39f736c77a8"
         }
       }
     },
     "Gemma_3_4B": {
       "path": "/mnt/disk/cwh/LLM/spec_variant_heads/Gemma_3_4B",
+      "model": "/mnt/disk/cwh/LLM/gemma-3-4b-it",
+      "model_signature": "80647e926a658c3bf6ec82b93b10e79b7ca4d74ae7b4ca3c631e2333093b3b5c",
       "training": {
         "family": "Gemma_3_4B",
         "model": "/mnt/disk/cwh/LLM/gemma-3-4b-it",
         "data": "/mnt/disk/cwh/Interest/spec-sampling-safety/experiments/e1-relaxed-verification/data/draft_train/teacher_data_gemma.jsonl",
         "data_sha256": "472f76774419f15b035b6972b63e8aa548e7a178b4969c7733a0eb8dbe6d8076",
-        "created_at": "2026-11-22T17:11:00+08:00",
+        "created_at": "2026-11-22T20:06:55+08:00",
         "seed": 0,
         "medusa_heads": 4,
         "epochs": 3,
         "batch_size": 24,
-        "optimizer_steps": 5931,
-        "training_records": 300,
-        "training_positions": 47439,
-        "skipped_records": 0,
-        "initial_loss": 22.499372482299805,
-        "final_loss": 7.194525718688965,
-        "protocol": "resource-matched harmful teacher distillation"
+        "optimizer_steps": 5832,
+        "training_records": 295,
+        "training_positions": 46639,
+        "skipped_records": 5,
+        "initial_loss": 24.95256233215332,
+        "final_loss": 5.9670867919921875,
+        "protocol": "shared-architecture harmful teacher distillation with evaluation-prompt exclusion",
+        "tokenization": {
+          "combined_prompt_answer_add_special_tokens": true,
+          "prompt_prefix_verified": true
+        },
+        "excluded_datasets": [
+          "jbb",
+          "advbench",
+          "strongreject"
+        ],
+        "excluded_prompt_hash_count": 897,
+        "excluded_prompt_hashes_sha256": "6acb2f1037cc4df24a7dd4b8e6c520f18272fcf692ca39404ab171ea77f8aa88"
       },
       "files": {
         "medusa_heads.pt": {
           "size": 104902140,
-          "sha256": "ac459cc3b8bbe8293bbd5fe151154c5a1657ce7005f444ddc25ebd4f423daf54"
+          "sha256": "da25e89fd4350d6194072d74c343a4a3d9b0f4776b6815151b0c056aa765d04a"
         },
         "eagle_head.pt": {
           "size": 52440618,
-          "sha256": "257983b91e26c6c07a19004a60ccf99825f9af764c1a04ee55b71d949b255baa"
+          "sha256": "c856c56a2b90fea3dcb0d07e738578bff117b9ec0e26cc4dc14dd4c2ff750a2c"
         },
         "metadata.json": {
-          "size": 654,
-          "sha256": "20b41003c148ff59c65921b16f4533c5179e6bc7e6d3096219950c42a90d6a67"
+          "size": 1021,
+          "sha256": "d25b9954448ce695a8f97c3ad7b32ebf3fd987e6bd322596f78a0cb55d5e8585"
         }
       }
     },
     "MiniCPM4_8B": {
       "path": "/mnt/disk/cwh/LLM/spec_variant_heads/MiniCPM4_8B",
+      "model": "/mnt/disk/cwh/LLM/MiniCPM4-8B",
+      "model_signature": "1cd437a185992bfe1258ddb67aab59b9b8c0da607653c3f5777d3403047b4eb2",
       "training": {
         "family": "MiniCPM4_8B",
         "model": "/mnt/disk/cwh/LLM/MiniCPM4-8B",
         "data": "/mnt/disk/cwh/Interest/spec-sampling-safety/experiments/e1-relaxed-verification/data/draft_train/teacher_data_minicpm.jsonl",
         "data_sha256": "bc500761dbdea044998c3526a58cecce24741c88354a3b7b6253f470f0f43dd2",
-        "created_at": "2026-11-22T17:16:34+08:00",
+        "created_at": "2026-11-22T20:12:15+08:00",
         "seed": 0,
         "medusa_heads": 4,
         "epochs": 3,
         "batch_size": 12,
-        "optimizer_steps": 11340,
-        "training_records": 300,
-        "training_positions": 45360,
-        "skipped_records": 0,
-        "initial_loss": 184.17080688476562,
-        "final_loss": 42.53904342651367,
-        "protocol": "resource-matched harmful teacher distillation"
+        "optimizer_steps": 11145,
+        "training_records": 295,
+        "training_positions": 44580,
+        "skipped_records": 5,
+        "initial_loss": 176.8958740234375,
+        "final_loss": 36.668174743652344,
+        "protocol": "shared-architecture harmful teacher distillation with evaluation-prompt exclusion",
+        "tokenization": {
+          "combined_prompt_answer_add_special_tokens": true,
+          "prompt_prefix_verified": true
+        },
+        "excluded_datasets": [
+          "jbb",
+          "advbench",
+          "strongreject"
+        ],
+        "excluded_prompt_hash_count": 897,
+        "excluded_prompt_hashes_sha256": "6acb2f1037cc4df24a7dd4b8e6c520f18272fcf692ca39404ab171ea77f8aa88"
       },
       "files": {
         "medusa_heads.pt": {
           "size": 268504572,
-          "sha256": "eb4596c19508b98452d171533ab2a72873816f3f177d8290558fac225278074b"
+          "sha256": "9ddea46e3baf7cfc2eaf304bb5e3a91b0697d86926993ec6b7369f8dcd09e7d1"
         },
         "eagle_head.pt": {
           "size": 134235690,
-          "sha256": "9b514a386e5309799e6ad916596ceac1f4a3870dd63a249408fd7d73a2c78676"
+          "sha256": "3d151695f0d414fd92c7e9b94a554443d80fb5add749d3b8cdd8ed700c10ff42"
         },
         "metadata.json": {
-          "size": 656,
-          "sha256": "1a37fe1f18e3ef9a93420dbb158dd7da2991e7a8576a438ffdd55d77e7870d50"
+          "size": 1023,
+          "sha256": "6d94ea05f31d41aef197166a14119a175ed1d30608417b7e886ed1aa051afd47"
         }
       }
     }

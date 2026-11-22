@@ -86,13 +86,14 @@ def load_cells(manifest_path, selected=()):
             raise ValueError(f"invalid mode scope: {path}")
         if len(set(allowed_modes)) != len(allowed_modes):
             raise ValueError(f"duplicate modes: {path}")
-        if not all(isinstance(r.get("response"), str) and r["response"].strip()
+        if not all(isinstance(r.get("response"), str)
                    and r.get("dataset") == entry["dataset"]
                    and r.get("mode") in allowed_modes for r in rows):
             raise ValueError(f"invalid generation records: {path}")
-        if path.name in cells:
-            raise ValueError(f"duplicate cell basename: {path.name}; use separate manifests per seed")
-        cells[path.name] = {"path": path, "rows": rows, "sha256": entry["sha256"],
+        cell_name = str(path.relative_to(result_root))
+        if cell_name in cells:
+            raise ValueError(f"duplicate cell path: {cell_name}")
+        cells[cell_name] = {"path": path, "rows": rows, "sha256": entry["sha256"],
                             "fingerprints": [row_digest(r) for r in rows]}
     if selected and set(selected) != set(cells):
         raise ValueError(f"selected cells absent from frozen manifest: {set(selected) - set(cells)}")
@@ -233,6 +234,8 @@ def main():
     ap.add_argument("--status", type=Path, default=Path("results/dual_judge_20261007/status.json"))
     ap.add_argument("--cells", nargs="*", help="optional frozen filenames, e.g. a pilot subset")
     ap.add_argument("--retry-unknown", action="store_true")
+    ap.add_argument("--require-valid", action="store_true",
+                    help="return nonzero and withhold completion if any label is unknown")
     ap.add_argument("--judges", default="gptoss,guard",
                     help="comma-separated formal judges; supports sequential GPU phases")
     ap.add_argument("--dry-run", action="store_true")
@@ -367,7 +370,11 @@ def main():
             if time.monotonic() - last_report >= 30:
                 report("stopping" if stop.is_set() else "running")
                 last_report = time.monotonic()
-    state = ("complete" if len(completed) == total else
+    judged_complete = len(completed) == total
+    unknown_count = sum(1 for verdict in completed.values()
+                        if verdict.get("safety") == "unknown")
+    state = ("complete" if judged_complete and (not args.require_valid or unknown_count == 0) else
+             "incomplete_unknown" if judged_complete and args.require_valid and unknown_count else
              "interrupted" if stop.is_set() else "incomplete")
     report(state)
     if state == "complete":
@@ -383,7 +390,8 @@ def main():
         atomic_json(args.status.with_name("completion_manifest.json"),
                     {"state": state, "completed_at": now(), "signature": signature,
                      "cells": entries, "labels": total, "raw_answers_unchanged": True,
-                     "note": "Unknowns are retained; complete means all rows received a recorded verdict."})
+                     "unknowns": unknown_count,
+                     "note": "Unknowns are retained; completion requires valid labels when --require-valid is set."})
     db.close()
     return 0 if state == "complete" else 1
 

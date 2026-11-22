@@ -45,13 +45,32 @@ def download_one(model: str, path: str, size: int, dest: str) -> str:
         return f"skip   {path}"
     os.makedirs(os.path.dirname(target) or dest, exist_ok=True)
     tmp = target + ".part"
-    req = urllib.request.Request(file_url(model, path), headers={"User-Agent": "ms-dl/1.0"})
-    with urllib.request.urlopen(req, timeout=120, context=ssl_context()) as resp, open(tmp, "wb") as f:
-        while True:
-            chunk = resp.read(1 << 20)
-            if not chunk:
-                break
-            f.write(chunk)
+    offset = os.path.getsize(tmp) if os.path.exists(tmp) else 0
+    if offset == size:
+        os.replace(tmp, target)
+        return f"done   {path} ({size/1e6:.1f} MB)"
+    if offset > size:
+        os.remove(tmp)
+        offset = 0
+    headers = {"User-Agent": "ms-dl/1.0"}
+    if offset:
+        headers["Range"] = f"bytes={offset}-"
+    req = urllib.request.Request(file_url(model, path), headers=headers)
+    with urllib.request.urlopen(req, timeout=120, context=ssl_context()) as resp:
+        mode = "wb"
+        if offset and getattr(resp, "status", None) == 206:
+            mode = "ab"
+        elif offset:
+            offset = 0
+        with open(tmp, mode) as out:
+            while True:
+                chunk = resp.read(1 << 20)
+                if not chunk:
+                    break
+                out.write(chunk)
+    actual = os.path.getsize(tmp)
+    if actual != size:
+        raise IOError(f"size mismatch for {path}: got {actual}, expected {size}")
     os.replace(tmp, target)
     return f"done   {path} ({size/1e6:.1f} MB)"
 
@@ -64,6 +83,7 @@ def main():
     files = list_files(model)
     total = sum(f["Size"] for f in files)
     print(f"[{name}] {len(files)} files, {total/1e9:.2f} GB -> {dest}", flush=True)
+    errors = []
     with ThreadPoolExecutor(max_workers=8) as ex:
         futs = {
             ex.submit(download_one, model, f["Path"], f["Size"], dest): f["Path"]
@@ -73,7 +93,11 @@ def main():
             try:
                 print(fut.result(), flush=True)
             except Exception as e:  # noqa: BLE001
-                print(f"ERROR  {futs[fut]}: {e}", flush=True)
+                message = f"ERROR  {futs[fut]}: {e}"
+                errors.append(message)
+                print(message, flush=True)
+    if errors:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

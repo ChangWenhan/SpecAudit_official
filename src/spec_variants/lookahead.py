@@ -55,6 +55,7 @@ class LookaheadPolicy(HistoryPolicy):
         ids = torch.tensor([self.history + current], dtype=torch.long, device=self.scratch.device)
         for _ in range(self.jacobi_steps):
             logits = self.scratch.prefill(ids)
+            self._count_proposal_forwards()
             next_ids = logits[0, start : start + len(current), :].argmax(dim=-1).tolist()
             next_ids = [int(x) for x in next_ids]
             if next_ids == current:

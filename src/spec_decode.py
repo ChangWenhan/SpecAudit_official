@@ -149,6 +149,7 @@ class GenStats:
     accept_lengths: List[int] = field(default_factory=list)
     fallbacks: int = 0
     draft_prefix_resets: int = 0
+    proposal_forward_calls: int = 0
     eos_in_accepted: bool = False
 
 
@@ -209,6 +210,7 @@ def speculative_generate(
         stats.interventions += 1
         if stop_ids and forced_token in stop_ids:
             stats.draft_prefix_resets = getattr(policy, "prefix_resets", 0)
+            stats.proposal_forward_calls = getattr(policy, "proposal_forward_calls", 0)
             return generated[:max_new_tokens], stats
 
     while len(generated) < max_new_tokens:
@@ -216,6 +218,20 @@ def speculative_generate(
         if g <= 0:
             break
         draft_tokens = policy.propose(g)
+        if not draft_tokens:
+            # No speculative candidate is available.  Take the ordinary target
+            # step rather than terminating generation or fabricating a draft.
+            probs = torch.softmax(target.last_logits[0] / temperature, dim=-1)
+            token = int(torch.multinomial(probs, 1, generator=rng).item())
+            generated.append(token)
+            target.extend([token])
+            stats.forwards += 1
+            ctx_len += 1
+            stats.iterations += 1
+            policy.sync([], token)
+            if stop_ids and token in stop_ids:
+                break
+            continue
         if len(draft_tokens) < g:
             g = len(draft_tokens)
             if g == 0:
@@ -276,4 +292,5 @@ def speculative_generate(
             break
 
     stats.draft_prefix_resets = getattr(policy, "prefix_resets", 0)
+    stats.proposal_forward_calls = getattr(policy, "proposal_forward_calls", 0)
     return generated[:max_new_tokens], stats

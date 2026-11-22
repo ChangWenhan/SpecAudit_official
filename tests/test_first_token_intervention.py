@@ -134,3 +134,23 @@ def test_unknown_opening_intervention_is_rejected():
         assert "first_token_source" in str(exc)
     else:
         raise AssertionError("expected ValueError")
+
+
+def test_empty_proposal_takes_one_ordinary_target_step():
+    target = FakeTarget(top1=4)
+    base_logits = target._logits
+    target._logits = lambda: base_logits() * 100
+    policy = FakePolicy([[], [2]])
+    generated, stats = speculative_generate(
+        target,
+        policy,
+        accept_one,
+        torch.tensor([[1, 2]]),
+        max_new_tokens=2,
+        gamma=1,
+        eos_token_id=99,
+    )
+    assert generated == [4, 2]
+    assert target.tokens[:3] == [1, 2, 4]
+    assert stats.iterations == 2
+    assert stats.accepted_tokens == 1

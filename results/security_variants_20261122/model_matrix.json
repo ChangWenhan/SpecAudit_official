@@ -1,5 +1,6 @@
 {
-  "updated_at": "2026-11-22T16:30:00+08:00",
+  "updated_at": "2026-11-22T20:40:00+08:00",
+  "protocol_version": "spec-variant-2026-11-22-v2",
   "scope": "4 methods x 3 models x 3 datasets; one prompt each",
   "cells": [
     {
@@ -12,8 +13,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/eagle/gemma_3_4b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "recursive_feature_eagle_head"
+      ],
+      "output": "results/security_variants_20261122/smoke/eagle/gemma_3_4b_all3.jsonl"
     },
     {
       "method": "eagle",
@@ -25,8 +29,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/eagle/minicpm4_8b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "recursive_feature_eagle_head"
+      ],
+      "output": "results/security_variants_20261122/smoke/eagle/minicpm4_8b_all3.jsonl"
     },
     {
       "method": "eagle",
@@ -38,8 +45,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/eagle/qwen3_4b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "recursive_feature_eagle_head"
+      ],
+      "output": "results/security_variants_20261122/smoke/eagle/qwen3_4b_all3.jsonl"
     },
     {
       "method": "lookahead",
@@ -51,8 +61,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/lookahead/gemma_3_4b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "None"
+      ],
+      "output": "results/security_variants_20261122/smoke/lookahead/gemma_3_4b_all3.jsonl"
     },
     {
       "method": "lookahead",
@@ -64,8 +77,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/lookahead/minicpm4_8b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "None"
+      ],
+      "output": "results/security_variants_20261122/smoke/lookahead/minicpm4_8b_all3.jsonl"
     },
     {
       "method": "lookahead",
@@ -77,8 +93,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/lookahead/qwen3_4b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "None"
+      ],
+      "output": "results/security_variants_20261122/smoke/lookahead/qwen3_4b_all3.jsonl"
     },
     {
       "method": "medusa",
@@ -90,8 +109,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/medusa/gemma_3_4b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "shared_projection_medusa_heads"
+      ],
+      "output": "results/security_variants_20261122/smoke/medusa/gemma_3_4b_all3.jsonl"
     },
     {
       "method": "medusa",
@@ -103,8 +125,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/medusa/minicpm4_8b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "shared_projection_medusa_heads"
+      ],
+      "output": "results/security_variants_20261122/smoke/medusa/minicpm4_8b_all3.jsonl"
     },
     {
       "method": "medusa",
@@ -116,8 +141,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/medusa/qwen3_4b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "shared_projection_medusa_heads"
+      ],
+      "output": "results/security_variants_20261122/smoke/medusa/qwen3_4b_all3.jsonl"
     },
     {
       "method": "ngram",
@@ -129,8 +157,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/ngram/gemma_3_4b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "None"
+      ],
+      "output": "results/security_variants_20261122/smoke/ngram/gemma_3_4b_all3.jsonl"
     },
     {
       "method": "ngram",
@@ -142,8 +173,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/ngram/minicpm4_8b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "None"
+      ],
+      "output": "results/security_variants_20261122/smoke/ngram/minicpm4_8b_all3.jsonl"
     },
     {
       "method": "ngram",
@@ -155,8 +189,11 @@
         "strongreject"
       ],
       "records": 3,
-      "empty_responses": 0,
-      "output": "results/security_variants_20261122/model_matrix/ngram/qwen3_4b_all3.jsonl"
+      "decode_empty": 0,
+      "artifact_kinds": [
+        "None"
+      ],
+      "output": "results/security_variants_20261122/smoke/ngram/qwen3_4b_all3.jsonl"
     }
   ]
 }

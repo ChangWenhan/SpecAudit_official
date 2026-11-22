@@ -20,4 +20,6 @@ class GenericEaglePolicy(HistoryPolicy):
         if g < 1:
             return []
         ids = torch.tensor([self.history], dtype=torch.long, device=self.device)
-        return self.model.propose_eagle(ids, g)
+        proposals = self.model.propose_eagle(ids, g)
+        self._count_proposal_forwards()
+        return proposals

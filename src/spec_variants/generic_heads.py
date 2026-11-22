@@ -93,21 +93,22 @@ class GenericSpecVariantModel(nn.Module):
     def propose_eagle(self, input_ids: torch.Tensor, gamma: int) -> list[int]:
         if self.eagle_head is None:
             raise RuntimeError("this artifact does not contain an EAGLE feature head")
-        ids = input_ids
         proposals: list[int] = []
+        outputs = self.base_model(
+            input_ids=input_ids,
+            attention_mask=torch.ones_like(input_ids),
+            use_cache=False,
+            output_hidden_states=True,
+        )
+        hidden = outputs.hidden_states[-1][:, -1]
+        previous_token = input_ids[:, -1:]
         for _ in range(gamma):
-            outputs = self.base_model(
-                input_ids=ids,
-                attention_mask=torch.ones_like(ids),
-                use_cache=False,
-                output_hidden_states=True,
-            )
-            hidden = outputs.hidden_states[-1][:, -1]
-            embedding = self.base_model.get_input_embeddings()(ids[:, -1:])
+            embedding = self.base_model.get_input_embeddings()(previous_token)
             feature = self.eagle_head(hidden, embedding[:, 0])
             token = int(self.base_model.lm_head(feature).argmax(dim=-1).item())
             proposals.append(token)
-            ids = torch.cat([ids, torch.tensor([[token]], device=ids.device)], dim=1)
+            hidden = feature
+            previous_token = torch.tensor([[token]], device=input_ids.device)
         return proposals
 
 

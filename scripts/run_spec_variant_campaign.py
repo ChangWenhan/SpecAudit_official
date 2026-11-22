@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import argparse
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
+import signal
 import subprocess
 import sys
 import time
@@ -38,6 +40,31 @@ def completed_count(path: Path) -> int:
     if not path.exists():
         return 0
     return sum(1 for line in path.open() if line.strip())
+
+
+def completed_cell(path: Path, expected: int) -> bool:
+    run_path = path.with_suffix(".run.json")
+    if completed_count(path) != expected or not run_path.is_file():
+        return False
+    metadata = json.loads(run_path.read_text())
+    return (
+        metadata.get("state") == "complete"
+        and metadata.get("records") == expected
+        and metadata.get("output_sha256") == hashlib.sha256(path.read_bytes()).hexdigest()
+    )
+
+
+def terminate_process_group(process) -> None:
+    if process is None or process.poll() is not None:
+        return
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+        process.wait(timeout=15)
+    except (ProcessLookupError, subprocess.TimeoutExpired):
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
 
 
 def main() -> None:
@@ -106,95 +133,118 @@ def main() -> None:
         "models": selected_models,
         "cells_total": len(cells),
         "cell_results": {},
+        "parent_pid": os.getpid(),
     }
+    active_process = None
+
+    def terminate(*_):
+        raise KeyboardInterrupt
+
+    signal.signal(signal.SIGTERM, terminate)
     atomic(status_path, status)
-    for cell_index, (method, family, target, heads, cache_mode, dataset) in enumerate(cells, 1):
-        expected = DATASET_COUNTS[dataset]
-        out = args.root / method / family.lower() / f"{dataset}.jsonl"
-        out.parent.mkdir(parents=True, exist_ok=True)
-        done = completed_count(out)
-        cell_key = f"{method}/{family}/{dataset}"
-        if done == expected:
-            status["cell_results"][cell_key] = {"state": "complete", "records": done}
-            atomic(status_path, status)
-            continue
-        if done > expected:
-            raise RuntimeError(f"too many records in {out}: {done}")
-        if done and not args.resume:
-            raise RuntimeError(f"partial output exists; rerun with --resume: {out} ({done}/{expected})")
-        command = [
-            sys.executable,
-            "-u",
-            "-m",
-            "src.run_spec_variant",
-            "--variant",
-            method,
-            "--target",
-            target,
-            "--dataset",
-            dataset,
-            "--verifier",
-            "topk",
-            "--k",
-            "50",
-            "--temperature",
-            "1.0",
-            "--gamma",
-            "6",
-            "--max-new",
-            "160",
-            "--seed",
-            "0",
-            "--cache-mode",
-            cache_mode,
-            "--out",
-            str(out),
-        ]
-        if method in ("medusa", "eagle"):
-            command += ["--variant-model", heads]
-        log_path = log_root / f"{cell_index:02d}_{method}_{family}_{dataset}.log"
-        status.update(
-            current_cell=cell_key,
-            current_index=cell_index,
-            current_records=done,
-            current_expected_records=expected,
-            current_output=str(out),
-            current_log=str(log_path),
-        )
-        status["cell_results"][cell_key] = {
-            "state": "running",
-            "records": done,
-        }
-        atomic(status_path, status)
-        env = {**os.environ, "CUDA_VISIBLE_DEVICES": os.environ.get("CUDA_VISIBLE_DEVICES", "0")}
-        with log_path.open("a") as log:
-            process = subprocess.Popen(
-                command,
-                cwd=Path(__file__).resolve().parents[1],
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                env=env,
-                start_new_session=True,
-            )
-            while process.poll() is None:
-                status["current_records"] = completed_count(out)
-                status["updated_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
-                status["cell_results"][cell_key]["records"] = status["current_records"]
+    try:
+        for cell_index, (method, family, target, heads, cache_mode, dataset) in enumerate(cells, 1):
+            expected = DATASET_COUNTS[dataset]
+            out = args.root / method / family.lower() / f"{dataset}.jsonl"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            cell_key = f"{method}/{family}/{dataset}"
+            cell_lock = (out.parent / f"{dataset}.lock").open("a")
+            try:
+                fcntl.flock(cell_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise RuntimeError(f"cell already running under {cell_lock.name}: {out}")
+            done = completed_count(out)
+            if completed_cell(out, expected):
+                status["cell_results"][cell_key] = {"state": "complete", "records": done}
                 atomic(status_path, status)
-                time.sleep(20)
-        if process.returncode:
-            status["state"] = "failed"
-            status["error"] = f"exit {process.returncode}: {log_path}"
-            status["cell_results"][cell_key]["state"] = "failed"
+                cell_lock.close()
+                continue
+            if done > expected:
+                raise RuntimeError(f"too many records in {out}: {done}")
+            if done and not args.resume:
+                raise RuntimeError(f"partial output exists; rerun with --resume: {out} ({done}/{expected})")
+            command = [
+                sys.executable,
+                "-u",
+                "-m",
+                "src.run_spec_variant",
+                "--variant",
+                method,
+                "--target",
+                target,
+                "--dataset",
+                dataset,
+                "--verifier",
+                "topk",
+                "--k",
+                "50",
+                "--temperature",
+                "1.0",
+                "--gamma",
+                "6",
+                "--max-new",
+                "160",
+                "--seed",
+                "0",
+                "--cache-mode",
+                cache_mode,
+                "--out",
+                str(out),
+            ]
+            if method in ("medusa", "eagle"):
+                command += ["--variant-model", heads]
+            log_path = log_root / f"{cell_index:02d}_{method}_{family}_{dataset}.log"
+            status.update(
+                current_cell=cell_key,
+                current_index=cell_index,
+                current_records=done,
+                current_expected_records=expected,
+                current_output=str(out),
+                current_log=str(log_path),
+                updated_at=datetime.now().astimezone().isoformat(timespec="seconds"),
+            )
+            status["cell_results"][cell_key] = {
+                "state": "running",
+                "records": done,
+            }
             atomic(status_path, status)
-            raise SystemExit(status["error"])
-        final_count = completed_count(out)
-        if final_count != expected:
-            raise RuntimeError(f"incomplete cell {out}: {final_count}/{expected}")
-        status["cell_results"][cell_key] = {"state": "complete", "records": final_count}
+            env = {**os.environ, "CUDA_VISIBLE_DEVICES": os.environ.get("CUDA_VISIBLE_DEVICES", "0")}
+            with log_path.open("a") as log:
+                active_process = subprocess.Popen(
+                    command,
+                    cwd=Path(__file__).resolve().parents[1],
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    env=env,
+                    start_new_session=True,
+                )
+                status["current_process_pid"] = active_process.pid
+                while active_process.poll() is None:
+                    status["current_records"] = completed_count(out)
+                    status["updated_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
+                    status["cell_results"][cell_key]["records"] = status["current_records"]
+                    atomic(status_path, status)
+                    time.sleep(20)
+            if active_process.returncode:
+                raise RuntimeError(f"exit {active_process.returncode}: {log_path}")
+            if not completed_cell(out, expected):
+                raise RuntimeError(f"incomplete or unverified cell {out}: {completed_count(out)}/{expected}")
+            status["cell_results"][cell_key] = {"state": "complete", "records": expected}
+            status.pop("current_process_pid", None)
+            cell_lock.close()
+            active_process = None
+            atomic(status_path, status)
+        status.update(state="generation_complete", finished_at=datetime.now().astimezone().isoformat(timespec="seconds"))
         atomic(status_path, status)
-    status.update(state="generation_complete", finished_at=datetime.now().astimezone().isoformat(timespec="seconds"))
-    atomic(status_path, status)
+    except BaseException as exc:
+        terminate_process_group(active_process)
+        status.update(
+            state="failed" if not isinstance(exc, KeyboardInterrupt) else "interrupted",
+            error=str(exc),
+            updated_at=datetime.now().astimezone().isoformat(timespec="seconds"),
+        )
+        atomic(status_path, status)
+        raise
 
 
 if __name__ == "__main__":

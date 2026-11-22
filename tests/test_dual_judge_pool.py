@@ -135,6 +135,14 @@ class PoolIntegrationTest(unittest.TestCase):
         self.assertEqual(len(self.requests), before)
         self.assertFalse(self.source.with_suffix(".guard_strong.jsonl").exists())
 
+    def test_require_valid_rejects_unknown_completion(self):
+        result = self.run_pool("--judges", "gptoss", "--require-valid")
+        self.assertNotEqual(result.returncode, 0)
+        status = json.loads(self.status.read_text())
+        self.assertEqual(status["state"], "incomplete_unknown")
+        self.assertEqual(status["judge_counts"]["gptoss"]["unknown"], 1)
+        self.assertFalse((self.root / "completion_manifest.json").exists())
+
     def test_manifest_accepts_multimode_cell(self):
         from scripts.run_dual_judge_pool import load_cells
 
@@ -147,6 +155,24 @@ class PoolIntegrationTest(unittest.TestCase):
         self.manifest.write_text(json.dumps({"cells": [entry]}))
         cells = load_cells(self.manifest)
         self.assertEqual(len(cells[self.source.name]["rows"]), len(rows))
+
+    def test_manifest_accepts_empty_response_and_duplicate_basenames(self):
+        from scripts.run_dual_judge_pool import load_cells
+
+        entries = []
+        for directory, response in (("a", ""), ("b", "fixture answer")):
+            path = self.root / directory / "cell.jsonl"
+            path.parent.mkdir()
+            rows = [{"id": "0", "sample_idx": 0, "prompt": "fixture",
+                     "response": response, "dataset": "fixture", "mode": "fixture"}]
+            path.write_text(json.dumps(rows[0]) + "\n")
+            entries.append({"file": f"{directory}/cell.jsonl",
+                            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                            "records": 1, "dataset": "fixture", "mode": "fixture"})
+        self.manifest.write_text(json.dumps({"cells": entries}))
+        cells = load_cells(self.manifest)
+        self.assertEqual(set(cells), {"a/cell.jsonl", "b/cell.jsonl"})
+        self.assertEqual(cells["a/cell.jsonl"]["rows"][0]["response"], "")
 
     def test_low_repair_changes_only_unknown_gptoss_and_preserves_guard(self):
         initial = self.run_pool()

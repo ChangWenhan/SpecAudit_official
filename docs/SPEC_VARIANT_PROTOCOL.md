@@ -16,15 +16,19 @@ reproduce upstream tree-kernel latency.
 
 | Variant | Upstream mechanism | Formal artifact protocol |
 |---|---|---|
-| Medusa | multiple heads from the target state | Four shared-projection harmful heads per target family |
-| EAGLE-3 | hidden-feature draft tree | Resource-matched harmful feature head per target family |
+| Medusa-style | multiple heads from the target state | Four shared-projection harmful heads per target family |
+| EAGLE-style | recursive hidden-feature drafting | One recursive harmful feature head per target family |
 | N-gram | longest/rightmost suffix lookup | No extra weights |
 | Lookahead | n-gram seed plus Jacobi refinement | No extra weights |
 
 Official pretrained heads do not cover the identical three model families.
-The formal Medusa/EAGLE cells therefore use independently trained heads of the
-same size and training protocol for Qwen3-4B, Gemma-3-4B, and MiniCPM4-8B.
-Training uses the existing 300 harmful teacher answers per family.  The public
+The formal Medusa/EAGLE cells therefore use the same custom adapter
+architecture and training protocol for Qwen3-4B, Gemma-3-4B, and MiniCPM4-8B.
+These are **Medusa-style** and **EAGLE-style** adapters, not full upstream
+system reproductions.  The EAGLE-style head recurs over target features after
+one target forward per proposal rather than calling the target again for every
+drafted token.  Training uses 295 harmful teacher answers per family after
+excluding all exact prompts from JBB, AdvBench, and StrongREJECT.  The public
 Qwen3 EAGLE-3 checkpoint and Vicuna Medusa checkpoint remain implementation
 smoke tests and are not mixed into the formal cross-family comparison.
 

@@ -30,6 +30,7 @@ class EaglePolicy(HistoryPolicy):
             return []
         ids = torch.tensor([self.history], dtype=torch.long, device=self.device)
         outputs, orig, hidden = self.model(ids, output_orig=True)
+        self._count_proposal_forwards()
         root = int(orig[:, -1, :].argmax(dim=-1).item())
         rooted_ids = torch.cat([ids, torch.tensor([[root]], device=self.device)], dim=1)
         if self.model.use_eagle3:
@@ -44,4 +45,7 @@ class EaglePolicy(HistoryPolicy):
         path = retrieve_indices[0]
         valid = path[path >= 0]
         chain = draft_tokens[0, valid].tolist()
-        return self._fill(chain, g)
+        chain = self._take(chain, g)
+        if not chain:
+            raise RuntimeError("EAGLE proposal path is empty")
+        return chain

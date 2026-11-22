@@ -26,12 +26,14 @@ class HistoryPolicy:
         self.prompt_ids: list[int] = []
         self.history: list[int] = []
         self.prefix_resets = 0
+        self.proposal_forward_calls = 0
 
     def reset(self, prompt_ids: torch.Tensor, ctx_len: int | None = None) -> None:
         del ctx_len
         self.prompt_ids = prompt_ids_to_list(prompt_ids)
         self.history = list(self.prompt_ids)
         self.prefix_resets = 0
+        self.proposal_forward_calls = 0
 
     def sync(self, accepted: Sequence[int], next_token: int) -> None:
         self.history.extend(int(x) for x in accepted)
@@ -49,3 +51,9 @@ class HistoryPolicy:
         fill = result[-1]
         result.extend([fill] * (g - len(result)))
         return result
+
+    def _take(self, tokens: Iterable[int], g: int) -> list[int]:
+        return [int(x) for x in tokens][:g]
+
+    def _count_proposal_forwards(self, count: int = 1) -> None:
+        self.proposal_forward_calls += int(count)

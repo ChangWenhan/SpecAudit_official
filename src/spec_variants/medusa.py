@@ -80,6 +80,7 @@ class MedusaPolicy(HistoryPolicy):
             output_orig=True,
             use_cache=False,
         )
+        self._count_proposal_forwards()
         # [heads, batch, positions, vocab] -> top-1 token per future head.
         head_logits = medusa_logits[:, 0, -1, :]
         if self.head_temperature > 0:
@@ -88,4 +89,4 @@ class MedusaPolicy(HistoryPolicy):
             ).squeeze(-1)
         else:
             tokens = head_logits.argmax(dim=-1)
-        return self._fill(tokens.tolist(), g)
+        return self._take(tokens.tolist(), g)

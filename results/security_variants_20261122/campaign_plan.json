@@ -1,5 +1,5 @@
 {
-  "status": "running",
+  "status": "restart_pending",
   "datasets": [
     {"name": "jbb", "n": 100},
     {"name": "advbench", "n": 520},
@@ -31,8 +31,9 @@
     }
   ],
   "methods": ["ngram", "lookahead", "medusa", "eagle"],
-  "cells_expected": 12,
-  "records_per_cell": 933,
+  "model_method_cells": 12,
+  "dataset_files": 36,
+  "records_by_dataset": {"jbb": 100, "advbench": 520, "strongreject": 313},
   "total_responses": 11196,
-  "artifact_protocol": "Resource-matched Medusa and EAGLE-style harmful heads trained independently for each target family; N-gram and Lookahead are draft-free."
+  "artifact_protocol": "Shared-architecture Medusa-style and recursive EAGLE-style harmful adapters trained independently per target family after excluding all evaluation prompts; N-gram and Lookahead are draft-free."
 }

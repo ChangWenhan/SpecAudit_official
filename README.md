@@ -22,9 +22,12 @@ audited raw-Harmony retry. The three-seed analyzer produced 126 ASR rows and 21
 utility rows, including the two attack rows that share Bare's IFEval output by
 definition. The final aggregates and paper table fragments are under
 `results/e13_analysis_20261122/`. A supplemental security audit of Medusa,
-EAGLE, N-gram speculation, and Lookahead Decoding now has four tested proposal
-adapters, a 4 × 3 × 3 smoke matrix, and one-seed harmful generation across the
-three model families and three datasets. See
+EAGLE, N-gram speculation, and Lookahead Decoding has four proposal adapters.
+An independent implementation review found and fixed candidate-chain,
+tokenization, training-leakage, resume-identity, concurrency, and judge issues;
+the invalidated outputs were deleted. The corrected 4 × 3 × 3 smoke matrix
+passes under protocol `spec-variant-2026-11-22-v2`; the clean one-seed campaign
+will be restarted after remote deployment verification. See
 [CURRENT_EXPERIMENTS.md](docs/CURRENT_EXPERIMENTS.md) and the project-level
 [EXPERIMENTS.md](../../EXPERIMENTS.md).
 

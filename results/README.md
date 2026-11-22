@@ -9,9 +9,11 @@ earlier utility roots are historical and are not resumed. The nine SecureSD
 harmful-request cells in `securesd_20261110/seed_0/` are complete and reused.
 `prefix_sweep_20261111/` is a JBB-only pilot, not the formal N sweep.
 
-The original P0/E13 experimental work is complete. A supplemental
-speculative-variant audit is in adapter-smoke status. The local
-source-of-truth layout is:
+The original P0/E13 experimental work is complete. The supplemental
+speculative-variant implementation review is complete; invalid pre-review
+outputs were deleted, the corrected smoke matrix passes, and the clean
+protocol-v2 rerun is pending remote deployment. The local source-of-truth
+layout is:
 
 | Path | Contents |
 |---|---|

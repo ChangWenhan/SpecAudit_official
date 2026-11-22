@@ -12,6 +12,7 @@ import random
 import torch
 import torch.nn.functional as F
 
+from src.data import load_prompts
 from src.models import load_causal_lm, load_tokenizer
 from src.spec_variants.generic_heads import EagleFeatureHead, SharedMedusaHeads
 
@@ -24,8 +25,29 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def normalized_prompt_sha256(prompt: str) -> str:
+    normalized = " ".join(prompt.split())
+    return hashlib.sha256(normalized.encode()).hexdigest()
+
+
+def evaluation_prompt_hashes(datasets: list[str]) -> set[str]:
+    hashes = set()
+    for dataset in datasets:
+        for row in load_prompts(dataset):
+            hashes.add(normalized_prompt_sha256(row["prompt"]))
+    return hashes
+
+
 @torch.inference_mode()
-def extract_samples(model, tokenizer, data_path: Path, num_heads: int, max_length: int, max_ctx: int):
+def extract_samples(
+    model,
+    tokenizer,
+    data_path: Path,
+    num_heads: int,
+    max_length: int,
+    max_ctx: int,
+    excluded_prompt_hashes: set[str],
+):
     hidden_chunks = []
     medusa_targets = []
     eagle_prev_embeddings = []
@@ -36,12 +58,19 @@ def extract_samples(model, tokenizer, data_path: Path, num_heads: int, max_lengt
         if not line.strip():
             continue
         row = json.loads(line)
-        prompt_ids = tokenizer(row["chat_prompt"], add_special_tokens=False).input_ids
-        answer_ids = tokenizer(row["answer"], add_special_tokens=False).input_ids
-        if not prompt_ids or len(answer_ids) <= num_heads + 2:
+        if normalized_prompt_sha256(row["prompt"]) in excluded_prompt_hashes:
             skipped += 1
             continue
-        input_ids = (prompt_ids + answer_ids)[:max_length]
+        prompt_ids = tokenizer(row["chat_prompt"], add_special_tokens=True).input_ids
+        full_ids = tokenizer(
+            row["chat_prompt"] + row["answer"], add_special_tokens=True
+        ).input_ids
+        if not prompt_ids or full_ids[: len(prompt_ids)] != prompt_ids:
+            raise ValueError(f"prompt/answer tokenization mismatch for {row['id']}")
+        if len(full_ids) - len(prompt_ids) <= num_heads + 2:
+            skipped += 1
+            continue
+        input_ids = full_ids[:max_length]
         prompt_len = len(prompt_ids)
         start = prompt_len - 1
         end = min(len(input_ids) - num_heads, start + max_ctx)
@@ -94,6 +123,8 @@ def train_heads(model, data, num_heads: int, epochs: int, batch_size: int, lr: f
     for epoch in range(epochs):
         order = torch.randperm(count, generator=generator)
         total_loss = 0.0
+        total_medusa = 0.0
+        total_eagle = 0.0
         for offset in range(0, count, batch_size):
             idx = order[offset : offset + batch_size]
             hidden = data["hidden"][idx].to(device=device, dtype=torch.bfloat16)
@@ -117,10 +148,14 @@ def train_heads(model, data, num_heads: int, epochs: int, batch_size: int, lr: f
             loss.backward()
             optimizer.step()
             total_loss += float(loss.item())
+            total_medusa += float(medusa_loss.item())
+            total_eagle += float(eagle_loss.item())
             losses.append(float(loss.item()))
             steps += 1
         print(
-            f"epoch {epoch + 1}/{epochs}: loss={total_loss / max(1, len(range(0, count, batch_size))):.4f}",
+            f"epoch {epoch + 1}/{epochs}: loss={total_loss / max(1, len(range(0, count, batch_size))):.4f} "
+            f"medusa={total_medusa / max(1, len(range(0, count, batch_size))):.4f} "
+            f"eagle={total_eagle / max(1, len(range(0, count, batch_size))):.4f}",
             flush=True,
         )
     return medusa.cpu(), eagle.cpu(), steps, losses
@@ -140,6 +175,11 @@ def main():
     parser.add_argument("--max-ctx", type=int, default=160)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", default="cuda")
+    parser.add_argument(
+        "--exclude-datasets",
+        default="jbb,advbench,strongreject",
+        help="exclude every exact evaluation prompt from head training",
+    )
     args = parser.parse_args()
     if args.heads < 1 or args.epochs < 1 or args.batch_size < 1:
         parser.error("heads, epochs and batch-size must be positive")
@@ -148,8 +188,19 @@ def main():
     args.out.mkdir(parents=True, exist_ok=True)
     model = load_causal_lm(args.model, args.device)
     tokenizer = load_tokenizer(args.model)
+    excluded_datasets = [x.strip() for x in args.exclude_datasets.split(",") if x.strip()]
+    excluded_hashes = evaluation_prompt_hashes(excluded_datasets)
+    excluded_hashes_sha256 = hashlib.sha256(
+        json.dumps(sorted(excluded_hashes)).encode()
+    ).hexdigest()
     data, records, skipped = extract_samples(
-        model, tokenizer, args.data, args.heads, args.max_length, args.max_ctx
+        model,
+        tokenizer,
+        args.data,
+        args.heads,
+        args.max_length,
+        args.max_ctx,
+        excluded_hashes,
     )
     print(
         f"extracted {records} records / {data['hidden'].shape[0]} positions; skipped={skipped}",
@@ -176,7 +227,14 @@ def main():
         "skipped_records": skipped,
         "initial_loss": losses[0],
         "final_loss": losses[-1],
-        "protocol": "resource-matched harmful teacher distillation",
+        "protocol": "shared-architecture harmful teacher distillation with evaluation-prompt exclusion",
+        "tokenization": {
+            "combined_prompt_answer_add_special_tokens": True,
+            "prompt_prefix_verified": True,
+        },
+        "excluded_datasets": excluded_datasets,
+        "excluded_prompt_hash_count": len(excluded_hashes),
+        "excluded_prompt_hashes_sha256": excluded_hashes_sha256,
     }
     (args.out / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
     print(f"wrote {args.out}", flush=True)

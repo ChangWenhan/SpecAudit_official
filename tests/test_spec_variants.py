@@ -45,6 +45,7 @@ def test_ngram_prefers_longest_then_rightmost_match():
 def test_ngram_proposal_and_sync_follow_vllm_fill_rule():
     policy = NgramPolicy(min_n=2, max_n=2)
     policy.reset(_prompt([1, 2, 3]), 3)
+    assert policy.propose(3) == []
     policy.sync([], 1)
     policy.sync([], 2)
     policy.sync([], 3)
@@ -52,6 +53,7 @@ def test_ngram_proposal_and_sync_follow_vllm_fill_rule():
 
     empty = NgramPolicy(min_n=4, max_n=4)
     empty.reset(_prompt([8]), 1)
+    empty.sync([], 8)
     assert empty.propose(3) == [8, 8, 8]
 
 
@@ -81,7 +83,8 @@ class _MedusaModel:
 def test_medusa_uses_one_supplier_head_per_position():
     policy = MedusaPolicy(_MedusaModel(), "cpu")
     policy.reset(_prompt([1, 2]), 2)
-    assert policy.propose(6) == [2, 3, 4, 5, 5, 5]
+    assert policy.propose(6) == [2, 3, 4, 5]
+    assert policy.proposal_forward_calls == 1
 
 
 class _FakeEagleLayer:
@@ -118,4 +121,47 @@ class _FakeEagleModel:
 def test_eagle_extracts_a_leaf_path_as_a_chain():
     policy = EaglePolicy(_FakeEagleModel(), "cpu")
     policy.reset(_prompt([1, 2]), 2)
-    assert policy.propose(6) == [10, 11, 12, 13, 13, 13]
+    assert policy.propose(6) == [10, 11, 12, 13]
+    assert policy.proposal_forward_calls == 1
+
+
+class _ToyEmbedding(torch.nn.Module):
+    def __init__(self, vocab_size=20, hidden_size=4):
+        super().__init__()
+        self.weight = torch.nn.Parameter(torch.eye(vocab_size)[:vocab_size, :hidden_size])
+
+    def forward(self, ids):
+        return self.weight[ids]
+
+
+class _GenericEagleToy(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.calls = 0
+        self.config = SimpleNamespace(hidden_size=4)
+        self.generation_config = SimpleNamespace(eos_token_id=None)
+        self.lm_head = torch.nn.Linear(4, 20, bias=False)
+        self.embedding = _ToyEmbedding()
+        self.eagle_head = lambda hidden, embedding: hidden + embedding
+
+    def get_input_embeddings(self):
+        return self.embedding
+
+    def __call__(self, input_ids, **kwargs):
+        self.calls += 1
+        hidden = torch.ones((1, input_ids.shape[1], 4))
+        return SimpleNamespace(hidden_states=(hidden,))
+
+
+def test_recursive_generic_eagle_uses_target_once_per_proposal():
+    from src.spec_variants.generic_eagle import GenericEaglePolicy
+    from src.spec_variants.generic_heads import GenericSpecVariantModel
+
+    base = _GenericEagleToy()
+    model = GenericSpecVariantModel(base, eagle_head=base.eagle_head)
+    policy = GenericEaglePolicy(model, "cpu")
+    policy.reset(_prompt([1, 2]), 2)
+    proposals = policy.propose(4)
+    assert len(proposals) == 4
+    assert base.calls == 1
+    assert policy.proposal_forward_calls == 1

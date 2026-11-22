@@ -191,7 +191,8 @@ def main() -> None:
                 command = [sys.executable, "-u", "-m", "scripts.run_dual_judge_pool",
                            "--manifest", str(args.manifest), "--config", str(config_path),
                            "--judges", judge, "--checkpoint", str(state_dir / "checkpoint.sqlite3"),
-                           "--status", str(state_dir / "status.json"), "--retry-unknown"]
+                           "--status", str(state_dir / "status.json"), "--retry-unknown",
+                           "--require-valid"]
                 status.update(stage="judging", judge=judge, updated_at=now())
                 atomic_json(status_path, status)
                 subprocess.run(command, cwd=ROOT, check=True)
