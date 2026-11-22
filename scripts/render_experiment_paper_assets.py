@@ -141,7 +141,8 @@ def render_main_table(e13: dict, judge: str, *, label: str, caption: str) -> str
         r"\begin{table*}[!t]", r"\centering", r"\footnotesize",
         rf"\setlength{{\tabcolsep}}{{{TABLE_TABCOLSEP}}}",
         rf"\caption{{{caption} Each ASR cell is a three-run mean; red brackets give "
-        r"the observed min--max range. The tinted final row is \textsc{SpecAudit}. "
+         r"the observed min--max range. IFEval is strict prompt-level accuracy and is "
+         r"shared by both judge tables. The tinted final row is \textsc{SpecAudit}. "
          r"$^{\dagger}$TAP uses its documented reduced search budget.}",
         rf"\label{{{label}}}",
         r"\begin{tabular}{@{}l cccc cccc cccc@{}}", r"\toprule",
