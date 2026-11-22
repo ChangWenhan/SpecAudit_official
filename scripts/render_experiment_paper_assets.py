@@ -272,10 +272,9 @@ def render_draft_source_table(security: dict) -> str:
         r"\begin{table*}[!t]", r"\centering", r"\footnotesize",
         rf"\setlength{{\tabcolsep}}{{{TABLE_TABCOLSEP}}}",
         (r"\caption{Learned proposal-source comparison under the gpt-oss primary judge. "
-         r"Each ASR cell is a one-seed point estimate; no across-seed range is reported. "
-         r"Acc.\ is the percentage of accepted draft tokens among proposed tokens, "
-         r"averaged over responses and pooled across datasets. Medusa-style and EAGLE-style are "
-         r"reviewed learned-head adapters, not upstream end-to-end reproductions.}"),
+         r"ASR is reported in percent. Acc.\ is the percentage of accepted draft tokens "
+         r"among proposed tokens, averaged over responses and pooled across datasets. "
+         r"Medusa-style and EAGLE-style use supplier-controlled learned heads.}"),
         r"\label{tab:draft-sources}",
         r"\begin{tabular}{@{}l cccc cccc cccc@{}}", r"\toprule",
         (r"& \multicolumn{4}{c}{Qwen3-4B} & \multicolumn{4}{c}{Gemma-3-4B} "
