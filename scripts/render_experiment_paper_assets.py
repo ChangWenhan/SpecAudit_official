@@ -286,9 +286,8 @@ def apply_style() -> None:
 
 def save_panel(fig: plt.Figure, stem: str) -> None:
     FIGURE_ROOT.mkdir(parents=True, exist_ok=True)
-    for suffix, dpi in (("pdf", None), ("png", 600)):
-        fig.savefig(FIGURE_ROOT / f"exp_{stem}.{suffix}", dpi=dpi,
-                    bbox_inches="tight", pad_inches=0.035, facecolor="white")
+    fig.savefig(FIGURE_ROOT / f"exp_{stem}.pdf", bbox_inches="tight",
+                pad_inches=0.035, facecolor="white")
     plt.close(fig)
 
 
