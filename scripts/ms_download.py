@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import ssl
 import sys
 import urllib.parse
 import urllib.request
@@ -17,8 +18,18 @@ FILES_API = "https://modelscope.cn/api/v1/models/{model}/repo/files?Revision=mas
 FILE_API = "https://modelscope.cn/api/v1/models/{model}/repo"
 
 
+def ssl_context():
+    # Some lab networks terminate TLS with a local proxy certificate.  This is
+    # opt-in and used only for public model downloads on those hosts.
+    if os.environ.get("MS_INSECURE_SSL") == "1":
+        return ssl._create_unverified_context()
+    return None
+
+
 def list_files(model: str):
-    with urllib.request.urlopen(FILES_API.format(model=model), timeout=60) as r:
+    with urllib.request.urlopen(
+        FILES_API.format(model=model), timeout=60, context=ssl_context()
+    ) as r:
         data = json.load(r)
     return [f for f in data["Data"]["Files"] if f.get("Type") == "blob"]
 
@@ -35,7 +46,7 @@ def download_one(model: str, path: str, size: int, dest: str) -> str:
     os.makedirs(os.path.dirname(target) or dest, exist_ok=True)
     tmp = target + ".part"
     req = urllib.request.Request(file_url(model, path), headers={"User-Agent": "ms-dl/1.0"})
-    with urllib.request.urlopen(req, timeout=120) as resp, open(tmp, "wb") as f:
+    with urllib.request.urlopen(req, timeout=120, context=ssl_context()) as resp, open(tmp, "wb") as f:
         while True:
             chunk = resp.read(1 << 20)
             if not chunk:

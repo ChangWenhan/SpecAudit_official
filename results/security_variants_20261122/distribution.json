@@ -1,0 +1,28 @@
+{
+  "updated_at": "2026-11-22T19:10:00+08:00",
+  "seed": 0,
+  "local_s218": {
+    "gpu": "RTX 4090 24GB",
+    "methods": ["ngram"],
+    "concurrent_tasks": 1,
+    "model_order": ["Qwen3_4B", "Gemma_3_4B", "MiniCPM4_8B"],
+    "status": "results/security_variants_20261122/seed_0/status_ngram.json"
+  },
+  "a100_s109": {
+    "gpu": "A100 80GB",
+    "methods": ["lookahead", "medusa", "eagle"],
+    "concurrent_tasks": 3,
+    "runtime": "/home/vicuna/anaconda3/envs/api/bin/python",
+    "project": "/mnt/d5f4cfb6-8afe-40a4-8650-2965046cd208/vicuna/spec-sampling-safety",
+    "status": [
+      "results/security_variants_20261122/seed_0/status_lookahead.json",
+      "results/security_variants_20261122/seed_0/status_medusa.json",
+      "results/security_variants_20261122/seed_0/status_eagle.json"
+    ]
+  },
+  "smoke": {
+    "local": "4 methods x 3 models x 3 datasets",
+    "a100": "3 assigned methods x 3 models x 3 datasets"
+  },
+  "judge": "gpt-oss-safeguard-20b after all four status queues complete and A100 results return"
+}

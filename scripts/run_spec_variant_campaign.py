@@ -13,11 +13,17 @@ import time
 from datetime import datetime
 
 
-MODELS = [
-    ("Qwen3_4B", "/mnt/disk/cwh/LLM/Qwen3-4B", "/mnt/disk/cwh/LLM/spec_variant_heads/Qwen3_4B", "incremental"),
-    ("Gemma_3_4B", "/mnt/disk/cwh/LLM/gemma-3-4b-it", "/mnt/disk/cwh/LLM/spec_variant_heads/Gemma_3_4B", "incremental"),
-    ("MiniCPM4_8B", "/mnt/disk/cwh/LLM/MiniCPM4-8B", "/mnt/disk/cwh/LLM/spec_variant_heads/MiniCPM4_8B", "rebuild"),
-]
+MODEL_NAMES = ["Qwen3_4B", "Gemma_3_4B", "MiniCPM4_8B"]
+MODEL_DIRS = {
+    "Qwen3_4B": "Qwen3-4B",
+    "Gemma_3_4B": "gemma-3-4b-it",
+    "MiniCPM4_8B": "MiniCPM4-8B",
+}
+CACHE_MODES = {
+    "Qwen3_4B": "incremental",
+    "Gemma_3_4B": "incremental",
+    "MiniCPM4_8B": "rebuild",
+}
 METHODS = ["ngram", "lookahead", "medusa", "eagle"]
 DATASET_COUNTS = {"jbb": 100, "advbench": 520, "strongreject": 313}
 
@@ -42,22 +48,51 @@ def main() -> None:
         default=Path("results/security_variants_20261122/seed_0"),
     )
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--methods", default=",".join(METHODS))
+    parser.add_argument("--models", default=",".join(MODEL_NAMES))
+    parser.add_argument("--status-name", default="status.json")
+    parser.add_argument("--lock-name", default="campaign.lock")
+    parser.add_argument(
+        "--model-root",
+        type=Path,
+        default=Path(os.environ.get("SPEC_MODEL_ROOT", "/mnt/disk/cwh/LLM")),
+    )
+    parser.add_argument(
+        "--head-root",
+        type=Path,
+        default=Path(os.environ.get("SPEC_HEAD_ROOT", "/mnt/disk/cwh/LLM/spec_variant_heads")),
+    )
     args = parser.parse_args()
     args.root.mkdir(parents=True, exist_ok=True)
     log_root = args.root / "logs"
     log_root.mkdir(exist_ok=True)
-    lock_path = args.root / "campaign.lock"
+    lock_path = args.root / args.lock_name
     lock = lock_path.open("a")
     try:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
         raise SystemExit(f"campaign already running under {lock_path}")
 
-    status_path = args.root / "status.json"
+    status_path = args.root / args.status_name
+    selected_methods = [item.strip() for item in args.methods.split(",") if item.strip()]
+    selected_models = [item.strip() for item in args.models.split(",") if item.strip()]
+    if not selected_methods or not set(selected_methods) <= set(METHODS):
+        raise ValueError(f"methods must be a subset of {METHODS}")
+    if not selected_models or not set(selected_models) <= set(MODEL_NAMES):
+        raise ValueError(f"models must be a subset of {MODEL_NAMES}")
+    models = [
+        (
+            family,
+            args.model_root / MODEL_DIRS[family],
+            args.head_root / family,
+            CACHE_MODES[family],
+        )
+        for family in selected_models
+    ]
     cells = [
         (method, *model, dataset)
-        for method in METHODS
-        for model in MODELS
+        for method in selected_methods
+        for model in models
         for dataset in DATASET_COUNTS
     ]
     status = {
@@ -66,7 +101,9 @@ def main() -> None:
         "seed": 0,
         "verifier": "topk:k50",
         "datasets": DATASET_COUNTS,
-        "expected_total_records": sum(DATASET_COUNTS.values()) * len(MODELS) * len(METHODS),
+        "expected_total_records": sum(DATASET_COUNTS.values()) * len(selected_models) * len(selected_methods),
+        "methods": selected_methods,
+        "models": selected_models,
         "cells_total": len(cells),
         "cell_results": {},
     }
