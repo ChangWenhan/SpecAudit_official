@@ -19,8 +19,6 @@ MODELS = (("qwen3_4b", "Qwen3_4B", "Qwen3-4B"),
 DATASETS = ("jbb", "advbench", "strongreject")
 METHODS = (
     ("rank50", "Paired draft", "D", "#0F4D92", "o"),
-    ("ngram", "N-gram", "N", "#8BCF8B", "s"),
-    ("lookahead", "Lookahead", "L", "#42949E", "^"),
     ("medusa", "Medusa-style", "M", "#B64342", "D"),
     ("eagle", "EAGLE-style", "E", "#9A4D8E", "X"),
 )
@@ -109,8 +107,7 @@ def summarize(method: str, model: str, nmax: int, root: Path, main_root: Path) -
         runs.append(longest_run(record.get("generated_token_ids") or []))
 
     n = len(source_rows)
-    start_position = 1 if method == "ngram" else 0
-    profile = acceptance_profile(source_rows, start_position, nmax)
+    profile = acceptance_profile(source_rows, 0, nmax)
     return {
         "method": method,
         "model": model,
@@ -164,7 +161,7 @@ def render(summary: dict, out: Path) -> None:
         "legend.frameon": False,
         "pdf.fonttype": 42,
     })
-    fig, axes = plt.subplots(2, 3, figsize=(12.6, 6.6), constrained_layout=True)
+    fig, axes = plt.subplots(2, 3, figsize=(12.6, 6.0), constrained_layout=True)
     positions = np.arange(1, summary["nmax"] + 1)
     for col, (slug, _, label) in enumerate(MODELS):
         top = axes[0, col]
@@ -188,10 +185,7 @@ def render(summary: dict, out: Path) -> None:
         target = summary["target_asr_pct"][slug]
         bottom.axhline(target, color="#666666", linestyle="--", linewidth=1.1,
                        label="Target ASR")
-        label_offsets = {
-            "rank50": (5, 4), "ngram": (-11, 4), "lookahead": (3, -12),
-            "medusa": (4, 4), "eagle": (4, 4),
-        }
+        label_offsets = {"rank50": (5, 4), "medusa": (4, 4), "eagle": (4, 4)}
         for method, display, abbrev, color, marker in METHODS:
             cell = summary["cells"][method, slug]
             bottom.scatter(cell["acceptance_pct"], cell["asr_pct"], color=color,
@@ -210,7 +204,7 @@ def render(summary: dict, out: Path) -> None:
             bottom.set_ylabel("Unsafe rate (%)")
 
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="outside upper center", ncols=5, fontsize=9.5)
+    fig.legend(handles, labels, loc="outside upper center", ncols=3, fontsize=9.5)
     axes[0, 0].text(0.02, 0.96, "(a)", transform=axes[0, 0].transAxes,
                     ha="left", va="top", fontsize=11, fontweight="bold")
     axes[1, 0].text(0.02, 0.96, "(b)", transform=axes[1, 0].transAxes,
@@ -243,7 +237,7 @@ def main() -> None:
             "acceptance_by_response_position":
                 "accepted/evaluated draft proposals; final block omitted because EOS or budget may shorten it",
             "repetition_proxy": "at least 8 identical consecutive tokens or a final 20-token window with at most two unique tokens",
-            "naive_sd": "paired-draft rank-50 run from the main table, used as the direct full-model draft reference",
+            "naive_sd": "paired-draft rank-50 run from the main table, used as the full-model learned-draft reference",
         },
         "target_asr_pct": {slug: target_asr(slug, args.main_analysis) for slug, _, _ in MODELS},
         "cells": {f"{method}|{model}": value for (method, model), value in cells.items()},

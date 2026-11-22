@@ -1,5 +1,5 @@
 {
-  "status": "running_protocol_v2",
+  "status": "complete",
   "datasets": [
     {
       "name": "jbb",
@@ -42,18 +42,17 @@
     }
   ],
   "methods": [
-    "ngram",
-    "lookahead",
     "medusa",
     "eagle"
   ],
-  "model_method_cells": 12,
-  "dataset_files": 36,
+  "model_method_cells": 6,
+  "dataset_files": 18,
   "records_by_dataset": {
     "jbb": 100,
     "advbench": 520,
     "strongreject": 313
   },
-  "total_responses": 11196,
-  "artifact_protocol": "Shared-architecture Medusa-style and recursive EAGLE-style harmful adapters trained independently per target family after excluding all evaluation prompts; N-gram and Lookahead are draft-free."
+  "total_responses": 5598,
+  "artifact_protocol": "Shared-architecture Medusa-style and recursive EAGLE-style harmful adapters trained independently per target family after excluding all evaluation prompts.",
+  "updated_at": "2026-11-23T02:38:02+08:00"
 }

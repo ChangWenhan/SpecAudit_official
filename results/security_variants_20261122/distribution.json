@@ -1,62 +1,32 @@
 {
-  "updated_at": "2026-11-22T20:40:00+08:00",
+  "updated_at": "2026-11-23T02:38:02+08:00",
   "seed": 0,
   "protocol_version": "spec-variant-2026-11-22-v2",
-  "code_commit": "07fb99e",
-  "local_s218": {
-    "gpu": "RTX 4090 24GB",
-    "methods": [
-      "ngram"
-    ],
-    "concurrent_tasks": 1,
-    "status": "results/security_variants_20261122/seed_0/status_ngram.json"
-  },
+  "scope": "learned supplier-controlled draft sources only",
   "a100_s109": {
     "gpu": "A100 80GB",
-    "methods": [
-      "lookahead",
-      "medusa",
-      "eagle"
-    ],
     "models": [
       "Qwen3_4B"
     ],
-    "concurrent_tasks": 3,
-    "status": [
-      "results/security_variants_20261122/seed_0/status_lookahead_qwen.json",
-      "results/security_variants_20261122/seed_0/status_medusa_qwen.json",
-      "results/security_variants_20261122/seed_0/status_eagle_qwen.json"
-    ]
-  },
-  "s111_gpu0": {
-    "gpu": "RTX 6000 Ada 49GB",
     "methods": [
-      "lookahead",
       "medusa",
       "eagle"
     ],
-    "models": [
-      "Gemma_3_4B"
-    ],
-    "concurrent_tasks": 3,
-    "status": [
-      "results/security_variants_20261122/seed_0/status_lookahead_gemma.json",
-      "results/security_variants_20261122/seed_0/status_medusa_gemma.json",
-      "results/security_variants_20261122/seed_0/status_eagle_gemma.json"
-    ]
+    "records": 1866,
+    "status": "returned_and_verified"
   },
-  "s111_gpu1": {
-    "gpu": "RTX 6000 Ada 49GB",
+  "s111_gpu0_gpu1": {
+    "gpu": "2 x RTX 6000 Ada 49GB",
     "models": [
+      "Gemma_3_4B",
       "MiniCPM4_8B"
     ],
-    "schedule": "Medusa + EAGLE concurrently, then Lookahead",
-    "concurrent_tasks": 2,
-    "status": [
-      "results/security_variants_20261122/seed_0/status_medusa_minicpm.json",
-      "results/security_variants_20261122/seed_0/status_eagle_minicpm.json",
-      "results/security_variants_20261122/seed_0/status_lookahead_minicpm.json"
-    ]
+    "methods": [
+      "medusa",
+      "eagle"
+    ],
+    "records": 3732,
+    "status": "returned_and_verified"
   },
-  "judge": "gpt-oss-safeguard-20b after all queues complete, results return, and manifest validation passes"
+  "judge": "gpt-oss-safeguard-20b; 5598 valid labels; unknown=0"
 }

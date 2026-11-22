@@ -21,12 +21,12 @@ state_of() {
 while true; do
   local_state=$(state_of "$LOCAL_ROOT/status_ngram.json")
   a100_states=$(ssh -o BatchMode=yes "$REMOTE_HOST" \
-    "cd '$REMOTE_ROOT/$RUN_REL' && for method in lookahead medusa eagle; do \
+    "cd '$REMOTE_ROOT/$RUN_REL' && for method in medusa eagle; do \
       /home/vicuna/anaconda3/envs/api/bin/python -c 'import json,os,sys; print(json.load(open(sys.argv[1])).get(\"state\",\"unknown\") if os.path.exists(sys.argv[1]) else \"unknown\")' status_\${method}_qwen.json; \
     done")
   s111_states=$(SSHPASS="$S111_PASSWORD" sshpass -e ssh -o StrictHostKeyChecking=no \
     -o PreferredAuthentications=password -o PubkeyAuthentication=no "$REMOTE_HOST2" \
-    "cd '$REMOTE_ROOT2/$RUN_REL' && for method in lookahead medusa eagle; do \
+    "cd '$REMOTE_ROOT2/$RUN_REL' && for method in medusa eagle; do \
       for model in gemma minicpm; do /home/user1/envs/unlearn/bin/python -c 'import json,os,sys; print(json.load(open(sys.argv[1])).get(\"state\",\"unknown\") if os.path.exists(sys.argv[1]) else \"unknown\")' status_\${method}_\${model}.json; done; \
     done")
   remote_states=$(printf '%s\n%s\n' "$a100_states" "$s111_states")
@@ -42,11 +42,11 @@ done
 
 mkdir -p "$LOCAL_ROOT"
 ssh -o BatchMode=yes "$REMOTE_HOST" \
-  "tar -C '$REMOTE_ROOT/$RUN_REL' -cf - lookahead/qwen3_4b medusa/qwen3_4b eagle/qwen3_4b status_lookahead_qwen.json status_medusa_qwen.json status_eagle_qwen.json" \
+  "tar -C '$REMOTE_ROOT/$RUN_REL' -cf - medusa/qwen3_4b eagle/qwen3_4b status_medusa_qwen.json status_eagle_qwen.json" \
   | tar -C "$LOCAL_ROOT" -xf -
 SSHPASS="$S111_PASSWORD" sshpass -e ssh -o StrictHostKeyChecking=no \
   -o PreferredAuthentications=password -o PubkeyAuthentication=no "$REMOTE_HOST2" \
-  "tar -C '$REMOTE_ROOT2/$RUN_REL' -cf - lookahead/gemma_3_4b lookahead/minicpm4_8b medusa/gemma_3_4b medusa/minicpm4_8b eagle/gemma_3_4b eagle/minicpm4_8b status_lookahead_gemma.json status_lookahead_minicpm.json status_medusa_gemma.json status_medusa_minicpm.json status_eagle_gemma.json status_eagle_minicpm.json" \
+  "tar -C '$REMOTE_ROOT2/$RUN_REL' -cf - medusa/gemma_3_4b medusa/minicpm4_8b eagle/gemma_3_4b eagle/minicpm4_8b status_medusa_gemma.json status_medusa_minicpm.json status_eagle_gemma.json status_eagle_minicpm.json" \
   | tar -C "$LOCAL_ROOT" -xf -
 
 cd "$ROOT"

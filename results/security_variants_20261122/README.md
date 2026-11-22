@@ -1,8 +1,8 @@
 # Speculative-variant security results
 
-This root contains supplemental experiments for Medusa, EAGLE, N-gram
-speculation, and Lookahead Decoding.  Formal runs use a new `seed_<n>/`
-directory and must never overwrite the smoke outputs.
+This root contains supplemental experiments for supplier-controlled learned
+proposal sources.  The formal scope is Medusa-style and EAGLE-style.  Runs use
+the `seed_0/` directory and must not overwrite retained smoke outputs.
 
 ```text
 security_variants_20261122/
@@ -11,16 +11,15 @@ security_variants_20261122/
     <variant>/*.jsonl
     <variant>/*.run.json
   seed_0/
-  seed_1/
-  seed_2/
   analysis/
-  judges/
+  seed_0/judge_distributed/
 ```
 
 The JSONL records preserve proposal configuration, verifier, seed, token and
-acceptance statistics, target artifact, and decoded response.  Formal judging
-uses `gpt-oss-safeguard-20b`; unresolved labels are retried and are never
-treated as safe.  See `docs/SPEC_VARIANT_PROTOCOL.md` for the exact cells.
+acceptance statistics, target artifact, and decoded response.  The formal grid
+has 2 methods x 3 models x 3 datasets = 18 files and 5,598 responses.  Judging
+uses `gpt-oss-safeguard-20b`; all 5,598 labels are valid and `unknown=0`.  See
+`docs/SPEC_VARIANT_PROTOCOL.md` for the exact cells.
 
 ## Current analysis
 
@@ -32,9 +31,9 @@ PYTHONPATH=. python -m scripts.analyze_spec_variant_security
 
 This writes `analysis/spec_variant_security.json`, the flat CSV, and the
 paper-ready `table_spec_variant_security.tex`.  The table compares Target,
-N-gram, Lookahead, Medusa-style, EAGLE-style, and the project's paired-draft
-rank-50 run across three models and three datasets.  ASR intervals are Wilson
-95\% intervals; acceptance is the mean accepted-to-proposed token ratio.
+Medusa-style, EAGLE-style, and the project's paired-draft rank-50 run across
+three models and three datasets.  ASR intervals are Wilson 95\% intervals;
+acceptance is the mean accepted-to-proposed token ratio.
 
 Run the mechanism diagnostic with:
 
@@ -45,6 +44,6 @@ PYTHONPATH=. python -m scripts.analyze_spec_variant_mechanism
 It writes `analysis/spec_variant_mechanism.json` and
 `figures/spec_variant_diagnostics/fig_spec_variant_mechanism.{png,pdf}`.  The
 figure reports acceptance by response position and the ASR--acceptance plane
-for the paired draft and all four proposal families.  These statistics are
+for the paired draft and both learned proposal families.  These statistics are
 descriptive diagnostics; they do not turn the one-seed comparison into a
 causal latency experiment.

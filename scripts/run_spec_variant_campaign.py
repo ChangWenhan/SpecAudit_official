@@ -1,4 +1,4 @@
-"""Run the one-seed supplemental campaign across four proposal families."""
+"""Run the one-seed supplemental campaign across learned draft sources."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ CACHE_MODES = {
     "Gemma_3_4B": "incremental",
     "MiniCPM4_8B": "rebuild",
 }
-METHODS = ["ngram", "lookahead", "medusa", "eagle"]
+METHODS = ["medusa", "eagle"]
 DATASET_COUNTS = {"jbb": 100, "advbench": 520, "strongreject": 313}
 
 

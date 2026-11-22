@@ -13,7 +13,7 @@ from src.result_io import read_jsonl
 
 DATASET_COUNTS = {"jbb": 100, "advbench": 520, "strongreject": 313}
 MODELS = ["qwen3_4b", "gemma_3_4b", "minicpm4_8b"]
-METHODS = ["ngram", "lookahead", "medusa", "eagle"]
+METHODS = ["medusa", "eagle"]
 PROTOCOL_VERSION = "spec-variant-2026-11-22-v2"
 CACHE_MODES = {"qwen3_4b": "incremental", "gemma_3_4b": "incremental", "minicpm4_8b": "rebuild"}
 

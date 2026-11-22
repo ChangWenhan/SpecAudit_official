@@ -1,7 +1,7 @@
 # Speculative-variant security protocol
 
 Updated 2026-11-23.  This file defines the supplemental experiment that audits
-widely used speculative-decoding proposal families under the same
+learned, supplier-controlled speculative proposal sources under the same
 lossy-verification question as the main paper.
 
 ## Scope
@@ -18,8 +18,11 @@ reproduce upstream tree-kernel latency.
 |---|---|---|
 | Medusa-style | multiple heads from the target state | Four shared-projection harmful heads per target family |
 | EAGLE-style | recursive hidden-feature drafting | One recursive harmful feature head per target family |
-| N-gram | longest/rightmost suffix lookup | No extra weights |
-| Lookahead | n-gram seed plus Jacobi refinement | No extra weights |
+
+N-gram and Lookahead are excluded from the formal security scope.  They do not
+expose supplier-controlled learned draft state, and target-refined Lookahead
+uses additional target forwards.  Their inclusion would test a different
+threat model from the draft supply-chain question in the main experiment.
 
 Official pretrained heads do not cover the identical three model families.
 The formal Medusa/EAGLE cells therefore use the same custom adapter
@@ -41,13 +44,14 @@ and all three datasets: JBB (100), AdvBench (520), and StrongREJECT (313).
 | ID | Comparison | Purpose |
 |---|---|---|
 | V1 | Target only vs each variant + top-50 | Measures whether lossy verification lets each proposer alter the safety outcome |
-| V2 | Four proposal families on the same target family | Compares mechanism behavior under a fixed verifier |
+| V2 | Two learned proposal families on the same target family | Compares mechanism behavior under a fixed verifier |
 | V3 | Accepted / proposed tokens and target-forward counts | Reports mechanism behavior; runtime is interpreted only within the same host/backend |
 
-The formal one-seed run contains 4 methods × 3 models × 3 datasets = 36 files
-and 11,196 responses.  Exact-verifier runs are retained as smoke diagnostics;
-they are not part of the supplemental table because one seed is intentionally
-limited to the main top-50 contrast.
+The formal one-seed run contains 2 methods × 3 models × 3 datasets = 18 files
+and 5,598 responses.  The comparison reports ASR and acceptance for the same
+rank-50 verifier.  Exact-verifier runs for the custom heads are not included,
+so the learned-source comparison supports source dependence rather than a
+second verifier-level causal control.
 
 Unknown judge labels never enter a completed denominator.  Failed or
 unparseable judge rows are retried and retained as failures until a valid
@@ -65,13 +69,14 @@ Representative smoke commands:
 
 ```bash
 python -m src.run_spec_variant \
-  --variant ngram --target /path/to/target --verifier topk --k 50 \
-  --prompt 'Explain speculative decoding in one sentence.' \
-  --max-new 8 --gamma 3 --out results/security_variants_20261122/smoke/ngram/qwen3.jsonl
+  --variant medusa --target /path/to/Qwen3-4B \
+  --variant-model /path/to/spec_variant_heads/Qwen3_4B \
+  --verifier topk --k 50 --max-new 4 --gamma 3 \
+  --out results/security_variants_20261122/smoke/medusa/qwen3.jsonl
 
 python -m src.run_spec_variant \
   --variant eagle --target /path/to/Qwen3-4B \
-  --variant-model /path/to/Qwen3-4B_eagle3 --cache-mode rebuild \
+  --variant-model /path/to/spec_variant_heads/Qwen3_4B --cache-mode rebuild \
   --verifier topk --k 50 --max-new 4 --gamma 3 \
   --out results/security_variants_20261122/smoke/eagle/qwen3.jsonl
 ```
@@ -85,12 +90,12 @@ python -m scripts.run_spec_variant_campaign \
 
 ## Current status
 
-The four adapters are implemented and their CPU regression tests pass.  The
-4 × 3 × 3 smoke matrix passed: four proposal families, three target families,
-and one prompt from each of the three datasets, with no empty responses.  The
-one-seed full generation campaign is complete under
+The Medusa-style and EAGLE-style adapters are implemented and their CPU
+regression tests pass.  The 2 × 3 × 3 smoke matrix passed: two learned proposal
+families, three target families, and one prompt from each of the three datasets.
+The one-seed full generation campaign is complete under
 `results/security_variants_20261122/seed_0/`. The primary judge completed all
-11,196 labels with `unknown=0`. Judging used disjoint shards on the local RTX
+5,598 labels with `unknown=0`. Judging used disjoint shards on the local RTX
 4090, A100, and both RTX 6000 Ada GPUs; returned sidecars were validated against
 the frozen source and policy hashes. The authoritative merged gate is
 `results/security_variants_20261122/seed_0/judge_distributed/merged_completion_manifest.json`.

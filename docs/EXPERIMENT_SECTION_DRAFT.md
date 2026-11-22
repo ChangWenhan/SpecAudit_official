@@ -1,6 +1,6 @@
 # Experiment section working draft
 
-Updated 2026-11-22. The full Section 5 source and all five tables are inlined in
+Updated 2026-11-23. The full Section 5 source and all tables are inlined in
 `../../paper/main.tex`; only the preamble remains an `\input`. The command
 `python -m scripts.render_experiment_paper_assets` updates the marked table
 blocks directly in `main.tex` and renders the publication figures under
@@ -52,6 +52,18 @@ Table 5 repeats the served conditions with the primary and auxiliary judges.
 The auxiliary column is labelled secondary and non-independent; disagreements
 are reported directly rather than averaged away.
 
+## 5.2A Dependence on the Learned Draft Source
+
+This subsection keeps the supply-chain threat model and replaces the full
+autoregressive draft with supplier-controlled Medusa-style and EAGLE-style
+learned heads. Table IV reports one-seed ASR with Wilson intervals and pooled
+acceptance. Figs. 3 and 4 show acceptance by response position and the
+safety--acceptance plane for the paired draft and both head families. The text
+separates proposal reliability from harmful direction and states that the heads
+are adapters, not full upstream reproductions. N-gram and target-refined
+Lookahead are outside this subsection because they do not expose learned draft
+state.
+
 ## 5.3 How Harm Enters: Opening-Token Intervention
 
 We first examine observational acceptance by output position (Fig. 2a). We then
@@ -99,14 +111,14 @@ absolute throughput is not compared. SecureSD is reported with `n/a` when no
 provenance-certified same-host rank anchor exists. The figure supports a claim
 about the implementation's relative cost, not a production latency claim.
 
-The final fixed-floating-object inventory is five tables and five experiment
-figures, with no appendix: Table III the cross-column primary-judge main
-results; Table IV the K sweep; Table V probability rules; Table VI Exact and
-SecureSD defenses; Table VII a same-format Qwen3Guard supplementary main table.
-Fig. 2
-shows dataset-level main controls; Fig. 3 K and exact-prefix sensitivity;
-Fig. 4 acceptance by position; Fig. 5 the three horizontal opening-token
-matrices; Fig. 6 the defense throughput trade-off.
+The final inventory has no appendix. The result tables are Table III for the
+cross-column main results, Table IV for learned draft sources, Table V for the
+K sweep, Table VI for probability rules, Table VII for Exact and SecureSD, and
+Table VIII for the Qwen3Guard supplementary main table. Fig. 2 shows the main
+controls; Figs. 3 and 4 show learned-source acceptance and safety--acceptance;
+Fig. 5 shows K and exact-prefix sensitivity; Fig. 6 shows acceptance by position;
+Fig. 7 shows the opening-token matrices; Fig. 8 shows the defense throughput
+trade-off.
 
 ## Available evidence and insertion status
 
@@ -116,11 +128,12 @@ matrices; Fig. 6 the defense throughput trade-off.
   analyses are available from the validated merged nine-condition batch.
 - Fig. 3: all P0 N points and the matched-acceptance/Pareto aggregators are
   available.
-- Fig. 4: all nine model/dataset N sweeps are complete.
+- Fig. 5: all nine model/dataset N sweeps are complete.
+- Learned-source Table IV and Figs. 3--4 are complete for Medusa-style and
+  EAGLE-style: 18 files, 5,598 valid primary-judge labels, `unknown=0`.
 - Manuscript insertion and figure review remain separate editorial steps. Use
   `scientific-figure-making` for publication rendering and inspect both PNG and
   vector output at 600 dpi before export.
 
-No experiment or analysis is queued. The remaining work is manuscript
-integration: insert the generated tables, render the final figures, and check
-that prose matches the frozen definitions and limitations.
+No experiment or analysis is queued. The learned-source additions are inserted
+in `paper/main.tex`, and the remaining work is editorial consistency review.

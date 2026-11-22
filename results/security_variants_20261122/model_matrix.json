@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-11-22T20:40:00+08:00",
+  "updated_at": "2026-11-23T02:38:02+08:00",
   "protocol_version": "spec-variant-2026-11-22-v2",
-  "scope": "4 methods x 3 models x 3 datasets; one prompt each",
+  "scope": "2 learned methods x 3 models x 3 datasets; one prompt each",
   "cells": [
     {
       "method": "eagle",
@@ -52,54 +52,6 @@
       "output": "results/security_variants_20261122/smoke/eagle/qwen3_4b_all3.jsonl"
     },
     {
-      "method": "lookahead",
-      "model": "gemma_3_4b",
-      "status": "passed",
-      "datasets": [
-        "advbench",
-        "jbb",
-        "strongreject"
-      ],
-      "records": 3,
-      "decode_empty": 0,
-      "artifact_kinds": [
-        "None"
-      ],
-      "output": "results/security_variants_20261122/smoke/lookahead/gemma_3_4b_all3.jsonl"
-    },
-    {
-      "method": "lookahead",
-      "model": "minicpm4_8b",
-      "status": "passed",
-      "datasets": [
-        "advbench",
-        "jbb",
-        "strongreject"
-      ],
-      "records": 3,
-      "decode_empty": 0,
-      "artifact_kinds": [
-        "None"
-      ],
-      "output": "results/security_variants_20261122/smoke/lookahead/minicpm4_8b_all3.jsonl"
-    },
-    {
-      "method": "lookahead",
-      "model": "qwen3_4b",
-      "status": "passed",
-      "datasets": [
-        "advbench",
-        "jbb",
-        "strongreject"
-      ],
-      "records": 3,
-      "decode_empty": 0,
-      "artifact_kinds": [
-        "None"
-      ],
-      "output": "results/security_variants_20261122/smoke/lookahead/qwen3_4b_all3.jsonl"
-    },
-    {
       "method": "medusa",
       "model": "gemma_3_4b",
       "status": "passed",
@@ -146,54 +98,6 @@
         "shared_projection_medusa_heads"
       ],
       "output": "results/security_variants_20261122/smoke/medusa/qwen3_4b_all3.jsonl"
-    },
-    {
-      "method": "ngram",
-      "model": "gemma_3_4b",
-      "status": "passed",
-      "datasets": [
-        "advbench",
-        "jbb",
-        "strongreject"
-      ],
-      "records": 3,
-      "decode_empty": 0,
-      "artifact_kinds": [
-        "None"
-      ],
-      "output": "results/security_variants_20261122/smoke/ngram/gemma_3_4b_all3.jsonl"
-    },
-    {
-      "method": "ngram",
-      "model": "minicpm4_8b",
-      "status": "passed",
-      "datasets": [
-        "advbench",
-        "jbb",
-        "strongreject"
-      ],
-      "records": 3,
-      "decode_empty": 0,
-      "artifact_kinds": [
-        "None"
-      ],
-      "output": "results/security_variants_20261122/smoke/ngram/minicpm4_8b_all3.jsonl"
-    },
-    {
-      "method": "ngram",
-      "model": "qwen3_4b",
-      "status": "passed",
-      "datasets": [
-        "advbench",
-        "jbb",
-        "strongreject"
-      ],
-      "records": 3,
-      "decode_empty": 0,
-      "artifact_kinds": [
-        "None"
-      ],
-      "output": "results/security_variants_20261122/smoke/ngram/qwen3_4b_all3.jsonl"
     }
   ]
 }

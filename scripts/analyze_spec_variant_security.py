@@ -17,9 +17,7 @@ MODELS = (("qwen3_4b", "Qwen3_4B", "Qwen3-4B"),
           ("minicpm4_8b", "MiniCPM4_8B", "MiniCPM4-8B"))
 DATASETS = (("jbb", "JBB"), ("advbench", "Adv."),
             ("strongreject", "SR"))
-VARIANTS = (("ngram", "N-gram", "N-gram"),
-            ("lookahead", "Lookahead", "Lookahead"),
-            ("medusa", "Medusa-style", "Medusa"),
+VARIANTS = (("medusa", "Medusa-style", "Medusa"),
             ("eagle", "EAGLE-style", "EAGLE"))
 
 
@@ -109,9 +107,9 @@ def render_table(cells: dict) -> str:
          r"by all responses; brackets are 95\% Wilson intervals. Acc. is the "
          r"mean per-request accepted-to-proposed token ratio pooled over the three "
          r"datasets. JBB, AdvBench, and StrongREJECT contain 100, 520, and 313 "
-         r"responses per cell. N-gram, Lookahead, "
-         r"Medusa-style, and EAGLE-style use the reviewed protocol-v2 adapters; "
-         r"the final row reuses the project's paired-draft rank-50 run.}"),
+         r"responses per cell. Medusa-style and EAGLE-style use the reviewed "
+         r"protocol-v2 learned-head adapters; the final row reuses the project's "
+         r"paired-draft rank-50 run.}"),
         r"\label{tab:spec-variant-security}",
         r"\begin{tabular}{l cccc|cccc|cccc}", r"\toprule",
         (r"& \multicolumn{4}{c|}{Qwen3-4B} & \multicolumn{4}{c|}{Gemma-3-4B} "

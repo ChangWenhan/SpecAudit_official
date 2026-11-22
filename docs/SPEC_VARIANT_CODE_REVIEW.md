@@ -37,8 +37,8 @@ integrity.  The main review then reproduced and fixed actionable findings.
   **EAGLE-style** harmful adapters. They extract a linear proposal chain and
   test verifier acceptance; they are not full upstream tree-kernel or latency
   reproductions.
-- The formal Lookahead row is described as a **Lookahead-style Jacobi
-  proposal**, not a reproduction of the upstream fused attention kernel.
+- The optional Lookahead adapter is a **Lookahead-style Jacobi proposal**, not
+  a reproduction of the upstream fused attention kernel.
 - The N-gram suffix policy follows vLLM's longest-then-rightmost selection and
   invalid-slot fill rule.
 - Official Qwen EAGLE-3 and Vicuna Medusa checkpoints remain implementation
@@ -50,8 +50,16 @@ integrity.  The main review then reproduced and fixed actionable findings.
 - Targeted adapter/resume/judge tests pass, including empty judge responses,
   duplicate basenames, strict unknown handling, short candidate chains, and
   one-target-forward recursive EAGLE proposals.
-- Corrected 4 method × 3 model × 3 dataset smoke matrix passes with no empty
-  decoded responses.
+- Corrected 2 method × 3 model × 3 dataset formal smoke matrix passes with no
+  empty decoded responses.
 - All previous formal outputs and invalid heads were deleted before the clean
-  restart. The corrected campaign is running under protocol version
+  restart. The corrected campaign completed under protocol version
   `spec-variant-2026-11-22-v2`.
+
+## Formal-scope decision (2026-11-23)
+
+N-gram and Lookahead are excluded from the formal result and paper comparison.
+Neither method exposes supplier-controlled learned draft state, and target-
+refined Lookahead uses additional target forwards.  Their adapter code remains
+available as an optional implementation path, but the formal scope contains
+only Medusa-style and EAGLE-style learned sources: 18 files and 5,598 responses.

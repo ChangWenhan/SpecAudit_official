@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-11-22T20:40:00+08:00",
+  "updated_at": "2026-11-23T02:38:02+08:00",
   "protocol_version": "spec-variant-2026-11-22-v2",
-  "formal_campaign": "running_protocol_v2",
+  "formal_campaign": "complete",
   "formal_seeds": [
     0
   ],
@@ -15,8 +15,6 @@
   "head_artifacts": "results/security_variants_20261122/head_artifacts.json",
   "formal_scope": {
     "methods": [
-      "ngram",
-      "lookahead",
       "medusa_style",
       "eagle_style"
     ],
@@ -31,15 +29,18 @@
       "strongreject": 313
     },
     "verifier": "topk:k50",
-    "model_method_cells": 12,
-    "dataset_files": 36,
-    "total_responses": 11196,
-    "status": [
-      "results/security_variants_20261122/seed_0/status_ngram.json",
-      "A100 status_lookahead_qwen/status_medusa_qwen/status_eagle_qwen.json",
-      "s111 status_{lookahead,medusa,eagle}_{gemma,minicpm}.json"
-    ]
+    "model_method_cells": 6,
+    "dataset_files": 18,
+    "total_responses": 5598,
+    "merged_judge_manifest": "results/security_variants_20261122/seed_0/judge_distributed/merged_completion_manifest.json"
   },
   "invalidated_outputs": "deleted after code review",
-  "deployment_verification": "results/security_variants_20261122/deployment_verification.json"
+  "deployment_verification": "results/security_variants_20261122/deployment_verification.json",
+  "remote_return_verification": "results/security_variants_20261122/seed_0/judge_distributed/remote_return_verification.json",
+  "remote_cleanup": {
+    "s109_project_removed": true,
+    "s111_project_removed": true,
+    "s111_project_env_removed": true,
+    "s109_shared_api_env_retained": true
+  }
 }
