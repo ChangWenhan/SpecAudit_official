@@ -99,12 +99,13 @@ absolute throughput is not compared. SecureSD is reported with `n/a` when no
 provenance-certified same-host rank anchor exists. The figure supports a claim
 about the implementation's relative cost, not a production latency claim.
 
-The final fixed-floating-object inventory is five tables and four figures, with
-no appendix: Table 1 pooled main ASR; Table 2 Exact and SecureSD defenses;
-Table 3 K sweep; Table 4 probability rules; Table 5 judge comparison; Fig. 2
-dataset-level main controls; Fig. 3 K and exact-prefix sensitivity; Fig. 4
-opening mechanism; Fig. 5 defense throughput trade-off. IFEval utility is
-reported in the main-results prose and in the regenerated analysis JSON/CSV.
+The final fixed-floating-object inventory is five tables and five experiment
+figures, with no appendix: Table 1 the cross-column main results with both
+judges; Table 2 Exact and SecureSD defenses; Table 3 K sweep; Table 4
+probability rules; Table 5 judge comparison; Fig. 2 dataset-level main
+controls; Fig. 3 K and exact-prefix sensitivity; Fig. 4 acceptance by position;
+Fig. 5 the three single-column opening-token matrices; Fig. 6 defense
+throughput trade-off.
 
 ## Available evidence and insertion status
 
