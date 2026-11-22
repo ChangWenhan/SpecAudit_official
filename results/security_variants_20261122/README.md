@@ -35,3 +35,16 @@ paper-ready `table_spec_variant_security.tex`.  The table compares Target,
 N-gram, Lookahead, Medusa-style, EAGLE-style, and the project's paired-draft
 rank-50 run across three models and three datasets.  ASR intervals are Wilson
 95\% intervals; acceptance is the mean accepted-to-proposed token ratio.
+
+Run the mechanism diagnostic with:
+
+```bash
+PYTHONPATH=. python -m scripts.analyze_spec_variant_mechanism
+```
+
+It writes `analysis/spec_variant_mechanism.json` and
+`figures/spec_variant_diagnostics/fig_spec_variant_mechanism.{png,pdf}`.  The
+figure reports acceptance by response position and the ASR--acceptance plane
+for the paired draft and all four proposal families.  These statistics are
+descriptive diagnostics; they do not turn the one-seed comparison into a
+causal latency experiment.
