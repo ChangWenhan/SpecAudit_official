@@ -38,7 +38,6 @@ MODELS = (
     ("MiniCPM4_8B", "MiniCPM4-8B", "MiniCPM"),
 )
 DATASETS = (("jbb", "JBB"), ("advbench", "Adv."), ("strongreject", "SR"))
-DATASET_N = {"jbb": 100, "advbench": 520, "strongreject": 313}
 TABLE_TABCOLSEP = "2.8pt"
 MAIN_CONDITIONS = (
     ("target", "Target only"),
@@ -100,53 +99,16 @@ def rate_cell(row: dict, *, bold: bool = False) -> str:
     mean = float(row["mean_pct"])
     low, high = map(float, row["minmax"])
     lead = rf"\textbf{{{mean:.1f}\%}}" if bold else rf"{mean:.1f}\%"
-    span = rf"{{\scriptsize\textcolor{{SpecRange}}{{[{low:.0f}, {high:.0f}]}}}}"
-    return rf"\shortstack{{{lead}\\{span}}}"
-
-
-def pooled_rate_cell(rows: list[dict], *, bold: bool = False) -> str:
-    values = {}
-    for seed in ("0", "1", "2"):
-        weighted = sum((float(row["seed_values_pct"][seed]) / 100) * DATASET_N[row["dataset"]]
-                       for row in rows)
-        values[seed] = 100 * weighted / sum(DATASET_N.values())
-    mean = sum(values.values()) / 3
-    low, high = min(values.values()), max(values.values())
-    lead = rf"\textbf{{{mean:.1f}\%}}" if bold else rf"{mean:.1f}\%"
-    span = rf"{{\scriptsize\textcolor{{SpecRange}}{{[{low:.1f}, {high:.1f}]}}}}"
-    return rf"\shortstack{{{lead}\\{span}}}"
-
-
-def fixed_rate(value: float, *, bold: bool = False) -> str:
-    text = rf"{value:.1f}\%"
-    return rf"\textbf{{{text}}}" if bold else text
-
-
-def delta_cell(value: float, reference: float) -> str:
-    delta = value - reference
-    return rf"\textcolor{{SpecRange}}{{{delta:+.1f}}}"
+    return (r"\specmetric{" + lead + r"}{\specrange{" + f"{low:.0f}" +
+            "}{" + f"{high:.0f}" + "}}")
 
 
 def point_delta_cell(value: float, delta: float) -> str:
-    return "".join((
-        r"\shortstack{", f"{value:.1f}", r"\%", r"\\",
-        r"{\scriptsize\textcolor{SpecRange}{", f"{delta:+.1f}", r"}}", r"}",
-    ))
-
-
-def range_delta_cell(mean: float, low: float, high: float, delta: float) -> str:
-    return "".join((
-        r"\shortstack{", f"{mean:.1f}", r"\%", r"\\",
-        r"{\scriptsize\textcolor{SpecRange}{[", f"{low:.1f}, {high:.1f}", r"]}}", r"\\",
-        r"{\scriptsize\textcolor{SpecRange}{", f"{delta:+.1f}", r"}}", r"}",
-    ))
-
-
+    return (r"\specmetric{" + f"{value:.1f}" + r"\%}{\specdelta{" +
+            f"{delta:+.1f}" + "}}")
 def range_only_cell(mean: float, low: float, high: float) -> str:
-    return "".join((
-        r"\shortstack{", f"{mean:.1f}", r"\%", r"\\",
-        r"{\scriptsize\textcolor{SpecRange}{[", f"{low:.0f}, {high:.0f}", r"]}}", r"}",
-    ))
+    return (r"\specmetric{" + f"{mean:.1f}" + r"\%}{\specrange{" +
+            f"{low:.0f}" + "}{" + f"{high:.0f}" + "}}")
 
 
 def render_main_table(e13: dict, judge: str, *, label: str, caption: str) -> str:
