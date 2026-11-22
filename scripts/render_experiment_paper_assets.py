@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the paper experiment tables and publication figures from final data."""
+"""Update marked experiment tables in main.tex and render final figures."""
 
 from __future__ import annotations
 
@@ -7,6 +7,8 @@ import hashlib
 import json
 import math
 import os
+import re
+import shutil
 from pathlib import Path
 
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib-specaudit")
@@ -21,8 +23,9 @@ from scripts.acceptance_by_position import profile
 
 ROOT = Path(__file__).resolve().parents[1]
 PAPER_ROOT = Path(__file__).resolve().parents[3] / "paper"
-TABLE_ROOT = PAPER_ROOT / "generated_experiments"
+PAPER_MAIN = PAPER_ROOT / "main.tex"
 FIGURE_ROOT = PAPER_ROOT / "pictures"
+MANIFEST = PAPER_ROOT / "experiment_assets_manifest.json"
 
 E13 = ROOT / "results/e13_analysis_20261122/e13.json"
 P0 = ROOT / "results/pareto_20261118/p0_gptoss.json"
@@ -77,6 +80,20 @@ def sha256(path: Path) -> str:
 def write_text(path: Path, data: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(data, encoding="utf-8")
+
+
+def update_main_tables(tables: dict[str, str]) -> None:
+    text = PAPER_MAIN.read_text(encoding="utf-8")
+    for name, content in tables.items():
+        block_name = name.removesuffix(".tex")
+        begin = f"% BEGIN GENERATED TABLE: {block_name}"
+        end = f"% END GENERATED TABLE: {block_name}"
+        pattern = re.compile(rf"{re.escape(begin)}\n.*?\n{re.escape(end)}", re.S)
+        replacement = f"{begin}\n{content.rstrip()}\n{end}"
+        text, count = pattern.subn(lambda _: replacement, text)
+        if count != 1:
+            raise ValueError(f"expected one marked block for {name}, found {count}")
+    write_text(PAPER_MAIN, text)
 
 
 def rate_cell(row: dict, *, bold: bool = False) -> str:
@@ -477,7 +494,6 @@ def main() -> None:
     evidence = load_json(EVIDENCE)
     accel = load_json(ACCEL)
 
-    TABLE_ROOT.mkdir(parents=True, exist_ok=True)
     tables = {
         "table_main_primary.tex": render_main_table(
             e13, "gptoss", label="tab:main-primary",
@@ -489,12 +505,10 @@ def main() -> None:
         "table_ksweep.tex": render_ksweep_table(evidence),
         "table_rules.tex": render_rules_table(evidence),
     }
-    for name, content in tables.items():
-        write_text(TABLE_ROOT / name, content)
-    for stale_name in ("table_main.tex", "table_judge.tex"):
-        stale = TABLE_ROOT / stale_name
-        if stale.exists():
-            stale.unlink()
+    update_main_tables(tables)
+    legacy = PAPER_ROOT / "generated_experiments"
+    if legacy.exists():
+        shutil.rmtree(legacy)
 
     apply_style()
     plot_main(e13)
@@ -510,14 +524,16 @@ def main() -> None:
             if path.exists():
                 path.unlink()
 
-    outputs = sorted(TABLE_ROOT.glob("*.tex")) + sorted(FIGURE_ROOT.glob("exp_*.pdf"))
+    outputs = [PAPER_MAIN, *sorted(FIGURE_ROOT.glob("exp_*.pdf"))]
     manifest = {
         "inputs": {str(path.relative_to(ROOT)): sha256(path)
                    for path in (E13, P0, EVIDENCE, ACCEL)},
+        "generated_tables": {name: hashlib.sha256(content.encode()).hexdigest()
+                             for name, content in tables.items()},
         "outputs": {str(path.relative_to(PAPER_ROOT)): sha256(path) for path in outputs},
         "main_aggregation": "three independent runs; arithmetic mean and observed min--max",
     }
-    write_text(TABLE_ROOT / "manifest.json", json.dumps(manifest, indent=2) + "\n")
+    write_text(MANIFEST, json.dumps(manifest, indent=2) + "\n")
     print(f"rendered {len(tables)} tables and {len(list(FIGURE_ROOT.glob('exp_*.pdf')))} figure panels")
 
 

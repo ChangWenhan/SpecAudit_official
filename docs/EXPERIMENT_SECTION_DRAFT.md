@@ -1,11 +1,11 @@
 # Experiment section working draft
 
-Updated 2026-11-22. The full Section 5 manuscript source now lives in
-`../../paper/generated_experiments/experiment_section.tex`, and the five tables
-are rebuilt by `python -m scripts.render_experiment_paper_assets`. The same
-command also renders the four publication figures under `paper/pictures/`.
-Manuscript numbers should continue to come only from the validated evidence
-roots, never from intermediate logs.
+Updated 2026-11-22. The full Section 5 source and all five tables are inlined in
+`../../paper/main.tex`; only the preamble remains an `\input`. The command
+`python -m scripts.render_experiment_paper_assets` updates the marked table
+blocks directly in `main.tex` and renders the publication figures under
+`paper/pictures/`. Manuscript numbers should come only from the validated
+evidence roots, never from intermediate logs.
 
 ## 5.1 Experimental Setup
 

@@ -57,9 +57,12 @@ The paper tables and four multi-panel experiment figures are then rebuilt with:
 python -m scripts.render_experiment_paper_assets
 ```
 
-That command writes `paper/generated_experiments/` and the individual vector
-panels under `paper/pictures/exp_*.pdf`; the LaTeX file arranges them with
-`subfigure` and contains no titles inside the imported panels.
+That command updates the marked experiment-table blocks directly inside
+`paper/main.tex` and writes the individual vector panels under
+`paper/pictures/exp_*.pdf`. The manuscript contains no experiment `\input`
+statements; the LaTeX file arranges the panels with `subfigure` and contains no
+titles inside the imported panels. `paper/experiment_assets_manifest.json`
+records the input and output hashes.
 
 Two gpt-oss rows initially failed Harmony parsing. They were retried through
 the audited raw-Harmony fallback and replaced before the final manifest was
