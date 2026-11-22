@@ -27,6 +27,7 @@ import requests
 
 from src.judge import parse_guard_output
 from src.judge_gptoss import HARM_POLICY, build_messages, parse_safeguard_output
+from src.result_io import read_jsonl
 
 FIELDS = {"gptoss": "guard_gptoss", "guard": "guard_strong"}
 SUFFIXES = {"gptoss": "gptoss", "guard": "guard_strong"}
@@ -74,7 +75,7 @@ def load_cells(manifest_path, selected=()):
         path = result_root / entry["file"]
         if digest(path.read_bytes()) != entry["sha256"]:
             raise ValueError(f"frozen source changed: {path}")
-        rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+        rows = read_jsonl(path)
         if len(rows) != entry["records"]:
             raise ValueError(f"row count mismatch: {path}")
         keys = [(str(r["id"]), r.get("sample_idx", 0), r.get("mode")) for r in rows]

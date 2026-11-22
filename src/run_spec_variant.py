@@ -13,7 +13,7 @@ import time
 
 from .data import load_prompts
 from .models import format_chat_prompt, load_causal_lm, load_tokenizer
-from .result_io import write_jsonl_atomic
+from .result_io import read_jsonl, write_jsonl_atomic
 from .spec_decode import CachedLM, eos_token_set, speculative_generate
 from .spec_variants.lookahead import LookaheadPolicy
 from .spec_variants.medusa import MedusaPolicy
@@ -144,7 +144,7 @@ def _load_resume(args, items, run_identity):
     prior = json.loads(run_path.read_text())
     if prior.get("identity") != run_identity:
         raise ValueError("resume identity differs from the frozen run configuration")
-    records = [json.loads(line) for line in args.out.read_text().splitlines() if line.strip()]
+    records = read_jsonl(args.out)
     if len(records) > len(items):
         raise ValueError("resume output has more records than the frozen input list")
     expected = {

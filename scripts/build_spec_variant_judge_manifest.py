@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from src.data import load_prompts
+from src.result_io import read_jsonl
 
 
 DATASET_COUNTS = {"jbb": 100, "advbench": 520, "strongreject": 313}
@@ -42,7 +43,7 @@ def main() -> None:
                 path = args.root / method / model / f"{dataset}.jsonl"
                 if not path.is_file():
                     raise FileNotFoundError(path)
-                rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+                rows = read_jsonl(path)
                 if len(rows) != expected:
                     raise ValueError(f"{path}: {len(rows)} records, expected {expected}")
                 mode = f"{method}:topk:k50"

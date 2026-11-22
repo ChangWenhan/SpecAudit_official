@@ -174,6 +174,19 @@ class PoolIntegrationTest(unittest.TestCase):
         self.assertEqual(set(cells), {"a/cell.jsonl", "b/cell.jsonl"})
         self.assertEqual(cells["a/cell.jsonl"]["rows"][0]["response"], "")
 
+    def test_manifest_preserves_unicode_line_separator_inside_response(self):
+        from scripts.run_dual_judge_pool import load_cells
+
+        response = "first\u2028second\u2029third"
+        self.rows[0]["response"] = response
+        self.source.write_text(json.dumps(self.rows[0]) + "\n")
+        entry = {"file": self.source.name,
+                 "sha256": hashlib.sha256(self.source.read_bytes()).hexdigest(),
+                 "records": 1, "dataset": "fixture", "mode": "fixture"}
+        self.manifest.write_text(json.dumps({"cells": [entry]}))
+        cells = load_cells(self.manifest)
+        self.assertEqual(cells[self.source.name]["rows"][0]["response"], response)
+
     def test_low_repair_changes_only_unknown_gptoss_and_preserves_guard(self):
         initial = self.run_pool()
         self.assertEqual(initial.returncode, 0, initial.stderr)
