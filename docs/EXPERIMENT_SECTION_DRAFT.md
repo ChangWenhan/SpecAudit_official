@@ -100,10 +100,11 @@ provenance-certified same-host rank anchor exists. The figure supports a claim
 about the implementation's relative cost, not a production latency claim.
 
 The final fixed-floating-object inventory is five tables and four figures, with
-no appendix: Table 1 main ASR/utility; Table 2 defenses; Table 3 K sweep;
-Table 4 probability rules; Table 5 judge comparison; Fig. 1 paired Exact effects;
-Fig. 2 position curve and opening intervention; Fig. 3 acceptance and cost;
-Fig. 4 N sweep.
+no appendix: Table 1 pooled main ASR; Table 2 Exact and SecureSD defenses;
+Table 3 K sweep; Table 4 probability rules; Table 5 judge comparison; Fig. 2
+dataset-level main controls; Fig. 3 K and exact-prefix sensitivity; Fig. 4
+opening mechanism; Fig. 5 defense throughput trade-off. IFEval utility is
+reported in the main-results prose and in the regenerated analysis JSON/CSV.
 
 ## Available evidence and insertion status
 
