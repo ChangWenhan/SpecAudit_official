@@ -102,7 +102,8 @@ about the implementation's relative cost, not a production latency claim.
 The final fixed-floating-object inventory is five tables and five experiment
 figures, with no appendix: Table III the cross-column primary-judge main
 results; Table IV the K sweep; Table V probability rules; Table VI Exact and
-SecureSD defenses; Table VII the supplementary Qwen3Guard results. Fig. 2
+SecureSD defenses; Table VII a same-format Qwen3Guard supplementary main table.
+Fig. 2
 shows dataset-level main controls; Fig. 3 K and exact-prefix sensitivity;
 Fig. 4 acceptance by position; Fig. 5 the three horizontal opening-token
 matrices; Fig. 6 the defense throughput trade-off.
