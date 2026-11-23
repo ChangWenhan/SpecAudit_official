@@ -52,7 +52,7 @@ Table 5 repeats the served conditions with the primary and auxiliary judges.
 The auxiliary column is labelled secondary and non-independent; disagreements
 are reported directly rather than averaged away.
 
-## 5.2A Dependence on the Learned Proposal Source
+## 5.2A Generalization to Speculative Decoding Variants
 
 This subsection keeps the supply-chain threat model and replaces the full
 autoregressive draft with supplier-controlled Medusa-style and EAGLE-style
