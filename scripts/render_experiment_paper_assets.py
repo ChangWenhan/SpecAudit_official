@@ -272,7 +272,7 @@ def render_draft_source_table(security: dict) -> str:
         r"\begin{table*}[!t]", r"\centering", r"\footnotesize",
         rf"\setlength{{\tabcolsep}}{{{TABLE_TABCOLSEP}}}",
         (r"\caption{Learned proposal-source comparison under the gpt-oss primary judge. "
-         r"ASR is reported in percent. Acc.\ is the percentage of accepted draft tokens "
+         r"ASR is reported in percent. Acc.\ is the acceptance ratio: accepted draft tokens "
          r"among proposed tokens, averaged over responses and pooled across datasets. "
          r"Medusa-style and EAGLE-style use supplier-controlled learned heads.}"),
         r"\label{tab:draft-sources}",
