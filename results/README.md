@@ -10,10 +10,11 @@ harmful-request cells in `securesd_20261110/seed_0/` are complete and reused.
 `prefix_sweep_20261111/` is a JBB-only pilot, not the formal N sweep.
 
 The original P0/E13 experimental work is complete. The supplemental
-speculative-variant implementation review is complete; invalid pre-review
-outputs were deleted, the corrected smoke matrix passes, and the clean
-protocol-v2 rerun is running on the verified distributed deployment. The local
-source-of-truth layout is:
+learned-proposal-source study is also complete. Invalid pre-review outputs were
+deleted, the corrected 2 × 3 × 3 smoke matrix passes, and the formal
+protocol-v2 run contains 18 dataset files and 5,598 valid primary-judge labels
+with `unknown=0`. N-gram and Lookahead are outside this threat model and their
+formal result files were removed. The local source-of-truth layout is:
 
 | Path | Contents |
 |---|---|
@@ -24,7 +25,7 @@ source-of-truth layout is:
 | `utility200_20261118/seed_{1,2}/` | IFEval seeds 1/2 generation and scores plus the 15-cell summaries |
 | `e13_analysis_20261122/` | 126 ASR rows, 21 utility rows, `e13.{json,csv}` and three table fragments |
 | `remote_archive_20261122/` | checksum-verified s109/s111 code, result, cache inventory and log archive |
-| `security_variants_20261122/` | Medusa/EAGLE/N-gram/Lookahead adapters, four GPU smoke outputs, and the future three-seed/judge campaign |
+| `security_variants_20261122/` | Medusa-style and EAGLE-style campaign metadata plus aggregate security and mechanism analyses; raw answers and judge sidecars remain private |
 
 The P0 package has `unknown=0` under both judges. Each E13 seed has 19,593
 valid labels per judge and `unknown=0`; two gpt-oss rows were recovered through

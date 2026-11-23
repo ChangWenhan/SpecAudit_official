@@ -1,6 +1,6 @@
 # SpecAudit 中文说明
 
-文档更新：2026-11-22。原始 2026-10-11 论文证据仍保持冻结；本轮新增实验、双判官结果、三 seed 聚合和远端结果回流均已完成。当前主线和引言结构见 [docs/POSITIONING.md](docs/POSITIONING.md)。
+文档更新：2026-11-23。原始 2026-10-11 论文证据仍保持冻结；本轮新增实验、双判官结果、三 seed 聚合、learned proposal source 补充实验和远端结果回流均已完成。当前主线和引言结构见 [docs/POSITIONING.md](docs/POSITIONING.md)。
 
 ## 一句话版本
 
@@ -17,6 +17,7 @@
 | E13 seeds 1/2 | 生成、双判官、打分和聚合全部完成；每个 seed 的两套判官结果各为 36 个文件、19,593 条标签 |
 | E13 最终分析 | 126 条 ASR 聚合行、21 条 utility 聚合行，Table 1 primary/auxiliary 与 Table 5 judge comparison 已生成 |
 | IFEval utility | seeds 0/1/2 完成；5 个实际生成配置 × 3 个模型 × 3 个 seed，共 45 个基础格、9,000 条回答 |
+| Learned proposal sources | Medusa-style 与 EAGLE-style 完成 18 个文件、5,598 条有效主判官标签，`unknown=0`；N-gram 与 Lookahead 不属于 learned draft 威胁模型，正式结果已移除 |
 | 远端执行 | s109、s111 项目目录已在本机校验压缩归档后删除；模型权重和环境未进入本地归档 |
 
 当前没有排队中的实验。最终入口：

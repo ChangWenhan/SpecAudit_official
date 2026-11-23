@@ -3,11 +3,13 @@
 This is a clean code-and-evidence release built from the research working tree.
 It is not a mirror of every historical file.
 
-Documentation framing updated 2026-11-22; see
+Documentation framing updated 2026-11-23; see
 [POSITIONING.md](POSITIONING.md). This is still a clean code-and-frozen-evidence
 release, not a mirror of the private working tree. The private workspace now
 also contains the completed P0/E13 raw results and the checksum-verified s109/
 s111 audit archive, but those directories remain outside the public release.
+The supplementary s109/s111 project copies have been removed; their aggregate
+learned-proposal-source results and hash manifests are retained locally.
 The internal manuscript history remains outside the code release. Release-era
 citation metadata has not been reconciled with the separately supplied
 manuscript.

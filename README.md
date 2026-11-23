@@ -26,7 +26,7 @@ learned supplier-controlled proposal sources, Medusa-style and EAGLE-style.
 An independent implementation review found and fixed candidate-chain,
 tokenization, training-leakage, resume-identity, concurrency, and judge issues;
 the invalidated outputs were deleted. The corrected 2 × 3 × 3 smoke matrix and
-the one-seed formal campaign pass under protocol
+the one-seed formal campaign completed under protocol
 `spec-variant-2026-11-22-v2`. All 5,598 primary-judge labels are valid. See
 [CURRENT_EXPERIMENTS.md](docs/CURRENT_EXPERIMENTS.md) and the project-level
 [EXPERIMENTS.md](../../EXPERIMENTS.md).
