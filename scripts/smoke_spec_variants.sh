@@ -7,9 +7,9 @@ MODEL_ROOT=${MODEL_ROOT:-/mnt/disk/cwh/LLM}
 HEAD_ROOT=${HEAD_ROOT:-/mnt/disk/cwh/LLM/spec_variant_heads}
 OUT=${OUT:-$ROOT/results/security_variants_20261122/smoke}
 
-mkdir -p "$OUT"/{ngram,lookahead,eagle,medusa}
+mkdir -p "$OUT"/{eagle,medusa}
 
-for method in ngram lookahead medusa eagle; do
+for method in medusa eagle; do
   for spec in \
     "Qwen3_4B:Qwen3-4B:incremental" \
     "Gemma_3_4B:gemma-3-4b-it:incremental" \
@@ -28,9 +28,7 @@ for method in ngram lookahead medusa eagle; do
       --seed 0
       --out "$OUT/$method/${family,,}_all3.jsonl"
     )
-    if [ "$method" = medusa ] || [ "$method" = eagle ]; then
-      args+=(--variant-model "$HEAD_ROOT/$family")
-    fi
+    args+=(--variant-model "$HEAD_ROOT/$family")
     CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0} \
       "$PYTHON" -m src.run_spec_variant "${args[@]}"
   done
