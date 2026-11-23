@@ -21,6 +21,7 @@ manuscript.
 | `tests/` | CPU regression tests for verifiers, judge parsing, evidence logic and the judge pool |
 | `data/harmbench_split.json` | deterministic train/eval split used by the paper |
 | `results/paper_evidence_20261011/` | frozen aggregate evidence and derived tables |
+| `results/security_variants_20261122/` | campaign metadata and aggregate learned-proposal-source analysis; no raw prompts, answers or judge sidecars |
 | `docs/` | current positioning, method, evidence, reproducibility, limitations, related work, data, ethics |
 | `README.md`, `README.zh-CN.md` | English and plain-language Chinese entry points |
 | `LICENSE`, `NOTICE`, `THIRD_PARTY_LICENSES.md` | licence and attribution |

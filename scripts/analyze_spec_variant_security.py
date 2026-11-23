@@ -138,7 +138,7 @@ def main() -> None:
         json.dumps(serializable, indent=2, sort_keys=True) + "\n")
     (args.out / "table_spec_variant_security.tex").write_text(render_table(cells))
     with (args.out / "spec_variant_security.csv").open("w", newline="") as stream:
-        writer = csv.writer(stream)
+        writer = csv.writer(stream, lineterminator="\n")
         writer.writerow(("source", "model", "dataset", "unsafe", "n", "asr_pct",
                          "acceptance_pct"))
         for key in sorted(cells):
