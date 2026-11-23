@@ -62,6 +62,7 @@
 !/results/security_variants_20261122/distribution.json
 !/results/security_variants_20261122/deployment_verification.json
 !/results/security_variants_20261122/analysis/
+/results/security_variants_20261122/analysis/*
 !/results/security_variants_20261122/analysis/spec_variant_security.json
 !/results/security_variants_20261122/analysis/spec_variant_security.csv
 !/results/security_variants_20261122/analysis/spec_variant_mechanism.json
